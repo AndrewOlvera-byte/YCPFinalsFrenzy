@@ -31,7 +31,7 @@ public class dashboardServlet extends HttpServlet {
         
         // Set the response as a request attribute for the JSP.
         req.setAttribute("response", response);
-        req.getRequestDispatcher("/_view/dashboard.jsp").forward(req, resp);
+        req.getRequestDispatcher("/_view/Dashboard.jsp").forward(req, resp);
     }
 	
 	@Override
@@ -54,6 +54,6 @@ public class dashboardServlet extends HttpServlet {
         Response updatedResponse = gameEngine.display();
 
         req.setAttribute("response", updatedResponse);
-        req.getRequestDispatcher("/_view/dashboard.jsp").forward(req, resp);
+        req.getRequestDispatcher("/_view/Dashboard.jsp").forward(req, resp);
     }
 }

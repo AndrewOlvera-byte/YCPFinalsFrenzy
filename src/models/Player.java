@@ -1,19 +1,17 @@
+package models;
+
 public class Player extends Character {
    private int skillPoints;
-   private int location;
    // private Room location;
-   public Player(String name, int hp, int skillPoints, int location) {
-       super(name, hp);
+   public Player(String name, int hp, int skillPoints, Inventory inventory) {
+       super(name, hp, inventory);
        this.skillPoints = skillPoints;
-       this.location = location;
    }
    public void move(String direction) {
        System.out.println(name + " moves " + direction + " to a new location.");
        // Implement movement logic based on Room class
    }
-   public int getLocation() {
-   	return location;
-   }
+   
    public void useSkillPoints() {
        if (skillPoints > 0) {
            skillPoints--;

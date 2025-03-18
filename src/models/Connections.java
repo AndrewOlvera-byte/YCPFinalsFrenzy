@@ -51,9 +51,9 @@ public class Connections {
         return connectionsMap.get(key);
     }
     
-    public Set<String> getAllKeys() {
+    /*public Set<String> getAllKeys() {
         return connectionsMap.keySet();
-    }
+    }*/
 }
 
 

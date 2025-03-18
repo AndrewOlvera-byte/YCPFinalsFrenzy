@@ -1,9 +1,11 @@
+package models;
+
 public class NPC extends Character {
    private boolean aggression;
    private String[] dialogue;
    private int damage;
-   public NPC(String name, int hp, boolean aggression, String[] dialogue, int damage) {
-       super(name, hp);
+   public NPC(String name, int hp, boolean aggression, String[] dialogue, int damage, Inventory inventory) {
+       super(name, hp, inventory);
        this.aggression = aggression;
        this.dialogue = dialogue;
        this.damage = damage;
@@ -16,5 +18,10 @@ public class NPC extends Character {
    }
    public String converse() {
        return name + " says: " + dialogue;
+   }
+   
+   public boolean isAgressive()
+   {return this.aggression;
+   
    }
 }

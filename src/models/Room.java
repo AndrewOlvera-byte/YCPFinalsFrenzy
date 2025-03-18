@@ -20,7 +20,7 @@ public class Room
 	}
 	
 	// Returns the index of the available room to switch to based on direction input, and returns -1 if it is null
-	public int getConnectedRoom(int currentRoomNum, String direction)
+	public int getConnectedRoom(String direction)
 	{
 		//check direction is getting the output of connections for key[direction] it is null if it 
 		Integer result = this.connections.getConnection(direction);
@@ -47,14 +47,14 @@ public class Room
 	public int getCharacterHealth(int characterNum)
 	{
 		Character currentCharacter = characterContainer.get(characterNum);
-		return currentCharacter.getHealth();
+		return currentCharacter.getHp();
 	}
 	
 	// sets the health of the character (player attacks character)
 	public void setCharacterHealth(int characterNum, int health)
 	{
 		Character currentCharacter = characterContainer.get(characterNum);
-		currentCharacter.setHealth(health);
+		currentCharacter.setHp(health);
 	}
 	
 	// returns the attack damage of a character using item itemNum in it's inventory (character attacks player)

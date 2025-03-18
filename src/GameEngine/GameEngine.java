@@ -16,7 +16,7 @@ public class GameEngine
 	private boolean isRunning = false;
 	private int currentRoomNum;
 	private ArrayList<Room> rooms = new ArrayList<>();
-	private String returnMessage = "";
+	private String runningMessage = "";
 	private String error = "";
 	
 	// Empty instantiation so data can be loaded using loadData()
@@ -42,13 +42,15 @@ public class GameEngine
 	public void loadRooms()
 	{
 		// example implementation but will be looped over data in the .csv file to load the rooms state last left off
-		String roomName = "First Room";
-		ArrayList<Item> itemContainer = new ArrayList<>();
-		Inventory inventory = new Inventory(itemContainer, 300);
-		Connections connections = new Connections();
+		String roomName1 = "First Room";
+		ArrayList<Item> itemContainer1 = new ArrayList<>();
+		Inventory inventory1 = new Inventory(itemContainer1, 300);
+		Connections connections1 = new Connections();
+		connections1.setConnection("North", 1);
+		connections1.setConnection("East", null);
 		ArrayList<models.Character> characterContainer = new ArrayList<>();
-		Room newRoom = new Room(roomName, inventory, connections, characterContainer);
-		this.rooms.add(newRoom);
+		Room newRoom1 = new Room(roomName1, inventory1, connections1, characterContainer);
+		this.rooms.add(newRoom1);
 	}
 	
 	// loading of player data
@@ -57,7 +59,7 @@ public class GameEngine
 		ArrayList<Item> itemContainer = new ArrayList<>();
 		String playerName = "Bob";
 		Inventory inventory = new Inventory(itemContainer, 30);
-		Player newPlayer = new Player(playerName, inventory, 100);
+		Player newPlayer = new Player(playerName, 200, 0, inventory);
 		this.player = newPlayer;
 	}
 	
@@ -65,7 +67,7 @@ public class GameEngine
 	public Boolean updateCurrentRoom(String direction)
 	{
 		Room currentRoom = rooms.get(currentRoomNum);
-		int newRoomNum = currentRoom.getConnectedRoom(this.currentRoomNum, direction);
+		int newRoomNum = currentRoom.getConnectedRoom(direction);
 		if(newRoomNum != -1)
 		{
 			this.currentRoomNum = newRoomNum;
@@ -96,7 +98,7 @@ public class GameEngine
 	{
 		Room currentRoom = rooms.get(currentRoomNum);
 		int attackDmg = currentRoom.getCharacterAttackDmg(characterNum, itemNum);
-		int playerHealth = player.getHealth();
+		int playerHealth = player.getHp();
 		int newHealth = playerHealth - attackDmg;
 		if(newHealth <= 0)
 		{
@@ -104,7 +106,7 @@ public class GameEngine
 		}
 		else
 		{
-			player.setHealth(playerHealth - attackDmg);
+			player.setHp(playerHealth - attackDmg);
 		}	
 	}
 	
