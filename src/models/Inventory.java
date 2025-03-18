@@ -66,4 +66,10 @@ public class Inventory {
 	public void setInventory(ArrayList<Item> inventory) {
 		this.inventory = inventory;
 	}
+	
+	public Item getItem(int itemNum)
+	{
+		Item item = inventory.get(itemNum);
+		return item;
+	}
 }

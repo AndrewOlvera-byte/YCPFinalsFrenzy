@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <!-- Include jQuery from a CDN -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <style type="text/css">
+        td.label {
+            text-align: right;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+    <script type="text/javascript">
+    $(document).ready(function() {
+        $("#updateButton").click(function() {
+            var userInput = $("#inputField").val();
+            $.ajax({
+                type: "POST",
+                url: "/YourAppContext/ajax/dashboardAjaxServlet",  // Adjust context path as needed
+                data: { input: userInput },
+                dataType: "json",
+                success: function(data, textStatus, jqXHR) {
+                    // Update fields using the JSON response fields
+                    $("#roomInventoryField").text("RoomInventory: " + data.roomInventory);
+                    $("#playerInventoryField").text("PlayerInventory: " + data.playerInventory);
+                    $("#roomConnectionsField").text("RoomConnections: " + data.roomConnections);
+                    $("#messageField").text("Message: " + data.message);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    $("#errorField").text("Error: " + textStatus + " - " + errorThrown);
+                }
+            });
+        });
+    });
+    </script>
+</head>
+<body>
+    <h1>Dashboard AJAX Example</h1>
+    <div id="resultDiv">
+        <p id="messageField">Message: </p>
+        <p id="roomInventoryField">RoomInventory: </p>
+        <p id="playerInventoryField">PlayerInventory: </p>
+        <p id="roomConnectionsField">RoomConnections: </p>
+    </div>
+    <table>
+        <tr>
+            <td class="label">Enter Input:</td>
+            <td><input id="inputField" type="text" size="12" /></td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <button id="updateButton">Update</button>
+            </td>
+        </tr>
+    </table>
+    
+    <div id="errorField" class="error"></div>
+</body>
+</html>

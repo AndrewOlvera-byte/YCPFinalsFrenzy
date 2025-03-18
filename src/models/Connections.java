@@ -1,3 +1,4 @@
+package models;
 import java.util.HashMap;
 
 public class Connections {
@@ -24,7 +25,7 @@ public class Connections {
         roomConnections.get(fromRoomId).put(direction, toRoomId);
     }
 
-    public boolean canMove(int currentRoomId, String direction, String playerKey) {
+    /*public boolean canMove(int currentRoomId, String direction, String playerKey) {
         if (!roomConnections.get(currentRoomId).containsKey(direction)) {
             return false; // No valid direction to move
         }
@@ -34,9 +35,9 @@ public class Connections {
 
         // Check if the next room is accessible based on the player's key
         return nextRoom.isAccessible(playerKey);  // Pass player's key to the room for access check
-    }
+    }*/
 
-    public int getNextRoom(int currentRoomId, String direction) {
+    public Integer getNextRoom(int currentRoomId, String direction) {
         return roomConnections.get(currentRoomId).get(direction);
     }
 }
