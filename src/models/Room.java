@@ -8,7 +8,7 @@ public class Room
 	private String roomName = "";
 	private Inventory inventory;
 	private Connections connections;
-	private ArrayList<Character> characterContainer;
+	private ArrayList<models.Character> characterContainer;
 	
 	//Constructor to initialize the room for loadData() in GameEngine which instantiates the room states for the game
 	public Room(String roomName, Inventory inventory, Connections connections, ArrayList<Character> characterContainer)
@@ -23,7 +23,7 @@ public class Room
 	public int getConnectedRoom(int currentRoomNum, String direction)
 	{
 		//check direction is getting the output of connections for key[direction] it is null if it 
-		Integer result = this.connections.getNextRoom(currentRoomNum, direction);
+		Integer result = this.connections.getConnection(direction);
 		if (result != null)
 		{
 			return result;

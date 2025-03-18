@@ -4,10 +4,12 @@ import java.util.HashMap;
 public class Connections {
     private HashMap<Integer, Room> rooms; // Map of room IDs to Room objects
     private HashMap<Integer, HashMap<String, Integer>> roomConnections; // Map of room IDs to possible directions
+    private HashMap<String, Integer> connectionsMap;
 
     public Connections() {
         rooms = new HashMap<>();
         roomConnections = new HashMap<>();
+        connectionsMap = new HashMap<>();
     }
 
     public void addRoom(int roomId, Room room) {
@@ -39,6 +41,18 @@ public class Connections {
 
     public Integer getNextRoom(int currentRoomId, String direction) {
         return roomConnections.get(currentRoomId).get(direction);
+    }
+    
+    public void setConnection(String key, Integer value) {
+        connectionsMap.put(key, value);
+    }
+    
+    public Integer getConnection(String key) {
+        return connectionsMap.get(key);
+    }
+    
+    public Set<String> getAllKeys() {
+        return connectionsMap.keySet();
     }
 }
 
