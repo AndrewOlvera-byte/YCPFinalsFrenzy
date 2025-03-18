@@ -1,9 +1,6 @@
 package models;
 import java.util.ArrayList;
-import models.Inventory;
-import models.Connections;
-import models.Item;
-import models.Character;
+
 
 
 public class Room
@@ -23,10 +20,10 @@ public class Room
 	}
 	
 	// Returns the index of the available room to switch to based on direction input, and returns -1 if it is null
-	public int getConnectedRoom(String direction)
+	public int getConnectedRoom(int currentRoomNum, String direction)
 	{
 		//check direction is getting the output of connections for key[direction] it is null if it 
-		int result = this.connections.checkDirection(direction);
+		Integer result = this.connections.getNextRoom(currentRoomNum, direction);
 		if (result != null)
 		{
 			return result;
@@ -54,10 +51,10 @@ public class Room
 	}
 	
 	// sets the health of the character (player attacks character)
-	public int setCharacterHealth(int characterNum, int health)
+	public void setCharacterHealth(int characterNum, int health)
 	{
 		Character currentCharacter = characterContainer.get(characterNum);
-		return currentCharacter.setHealth(health);
+		currentCharacter.setHealth(health);
 	}
 	
 	// returns the attack damage of a character using item itemNum in it's inventory (character attacks player)
@@ -90,5 +87,21 @@ public class Room
 	{
 		Character currentCharacter = characterContainer.get(characterNum);
 		return currentCharacter.getName();
+	}
+	
+	public void removeCharacter(int characterNum)
+	{
+		this.characterContainer.remove(characterNum);
+	}
+	public int getCharacterTotal()
+	{
+		return this.characterContainer.size();
+	}
+	
+	public boolean isCharAgressive(int characterNum)
+	{
+		Character currentCharacter = characterContainer.get(characterNum);
+		boolean aggressive = currentCharacter.isAgressive();
+		return aggressive;
 	}
 }

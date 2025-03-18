@@ -1,13 +1,14 @@
 package GameEngine;
 
 import java.util.ArrayList;
-import java.util.JSONObject;
+
 import models.Room;
+import models.Player;
 import models.Connections;
 import models.Inventory;
-import models.Character;
+import models.Item;
 import models.Response;
-import models.Player;
+
 
 public class GameEngine
 {
@@ -16,6 +17,7 @@ public class GameEngine
 	private int currentRoomNum;
 	private ArrayList<Room> rooms = new ArrayList<>();
 	private String returnMessage = "";
+	private String error = "";
 	
 	// Empty instantiation so data can be loaded using loadData()
 	public GameEngine()
@@ -40,18 +42,22 @@ public class GameEngine
 	public void loadRooms()
 	{
 		// example implementation but will be looped over data in the .csv file to load the rooms state last left off
-		Inventory inventory = new Inventory();
+		String roomName = "First Room";
+		ArrayList<Item> itemContainer = new ArrayList<>();
+		Inventory inventory = new Inventory(itemContainer, 300);
 		Connections connections = new Connections();
-		ArrayList<Character> characterContainer = new ArrayList<>();
-		Room newRoom = new Room(inventory, connections, characterContainer);
+		ArrayList<models.Character> characterContainer = new ArrayList<>();
+		Room newRoom = new Room(roomName, inventory, connections, characterContainer);
 		this.rooms.add(newRoom);
 	}
 	
 	// loading of player data
 	public void loadPlayer()
 	{
-		Inventory inventory = new Inventory();
-		Player newPlayer = new Player(inventory);
+		ArrayList<Item> itemContainer = new ArrayList<>();
+		String playerName = "Bob";
+		Inventory inventory = new Inventory(itemContainer, 30);
+		Player newPlayer = new Player(playerName, inventory, 100);
 		this.player = newPlayer;
 	}
 	
@@ -59,7 +65,7 @@ public class GameEngine
 	public Boolean updateCurrentRoom(String direction)
 	{
 		Room currentRoom = rooms.get(currentRoomNum);
-		int newRoomNum = currentRoom.getConnectedRoom(direction);
+		int newRoomNum = currentRoom.getConnectedRoom(this.currentRoomNum, direction);
 		if(newRoomNum != -1)
 		{
 			this.currentRoomNum = newRoomNum;
@@ -74,7 +80,15 @@ public class GameEngine
 		Room currentRoom = rooms.get(currentRoomNum);
 		int attackDmg = player.getAttackDmg(itemNum);//Needed
 		int charHealth = currentRoom.getCharacterHealth(characterNum);
-		currentRoom.setCharacterHealth(characterNum, charHealth - attackDmg);
+		int newHealth = charHealth - attackDmg;
+		if(newHealth <= 0)
+		{
+			currentRoom.removeCharacter(characterNum);
+		}
+		else
+		{
+			currentRoom.setCharacterHealth(characterNum, newHealth);
+		}
 	}
 	
 	// method for the character characterNum attacking the player with itemNum (can be 0 for now and only give enemies 1 weapon for MS1 demo)
@@ -83,7 +97,15 @@ public class GameEngine
 		Room currentRoom = rooms.get(currentRoomNum);
 		int attackDmg = currentRoom.getCharacterAttackDmg(characterNum, itemNum);
 		int playerHealth = player.getHealth();
-		player.setHealth(playerHealth - attackDmg);
+		int newHealth = playerHealth - attackDmg;
+		if(newHealth <= 0)
+		{
+			this.error = "You Died!";
+		}
+		else
+		{
+			player.setHealth(playerHealth - attackDmg);
+		}	
 	}
 	
 	// method for player to pickup item itemNum from room inventory
@@ -104,17 +126,46 @@ public class GameEngine
 		player.removeItem(itemNum);
 	}
 	
+	// method to get character name for display()
+	public String getCharacterName(int characterNum)
+	{
+		Room currentRoom = rooms.get(currentRoomNum);
+		String name = currentRoom.getCharacterName(characterNum);
+		return name;
+		
+	}
+	
 	// method called in servlet to get input and call methods based on it, need to figure out optimal CLI parsing technique
 	// if the input is valid and processed return true, and if it is an invalid input return false, so the servlet knows when to send error message
 	public boolean processInput(String input)
 	{
+		
+		//-----------------
+		//Do at beginning of every turn
+		// Check if any character's have aggression in the room
+		ArrayList<Integer> aggressiveCharacters = new ArrayList<>();
+		Room currentRoom = rooms.get(currentRoomNum);
+		int size = currentRoom.getCharacterTotal();
+		for (int i = 0; i < size; i++)
+		{
+			if (currentRoom.isCharAgressive(i))
+			{
+				aggressiveCharacters.add(i);
+			}
+		}
+		
+		// We need to decide whether every agressive character attacks every turn, or every other, or something else
+		// TODO: iterate over agressivw characters and do charAttackPlayer(0,i)
+		//-----------------
+		
 		//String parsing logic and calling methods inside
+		return true;
 	}
 	
 	// returns a Response object to be sent over the get and post request so that the page displays the current game state at all times and updates based on post request input
 	public Response display()
 	{
-		Response response = new Response();// put fields inside here which will be called with ${response.attribute} in jsp and html
+		Response response = new Response("Test Room Inventory", "Test Player Inventory", "Test room connections", "Test message", "Test error");// put fields inside here which will be called with ${response.attribute} in jsp and html
 		return response;
 	}
 	

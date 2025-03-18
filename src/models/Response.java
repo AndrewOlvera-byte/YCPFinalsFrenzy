@@ -9,12 +9,14 @@ public class Response
 	private String playerInventory;
 	private String roomConnections;
 	private String message;
-	public Response(String roomInventory, String playerInventory, String roomConnections, String message)
+	private String error;
+	public Response(String roomInventory, String playerInventory, String roomConnections, String message, String error)
 	{
 		this.roomInventory = roomInventory;
 		this.playerInventory = playerInventory;
 		this.roomConnections = roomConnections;
 		this.message = message;
+		this.error = error;
 	}
 	
 	// getters needed for JSP/html implementation
@@ -37,4 +39,21 @@ public class Response
 	{
 		return this.message;
 	}
+	public String getError()
+	{
+		return this.error;
+	}
+	
+	 public String toJson() {
+	        return "{\"roomInventory\":\"" + escapeJson(roomInventory) + "\", \"playerInventory\":" + escapeJson(playerInventory) + "\", \"roomConnections\":" + escapeJson(roomConnections) + "\", \"message\":" + escapeJson(message) + "\", \"error\":" + escapeJson(error) + "}";
+	    }
+	    
+	    // Simple helper method to escape double quotes for JSON safety.
+	 private String escapeJson(String s) 
+	 {
+		 if (s == null) {
+	            return "";
+	        }
+	        return s.replace("\"", "\\\"");
+	 }
 }

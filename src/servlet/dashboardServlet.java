@@ -1,6 +1,13 @@
 package servlet;
 
 import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 import GameEngine.GameEngine;
 import models.Response;
 
@@ -24,7 +31,7 @@ public class dashboardServlet extends HttpServlet {
         
         // Set the response as a request attribute for the JSP.
         req.setAttribute("response", response);
-        req.getRequestDispatcher("/game.jsp").forward(req, resp);
+        req.getRequestDispatcher("/_view/dashboard.jsp").forward(req, resp);
     }
 	
 	@Override
@@ -41,12 +48,12 @@ public class dashboardServlet extends HttpServlet {
 
         // Process the input from the request.
         String input = req.getParameter("input");
-        gameEngine.processInput(input);
+        boolean success = gameEngine.processInput(input);
 
         // Get updated game state.
         Response updatedResponse = gameEngine.display();
 
         req.setAttribute("response", updatedResponse);
-        req.getRequestDispatcher("/dashboard.jsp").forward(req, resp);
+        req.getRequestDispatcher("/_view/dashboard.jsp").forward(req, resp);
     }
 }
