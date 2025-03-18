@@ -1,5 +1,4 @@
 package main;
-joe edit
 
 import java.lang.management.ManagementFactory;
 
