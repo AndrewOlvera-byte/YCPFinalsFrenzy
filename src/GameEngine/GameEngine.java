@@ -70,13 +70,15 @@ public class GameEngine
 		Room newRoom1 = new Room(roomName1, inventory1, connections1, characterContainer1);
 		this.rooms.add(newRoom1);
 		
+		//start
+		
 		String roomName2 = "Second Room";
 		ArrayList<Item> itemContainer2 = new ArrayList<>();
 		Inventory inventory2 = new Inventory(itemContainer2, 300);
 		
 		Connections connections2 = new Connections();
 		connections2.setConnection("North", null);
-		connections2.setConnection("East", null);
+		connections2.setConnection("East", 2);
 		connections2.setConnection("South", 0);
 		connections2.setConnection("West", null);
 		
@@ -92,6 +94,33 @@ public class GameEngine
 		characterContainer2.add(boss);
 		Room newRoom2 = new Room(roomName2, inventory2, connections2, characterContainer2);
 		this.rooms.add(newRoom2);
+		
+		
+		
+		String roomName3 = "Third Room";
+		ArrayList<Item> itemContainer3 = new ArrayList<>();
+		Inventory inventory3 = new Inventory(itemContainer3, 300);
+		
+		Connections connections3 = new Connections();
+		connections2.setConnection("North", null);
+		connections2.setConnection("East", 2);
+		connections2.setConnection("South", 0);
+		connections2.setConnection("West", null);
+		
+		
+		ArrayList<Item> itemContainerFriend = new ArrayList<>();
+		String[] componentsFriend = {};
+		Weapon weaponFriend = new Weapon(20, 30, "Paint Brush", componentsFriend, 1);
+		itemContainerBoss.add(weaponFriend);
+		Inventory inventoryFriend = new Inventory(itemContainerFriend, 300);
+		
+		ArrayList<models.Character> characterContainer3 = new ArrayList<>();
+		Character Friend = new Character("Big Boss", 400, inventoryFriend);
+		characterContainer2.add(Friend);
+		Room newRoom3 = new Room(roomName3, inventory3, connections3, characterContainer3);
+		this.rooms.add(newRoom3);
+		
+
 	}
 	
 	// loading of player data
@@ -101,7 +130,7 @@ public class GameEngine
 		Weapon weaponPlayer = new Weapon(20, 30, "Badass Sword", components, 80);
 		ArrayList<Item> itemContainer = new ArrayList<>();
 		itemContainer.add(weaponPlayer);
-		String playerName = "Bob";
+		String playerName = "Cooper";
 		Inventory inventory = new Inventory(itemContainer, 30);
 		Player newPlayer = new Player(playerName, 200, 0, inventory);
 		this.player = newPlayer;
