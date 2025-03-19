@@ -19,6 +19,10 @@ public class GameEngine
 	        "pickup", "drop", "use", "examine", "go", "talk"
 	));
 	
+	private static final Set<String> PREPOSITIONS = new HashSet<>(Arrays.asList(
+	        "on", "with", "at", "in", "to"
+	    ));
+	
 	private Player player;
 	private boolean isRunning = false;
 	private int currentRoomNum;
@@ -126,8 +130,12 @@ public class GameEngine
 	}
 	
 	// method for the player attacking a character - needs the characterNum to attack and item being used to attack
-	public void playerAttackChar(int itemNum, int characterNum)
+	public String playerAttackChar(int itemNum, int characterNum)
 	{
+		if (characterNum == -1) 
+		{
+			return "Attack who?";
+		}
 		Room currentRoom = rooms.get(currentRoomNum);
 		int attackDmg = player.getAttackDmg(itemNum);//Needed
 		int charHealth = currentRoom.getCharacterHealth(characterNum);
@@ -135,10 +143,12 @@ public class GameEngine
 		if(newHealth <= 0)
 		{
 			currentRoom.removeCharacter(characterNum);
+			return currentRoom.getCharacterName(characterNum) + " has died!";
 		}
 		else
 		{
 			currentRoom.setCharacterHealth(characterNum, newHealth);
+			return currentRoom.getCharacterName(characterNum) + " has taken " + attackDmg + " damage.";
 		}
 	}
 	
@@ -160,21 +170,59 @@ public class GameEngine
 	}
 	
 	// method for player to pickup item itemNum from room inventory
-	public void pickupItem(int itemNum)
+	public String pickupItem(int itemNum)
 	{
+		if (itemNum == -1) 
+		{
+			return "Pick up what?";
+		}
 		Room currentRoom = rooms.get(currentRoomNum);
 		Item item = currentRoom.getItem(itemNum);
 		currentRoom.removeItem(itemNum);
 		this.player.addItem(item);
+		
+		return currentRoom.getItemName(itemNum) + " was picked up.";
+	}
+	
+	// helper method to convert from an items name to its ID
+	public int ItemNameToID(String Name) 
+	{
+		int itemNum = -1; // set to -1 so if there is no item found it will return -1 to pick up / drop item, triggering "what item"
+		Room currentRoom = rooms.get(currentRoomNum);
+		for (int i = 0; i < currentRoom.getInventorySize(); i++) {
+			if (Name == currentRoom.getItemName(i)) {
+				itemNum = i;
+			}
+		}
+		return itemNum;
+	}
+	
+	// helper method to convert from an char name to its ID
+	public int CharNameToID(String Name) 
+	{
+		int charNum = -1; // set to -1 so if there is no char found it will return -1 to PlayerAttackChar, triggering "what char"
+		Room currentRoom = rooms.get(currentRoomNum);
+		for (int i = 0; i < currentRoom.getCharacterTotal(); i++) {
+			if (Name == currentRoom.getCharacterName(i)) {
+				charNum = i;
+			}
+		}
+		return charNum;
 	}
 	
 	// method to drop an item from player inventory into room inventory
-	public void dropItem(int itemNum)
+	public String dropItem(int itemNum)
 	{
+		if (itemNum == -1) 
+		{
+			return "Drop what?";
+		}
 		Room currentRoom = rooms.get(currentRoomNum);
 		Item item = player.getItem(itemNum);
 		currentRoom.addItem(item);
 		player.removeItem(itemNum);
+		
+		return currentRoom.getItemName(itemNum) + " was dropped.";
 	}
 	
 	// method to get character name for display()
@@ -344,10 +392,12 @@ public class GameEngine
 		
 		
 		
-		//String parsing logic and calling methods inside
+		// String parsing logic and calling methods inside
 		String[] parsedInput = parseInput(input);
         String verb = parsedInput[0];
         String noun = parsedInput[1];
+        String preposition = parsedInput[2];
+        String noun2 = parsedInput[3];
 
         if (verb == null || verb.isEmpty()) {
             this.runningMessage += "I don't understand that.";
@@ -359,8 +409,15 @@ public class GameEngine
 
         switch (verb) {
             case "pickup":
-                
+                pickupItem(ItemNameToID(noun));
             case "drop":
+            	dropItem(ItemNameToID(noun));
+            case "swing": // for hand-held weapons that can be swung, this is like an "or" 
+            case "slash":
+            case "hit":
+            case "strike":
+            	playerAttackChar(CharNameToID(noun), ItemNameToID(noun2));
+            //case "throw": throwable weapons?	
                 
             case "go":
                 
