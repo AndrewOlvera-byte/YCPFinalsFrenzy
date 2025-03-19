@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>YCP Finals Frenzy</title>
+    <!-- Include jQuery from a CDN -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <style type="text/css">
+        td.label {
+            text-align: right;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+    <script type="text/javascript">
+    $(document).ready(function() {
+        $("#updateButton").click(function() {
+            var userInput = $("#inputField").val();
+            $.ajax({
+                type: "POST",
+                url: "/YourAppContext/ajax/dashboardAjaxServlet",  // Adjust context path as needed
+                data: { input: userInput },
+                dataType: "json",
+                success: function(data, textStatus, jqXHR) {
+                    // Update fields using the JSON response fields
+                    $("#roomInventoryField").text("Room Inventory: " + data.roomInventory);
+                    $("#playerInventoryField").text("Player Inventory: " + data.playerInventory);
+                    $("#playerInfoField").text("Player Info: " + data.playerInfo);
+                    $("#charactersInRoomField").text("Caracter Info: " + data.charactersInRoom);
+                    $("#roomConnectionsField").text("Room Connections: " + data.roomConnections);
+                    $("#messageField").text("Message: " + data.message);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    $("#errorField").text("Error: " + textStatus + " - " + errorThrown);
+                }
+            });
+        });
+    });
+    </script>
+</head>
+<body>
+    <h1>YCP Finals Frenzy</h1>
+    <div id="resultDiv">
+        <p id="messageField">Message: </p>
+        <p id="roomInventoryField">Room Inventory: </p>
+        <p id="playerInventoryField">Player Inventory: </p>
+        <p id="playerInfoField">Player Info: </p>
+        <p id="charactersInRoomField">Character Info: </p>
+        <p id="roomConnectionsField">Room Connections: </p>
+    </div>
+    <table>
+        <tr>
+            <td class="label">Enter Input:</td>
+            <td><input id="inputField" type="text" size="12" /></td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <button id="updateButton">Update</button>
+            </td>
+        </tr>
+    </table>
+    
+    <div id="errorField" class="error"></div>
+</body>
+</html>

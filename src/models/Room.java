@@ -1,9 +1,6 @@
 package models;
 import java.util.ArrayList;
-import models.Inventory;
-import models.Connections;
-import models.Item;
-import models.Character;
+
 
 
 public class Room
@@ -11,7 +8,7 @@ public class Room
 	private String roomName = "";
 	private Inventory inventory;
 	private Connections connections;
-	private ArrayList<Character> characterContainer;
+	private ArrayList<models.Character> characterContainer;
 	
 	//Constructor to initialize the room for loadData() in GameEngine which instantiates the room states for the game
 	public Room(String roomName, Inventory inventory, Connections connections, ArrayList<Character> characterContainer)
@@ -26,7 +23,7 @@ public class Room
 	public int getConnectedRoom(String direction)
 	{
 		//check direction is getting the output of connections for key[direction] it is null if it 
-		int result = this.connections.checkDirection(direction);
+		Integer result = this.connections.getConnection(direction);
 		if (result != null)
 		{
 			return result;
@@ -50,14 +47,14 @@ public class Room
 	public int getCharacterHealth(int characterNum)
 	{
 		Character currentCharacter = characterContainer.get(characterNum);
-		return currentCharacter.getHealth();
+		return currentCharacter.getHp();
 	}
 	
 	// sets the health of the character (player attacks character)
-	public int setCharacterHealth(int characterNum, int health)
+	public void setCharacterHealth(int characterNum, int health)
 	{
 		Character currentCharacter = characterContainer.get(characterNum);
-		return currentCharacter.setHealth(health);
+		currentCharacter.setHp(health);
 	}
 	
 	// returns the attack damage of a character using item itemNum in it's inventory (character attacks player)
@@ -90,5 +87,51 @@ public class Room
 	{
 		Character currentCharacter = characterContainer.get(characterNum);
 		return currentCharacter.getName();
+	}
+	
+	public void removeCharacter(int characterNum)
+	{
+		this.characterContainer.remove(characterNum);
+	}
+	
+	public int getCharacterTotal()
+	{
+		return this.characterContainer.size();
+	}
+	
+	public boolean isCharAgressive(int characterNum)
+	{
+		Character currentCharacter = characterContainer.get(characterNum);
+		boolean aggressive = currentCharacter.isAgressive();
+		return aggressive;
+	}
+	
+	public boolean getCharacterJustAttacked(int characterNum)
+	{
+		Character currentCharacter = characterContainer.get(characterNum);
+		boolean justAttacked = currentCharacter.getJustAttacked();
+		return justAttacked;
+	}
+	
+	public void setCharacterJustAttacked(int characterNum, boolean value)
+	{
+		Character currentCharacter = characterContainer.get(characterNum);
+		currentCharacter.setJustAttacked(value);
+	}
+	
+	public int getInventorySize()
+	{
+		int size = inventory.getSize();
+		return size;
+	}
+	
+	public String getItemName(int itemNum)
+	{
+		return inventory.getItemName(itemNum);
+	}
+	
+	public int getCharacterContainerSize()
+	{
+		return characterContainer.size();
 	}
 }
