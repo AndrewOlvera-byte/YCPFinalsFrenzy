@@ -132,11 +132,14 @@ public class GameEngine
 	// method for the player attacking a character - needs the characterNum to attack and item being used to attack
 	public String playerAttackChar(int itemNum, int characterNum)
 	{
-		if (characterNum == -1) 
+		if (characterNum == -1 && itemNum == -1) {
+			return "Attack who with what?";
+		}
+		else if (characterNum == -1) 
 		{
 			return "Attack who?";
 		}
-		if (itemNum == -1) {
+		else if (itemNum == -1) {
 			return "Attack with what?";
 		}
 		Room currentRoom = rooms.get(currentRoomNum);
@@ -434,13 +437,13 @@ public class GameEngine
             	playerAttackChar(CharNameToID(noun), ItemNameToID(noun2));
             //case "throw": throwable weapons?	
                 
-            case "go":
+            //case "go":
                 
-            case "examine":
+            //case "examine":
                 
-            case "talk":
+            //case "talk":
                 
-            case "use":
+            //case "use":
                 
             default:
                 this.runningMessage += "Command not implemented.";
