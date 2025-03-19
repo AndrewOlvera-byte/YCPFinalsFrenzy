@@ -1,6 +1,7 @@
 package GameEngine;
 
 import java.util.ArrayList;
+import java.util.*;
 
 import models.Room;
 import models.Player;
@@ -14,6 +15,10 @@ import models.Weapon;
 
 public class GameEngine
 {
+	private static final Set<String> VALID_VERBS = new HashSet<>(Arrays.asList(
+	        "pickup", "drop", "use", "examine", "go", "talk"
+	));
+	
 	private Player player;
 	private boolean isRunning = false;
 	private int currentRoomNum;
@@ -287,6 +292,16 @@ public class GameEngine
 		
 	}
 	
+	public static String[] parseInput(String command) {
+        String[] words = command.split("\\s+");
+        if (words.length == 0) return new String[]{null, null};
+
+        String verb = words[0];
+        String noun = (words.length > 1) ? words[1] : null;
+
+        return new String[]{verb, noun};
+    }
+	
 	// method called in servlet to get input and call methods based on it, need to figure out optimal CLI parsing technique
 	// if the input is valid and processed return true, and if it is an invalid input return false, so the servlet knows when to send error message
 	public boolean processInput(String input)
@@ -330,6 +345,35 @@ public class GameEngine
 		
 		
 		//String parsing logic and calling methods inside
+		String[] parsedInput = parseInput(input);
+        String verb = parsedInput[0];
+        String noun = parsedInput[1];
+
+        if (verb == null || verb.isEmpty()) {
+            this.runningMessage += "I don't understand that.";
+        }
+
+        if (!VALID_VERBS.contains(verb)) {
+            this.runningMessage += "Unknown command: " + verb;
+        }
+
+        switch (verb) {
+            case "pickup":
+                
+            case "drop":
+                
+            case "go":
+                
+            case "examine":
+                
+            case "talk":
+                
+            case "use":
+                
+            default:
+                this.runningMessage += "Command not implemented.";
+        }
+    
 		return true;
 	}
 	
