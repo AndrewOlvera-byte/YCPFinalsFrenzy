@@ -20,8 +20,11 @@ public class NPC extends Character {
        return name + " says: " + dialogue;
    }
    
-   public boolean isAgressive()
-   {return this.aggression;
+   public boolean getAggresion(){
+	   return this.aggression;
    
+   }
+   public void setAgression(boolean aggression){
+	   this.aggression = aggression;
    }
 }
