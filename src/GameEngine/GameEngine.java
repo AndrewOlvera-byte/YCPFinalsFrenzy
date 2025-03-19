@@ -136,6 +136,9 @@ public class GameEngine
 		{
 			return "Attack who?";
 		}
+		if (itemNum == -1) {
+			return "Attack with what?";
+		}
 		Room currentRoom = rooms.get(currentRoomNum);
 		int attackDmg = player.getAttackDmg(itemNum);//Needed
 		int charHealth = currentRoom.getCharacterHealth(characterNum);
@@ -342,13 +345,25 @@ public class GameEngine
 	
 	public static String[] parseInput(String command) {
         String[] words = command.split("\\s+");
-        if (words.length == 0) return new String[]{null, null};
+        if (words.length == 0) return new String[]{null, null, null, null};
 
         String verb = words[0];
-        String noun = (words.length > 1) ? words[1] : null;
+        String noun = null;
+        String preposition = null;
+        String noun2 = null;
+        
+        for (int i = 1; i < words.length; i++) {
+            if (PREPOSITIONS.contains(words[i])) {
+                preposition = words[i];
+                noun2 = (i + 1 < words.length) ? String.join(" ", Arrays.copyOfRange(words, i + 1, words.length)) : null;
+                break;
+            }
+            noun = (noun == null) ? words[i] : noun + " " + words[i];
+        }
 
-        return new String[]{verb, noun};
+        return new String[]{verb, noun, preposition, noun2};
     }
+    
 	
 	// method called in servlet to get input and call methods based on it, need to figure out optimal CLI parsing technique
 	// if the input is valid and processed return true, and if it is an invalid input return false, so the servlet knows when to send error message
