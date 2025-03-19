@@ -93,6 +93,7 @@ public class Room
 	{
 		this.characterContainer.remove(characterNum);
 	}
+	
 	public int getCharacterTotal()
 	{
 		return this.characterContainer.size();
@@ -103,5 +104,34 @@ public class Room
 		Character currentCharacter = characterContainer.get(characterNum);
 		boolean aggressive = currentCharacter.isAgressive();
 		return aggressive;
+	}
+	
+	public boolean getCharacterJustAttacked(int characterNum)
+	{
+		Character currentCharacter = characterContainer.get(characterNum);
+		boolean justAttacked = currentCharacter.getJustAttacked();
+		return justAttacked;
+	}
+	
+	public void setCharacterJustAttacked(int characterNum, boolean value)
+	{
+		Character currentCharacter = characterContainer.get(characterNum);
+		currentCharacter.setJustAttacked(value);
+	}
+	
+	public int getInventorySize()
+	{
+		int size = inventory.getSize();
+		return size;
+	}
+	
+	public String getItemName(int itemNum)
+	{
+		return inventory.getItemName(itemNum);
+	}
+	
+	public int getCharacterContainerSize()
+	{
+		return characterContainer.size();
 	}
 }

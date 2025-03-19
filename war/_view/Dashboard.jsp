@@ -3,22 +3,24 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Dashboard</title>
+    <title>YCP Finals Frenzy</title>
     <style type="text/css">
         td.label { text-align: right; }
         .error { color: red; }
     </style>
 </head>
 <body>
-    <h1>Dashboard</h1>
+    <h1>YCP Finals Frenzy</h1>
     <!-- Render the initial state from the server -->
     <div id="initialDisplay">
         <p>Message: ${response.message}</p>
-        <p>RoomInventory: ${response.roomInventory}</p>
-        <p>PlayerInventory: ${response.playerInventory}</p>
-        <p>RoomConnections: ${response.roomConnections}</p>
+        <p>Room Inventory: ${response.roomInventory}</p>
+        <p>Player Inventory: ${response.playerInventory}</p>
+        <p>Characters InRoom: ${response.charactersInRoom}</p>
+        <p>Player Info: ${response.playerInfo}</p>
+        <p>Room Connections: ${response.roomConnections}</p>
     </div>
-    <!-- Optionally include a form for non-AJAX submissions -->
+    
     <form action="${pageContext.request.contextPath}/dashboard" method="post">
         <table>
             <tr>

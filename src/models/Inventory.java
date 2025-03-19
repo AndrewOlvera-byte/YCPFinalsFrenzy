@@ -16,10 +16,11 @@ public class Inventory {
 	}
 	
 	public void addItem(Item item) {
-		if(currentWeight + item.getWeight() < maxWeight) {
+		/*if(currentWeight + item.getWeight() < maxWeight) {
 			inventory.add(item);
 			currentWeight += item.getWeight();
-		}
+		}*/
+		inventory.add(item);
 	}
 	
 	public void removeItem(int itemNumber) {
@@ -71,5 +72,16 @@ public class Inventory {
 	{
 		Item item = inventory.get(itemNum);
 		return item;
+	}
+	
+	public int getSize()
+	{
+		return inventory.size();
+	}
+	
+	public String getItemName(int itemNum)
+	{
+		Item item = inventory.get(itemNum);
+		return item.getName();
 	}
 }

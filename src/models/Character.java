@@ -6,6 +6,7 @@ public class Character {
    protected String name;
    protected int hp;
    protected Inventory inventory;
+   private boolean justAttacked = false;
    public Character(String name, int hp, Inventory inventory) {
        this.name = name;
        this.hp = hp;
@@ -53,6 +54,26 @@ public class Character {
    public void removeItem(int itemNum)
    {
 	   this.inventory.removeItem(itemNum);
+   }
+   
+   public boolean getJustAttacked()
+   {
+	   return this.justAttacked;
+   }
+   
+   public void setJustAttacked(boolean value)
+   {
+	   this.justAttacked = value;
+   }
+   
+   public int getInventorySize()
+   {
+	   return this.inventory.getSize();
+   }
+   
+   public String getItemName(int itemNum)
+   {
+	   return this.inventory.getItemName(itemNum);
    }
    
    
