@@ -375,6 +375,68 @@ public class GameEngine
 		
 	}
 	
+	public String getGo(String noun) {
+		Room currentRoom = rooms.get(currentRoomNum);
+		int nextRoomNum;
+		String message = "";
+		final Set<String> NORTH = new HashSet<>(Arrays.asList(
+		        "North", "north", "N", "n"
+		));
+		final Set<String> SOUTH = new HashSet<>(Arrays.asList(
+		        "South", "south", "s", "S"
+		));
+		final Set<String> WEST = new HashSet<>(Arrays.asList(
+		        "West", "west", "W", "w"
+		));
+		final Set<String> EAST = new HashSet<>(Arrays.asList(
+		        "East", "east", "E", "e"
+		));
+		if(NORTH.contains(noun)) {
+			nextRoomNum = currentRoom.getConnectedRoom("North");
+			if(nextRoomNum != currentRoomNum) {
+				message = "Moved to Room " + nextRoomNum;
+			}
+			else {
+				message = "There is no room in this direction";
+			}
+			this.currentRoomNum = nextRoomNum;
+		}
+		else if(SOUTH.contains(noun)) {
+			nextRoomNum = currentRoom.getConnectedRoom("South");
+			if(nextRoomNum > -1) {
+				message = "Moved to Room " + nextRoomNum;
+				this.currentRoomNum = nextRoomNum;
+			}
+			else {
+				message = "There is no room in this direction";
+			}
+		}
+		else if (EAST.contains(noun)) {
+			nextRoomNum = currentRoom.getConnectedRoom("East");
+			if(nextRoomNum > -1) {
+				message = "Moved to Room " + nextRoomNum;
+				this.currentRoomNum = nextRoomNum;
+			}
+			else {
+				message = "There is no room in this direction";
+			}
+		}
+		else if (WEST.contains(noun)) {
+			nextRoomNum = currentRoom.getConnectedRoom("West");
+			if(nextRoomNum > -1) {
+				message = "Moved to Room " + nextRoomNum;
+				this.currentRoomNum = nextRoomNum;
+			}
+			else {
+				message = "There is no room in this direction";
+			}
+		}
+		else {
+			message = "This is not a valid direction";
+		}
+		return message;
+	}
+	
 	public static String[] parseInput(String command) {
         String[] words = command.split("\\s+");
         if (words.length == 0) return new String[]{null, null, null, null};
@@ -469,8 +531,9 @@ public class GameEngine
                 break;
             //case "throw": throwable weapons?	
                 
-            //case "go":
-                
+            case "go":
+            	this.runningMessage += getGo(noun);
+               	break;
             //case "examine":
                 
             //case "talk":
