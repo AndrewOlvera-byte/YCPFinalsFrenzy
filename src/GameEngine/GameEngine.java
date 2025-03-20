@@ -16,7 +16,7 @@ import models.Weapon;
 public class GameEngine
 {
 	private static final Set<String> VALID_VERBS = new HashSet<>(Arrays.asList(
-	        "pickup", "drop", "use", "examine", "go", "talk", "attack", "slash", "strike", "hit" 
+	        "pickup", "drop", "use", "examine", "go", "talk", "attack", "swing", "slash", "strike", "hit" 
 	));
 	
 	private static final Set<String> PREPOSITIONS = new HashSet<>(Arrays.asList(
@@ -90,7 +90,7 @@ public class GameEngine
 		Inventory inventoryBoss = new Inventory(itemContainerBoss, 300);
 		
 		ArrayList<models.Character> characterContainer2 = new ArrayList<>();
-		Character boss = new Character("Big Boss", 400, inventoryBoss);
+		Character boss = new Character("Boss", 400, inventoryBoss);
 		characterContainer2.add(boss);
 		Room newRoom2 = new Room(roomName2, inventory2, connections2, characterContainer2);
 		this.rooms.add(newRoom2);
@@ -127,7 +127,7 @@ public class GameEngine
 	public void loadPlayer()
 	{
 		String[] components = {};
-		Weapon weaponPlayer = new Weapon(20, 30, "Badass Sword", components, 80);
+		Weapon weaponPlayer = new Weapon(20, 30, "Sword", components, 80);
 		ArrayList<Item> itemContainer = new ArrayList<>();
 		itemContainer.add(weaponPlayer);
 		String playerName = "Cooper";
@@ -177,8 +177,9 @@ public class GameEngine
 		int newHealth = charHealth - attackDmg;
 		if(newHealth <= 0)
 		{
+			String temp = currentRoom.getCharacterName(characterNum);
 			currentRoom.removeCharacter(characterNum);
-			return currentRoom.getCharacterName(characterNum) + " has died!";
+			return temp + " has died!";
 		}
 		else
 		{
@@ -210,23 +211,39 @@ public class GameEngine
 		if (itemNum == -1) 
 		{
 			return "Pick up what?";
+			
 		}
 		Room currentRoom = rooms.get(currentRoomNum);
+		String itemName = currentRoom.getItemName(itemNum); // tempname for the item name when we remove it
 		Item item = currentRoom.getItem(itemNum);
 		currentRoom.removeItem(itemNum);
 		this.player.addItem(item);
 		
-		return currentRoom.getItemName(itemNum) + " was picked up.";
+		return itemName + " was picked up.";
 	}
 	
 	// helper method to convert from an items name to its ID
-	public int ItemNameToID(String Name) 
+	public int RoomItemNameToID(String Name) 
 	{
 		int itemNum = -1; // set to -1 so if there is no item found it will return -1 to pick up / drop item, triggering "what item"
 		Room currentRoom = rooms.get(currentRoomNum);
 		for (int i = 0; i < currentRoom.getInventorySize(); i++) {
-			if (Name == currentRoom.getItemName(i)) {
+			if (Name.equalsIgnoreCase(currentRoom.getItemName(i))) {
 				itemNum = i;
+				break;
+			}
+		}
+		return itemNum;
+	}
+	
+	public int CharItemNameToID(String Name) 
+	{
+		int itemNum = -1; // set to -1 so if there is no item found it will return -1 to pick up / drop item, triggering "what item"
+		Room currentRoom = rooms.get(currentRoomNum);
+		for (int i = 0; i < player.getInventorySize(); i++) {
+			if (Name.equalsIgnoreCase(player.getItemName(i))) {
+				itemNum = i;
+				break;
 			}
 		}
 		return itemNum;
@@ -238,7 +255,7 @@ public class GameEngine
 		int charNum = -1; // set to -1 so if there is no char found it will return -1 to PlayerAttackChar, triggering "what char"
 		Room currentRoom = rooms.get(currentRoomNum);
 		for (int i = 0; i < currentRoom.getCharacterTotal(); i++) {
-			if (Name == currentRoom.getCharacterName(i)) {
+			if (Name.equalsIgnoreCase(currentRoom.getCharacterName(i))) {
 				charNum = i;
 			}
 		}
@@ -492,7 +509,7 @@ public class GameEngine
 			else
 			{
 				charAttackPlayer(0, characterNum);
-				this.runningMessage+="\nYou have been Attacked!";
+				this.runningMessage+="\nYou have been attacked!";
 			}
 		}
 		
@@ -518,16 +535,17 @@ public class GameEngine
 
         switch (verb) {
             case "pickup":
-                this.runningMessage += pickupItem(ItemNameToID(noun));
+                this.runningMessage += pickupItem(RoomItemNameToID(noun));
                 break;
             case "drop":
-            	this.runningMessage += dropItem(ItemNameToID(noun));
+            	this.runningMessage += dropItem(CharItemNameToID(noun));
                 break;
+            case "attack":
             case "swing": // for hand-held weapons that can be swung, this is like an "or" 
             case "slash":
             case "hit":
             case "strike":
-            	this.runningMessage += playerAttackChar(CharNameToID(noun), ItemNameToID(noun2));
+            	this.runningMessage += playerAttackChar(CharItemNameToID(noun2), CharNameToID(noun));
                 break;
             //case "throw": throwable weapons?	
                 
