@@ -27,7 +27,7 @@ public class GameEngine
 	private boolean isRunning = false;
 	private int currentRoomNum;
 	private ArrayList<Room> rooms = new ArrayList<>();
-	private String runningMessage = "";
+	private String runningMessage = "\n";
 	private String error = "";
 	
 	// Empty instantiation so data can be loaded using loadData()
@@ -304,14 +304,20 @@ public class GameEngine
 		return currentRoom.getRoomName();
 	}
 	
+	public String getRoomName(int roomNum)
+	{
+		Room currentRoom = rooms.get(roomNum);
+		return currentRoom.getRoomName();
+	}
+	
 	public String getCurrentRoomItems()
 	{
-		String currentRoomItems = "Room Inventory:\n";
+		String currentRoomItems = "\n";
 		Room currentRoom = rooms.get(currentRoomNum);
 		int size = currentRoom.getInventorySize();
 		for (int i = 0; i < size; i ++)
 		{
-			currentRoomItems += i+1 + "\t" + currentRoom.getItemName(i) + "\n";
+			currentRoomItems += i+1 + "\t" + currentRoom.getItemName(i) + "\n\n";
 		}
 		
 		return currentRoomItems;
@@ -319,11 +325,11 @@ public class GameEngine
 	
 	public String getPlayerInventoryString()
 	{
-		String playerInventoryString = "Player Inventory:\n";
+		String playerInventoryString = "\n";
 		int size = this.player.getInventorySize();
 		for (int i = 0; i < size; i ++)
 		{
-			playerInventoryString += i+1 + "\t" + player.getItemName(i) + "\n";
+			playerInventoryString += i+1 + "\t" + player.getItemName(i) + "\n\n";
 		}
 		
 		return playerInventoryString;
@@ -331,26 +337,26 @@ public class GameEngine
 	
 	public String getPlayerInfo()
 	{
-		String playerInfo = "Player Info:\n";
-		playerInfo += "Name: " + player.getName() + "\nHealth: " + player.getHp() + "\n";
+		String playerInfo = "\n";
+		playerInfo += "Name: " + player.getName() + "\nHealth: " + player.getHp() + "\n\n";
 		return playerInfo;
 	}
 	
 	public String getRoomCharactersInfo()
 	{
-		String charactersInfo = "Characters in Room:\n";
+		String charactersInfo = "\n";
 		Room currentRoom = rooms.get(currentRoomNum);
 		int size = currentRoom.getCharacterContainerSize();
 		for (int i = 0; i < size; i ++)
 		{
-			charactersInfo += i + 1 + "\t" + currentRoom.getCharacterName(i) + "\nHealth: " + currentRoom.getCharacterHealth(i) + "\n";
+			charactersInfo += i + 1 + "\t" + currentRoom.getCharacterName(i) + "\nHealth: " + currentRoom.getCharacterHealth(i) + "\n\n";
 		}
 		return charactersInfo;
 	}
 	
 	public String getRoomConnectionOutput()
 	{
-		String roomConnectionOutput = "Rooms available for each movement:\n";
+		String roomConnectionOutput = "\n";
 		int outputNorth = getMapOutput("North");
 		int outputEast = getMapOutput("East");
 		int outputSouth = getMapOutput("South");
@@ -358,41 +364,41 @@ public class GameEngine
 		
 		if (outputNorth == -1)
 		{
-			roomConnectionOutput += "North : None" + " -- ";
+			roomConnectionOutput += "\nNorth : None\n";
 		}
 		else
 		{
-			int sum = outputNorth;
-			roomConnectionOutput += "North : Room " + sum + " -- ";
+			String roomName = getRoomName(outputNorth);
+			roomConnectionOutput += "\nNorth : " + roomName + "\n";
 		}
 		
 		if (outputEast == -1)
 		{
-			roomConnectionOutput += "East : None" + " -- ";
+			roomConnectionOutput += "\nEast : None\n";
 		}
 		else
 		{
-			int sum = outputEast;
-			roomConnectionOutput += "East : Room " + sum + " -- ";
+			String roomName = getRoomName(outputNorth);
+			roomConnectionOutput += "\nEast : " + roomName + "\n";
 		}
 		if (outputSouth == -1)
 		{
-			roomConnectionOutput += "South : None" + " -- ";
+			roomConnectionOutput += "\nSouth : None\n";
 		}
 		else
 		{
-			int sum = outputSouth;
-			roomConnectionOutput += "South : Room " + sum + " -- ";
+			String roomName = getRoomName(outputNorth);
+			roomConnectionOutput += "\nSouth : " + roomName + "\n";
 		}
 		
 		if (outputWest == -1)
 		{
-			roomConnectionOutput += "West : None" ;
+			roomConnectionOutput += "\nWest : None\n" ;
 		}
 		else
 		{
-			int sum = outputWest;
-			roomConnectionOutput += "West : Room " + sum ;
+			String roomName = getRoomName(outputNorth);
+			roomConnectionOutput += "\nWest : " + roomName + "\n";
 		}
 		
 		return roomConnectionOutput;
@@ -419,45 +425,45 @@ public class GameEngine
 		if(NORTH.contains(noun)) {
 			nextRoomNum = currentRoom.getConnectedRoom("North");
 			if(nextRoomNum != -1) {
-				message = "Moved to Room " + nextRoomNum;
+				message = "\nMoved to Room " + nextRoomNum;
 				this.currentRoomNum = nextRoomNum;
 			}
 			else {
-				message = "There is no room in this direction";
+				message = "\nThere is no room in this direction";
 			}
 		}
 		else if(SOUTH.contains(noun)) {
 			nextRoomNum = currentRoom.getConnectedRoom("South");
 			if(nextRoomNum > -1) {
-				message = "Moved to Room " + nextRoomNum;
+				message = "\nMoved to Room " + nextRoomNum;
 				this.currentRoomNum = nextRoomNum;
 			}
 			else {
-				message = "There is no room in this direction";
+				message = "\nThere is no room in this direction";
 			}
 		}
 		else if (EAST.contains(noun)) {
 			nextRoomNum = currentRoom.getConnectedRoom("East");
 			if(nextRoomNum > -1) {
-				message = "Moved to Room " + nextRoomNum;
+				message = "\nMoved to Room " + nextRoomNum;
 				this.currentRoomNum = nextRoomNum;
 			}
 			else {
-				message = "There is no room in this direction";
+				message = "\nThere is no room in this direction";
 			}
 		}
 		else if (WEST.contains(noun)) {
 			nextRoomNum = currentRoom.getConnectedRoom("West");
 			if(nextRoomNum > -1) {
-				message = "Moved to Room " + nextRoomNum;
+				message = "\nMoved to Room " + nextRoomNum;
 				this.currentRoomNum = nextRoomNum;
 			}
 			else {
-				message = "There is no room in this direction";
+				message = "\nThere is no room in this direction";
 			}
 		}
 		else {
-			message = "This is not a valid direction";
+			message = "\nThis is not a valid direction";
 		}
 		return message;
 	}
@@ -522,7 +528,7 @@ public class GameEngine
 			}
 		}
 		
-		//updateCurrentRoom("North");
+		
 		
 		
 		
@@ -535,11 +541,11 @@ public class GameEngine
         String noun2 = parsedInput[3];
 
         if (verb == null || verb.isEmpty()) {
-            this.runningMessage += "I don't understand that.";
+            this.runningMessage += "\nI don't understand that.";
         }
 
         if (!VALID_VERBS.contains(verb)) {
-            this.runningMessage += "Unknown command: " + verb;
+            this.runningMessage += "\nUnknown command: " + verb;
         }
 
         switch (verb.toLowerCase()) {
@@ -571,7 +577,7 @@ public class GameEngine
             //case "use":
                 
             default:
-                this.runningMessage += "Command not implemented.";
+                this.runningMessage += "\nCommand not implemented.";
         }
     
 		return true;
