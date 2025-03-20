@@ -13,6 +13,22 @@
         .error {
             color: red;
         }
+        
+        .formatted {
+            white-space: pre-wrap;
+        }
+        
+        .scrollable-container {
+    		width: 400px;
+    		height: 300px;
+    		overflow: auto;
+    		background-color: #f0f0f0;
+    		border-radius: 8px;
+    		padding: 10px;
+    		white-space: pre-wrap;
+    		border: 1px solid #ccc;
+    		text-align: center;
+		}
     </style>
     <script type="text/javascript">
     $(document).ready(function() {
@@ -43,12 +59,14 @@
 <body>
     <h1>YCP Finals Frenzy</h1>
     <div id="resultDiv">
-        <p id="messageField">Message: </p>
-        <p id="roomInventoryField">Room Inventory: </p>
-        <p id="playerInventoryField">Player Inventory: </p>
-        <p id="playerInfoField">Player Info: </p>
-        <p id="charactersInRoomField">Character Info: </p>
-        <p id="roomConnectionsField">Room Connections: </p>
+        <div id="messageField" class="scrollable-container">
+            Messages:
+        </div>
+        <pre id="roomInventoryField" class="formatted">Room Inventory: </pre>
+        <pre id="playerInventoryField" class="formatted">Player Inventory: </pre>
+        <pre id="playerInfoField" class="formatted">Player Info: </pre>
+        <pre id="charactersInRoomField" class="formatted">Character Info: </pre>
+        <pre id="roomConnectionsField" class="formatted">Room Connections: </pre>
     </div>
     <table>
         <tr>

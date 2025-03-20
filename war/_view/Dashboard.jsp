@@ -7,18 +7,36 @@
     <style type="text/css">
         td.label { text-align: right; }
         .error { color: red; }
+        
+        .formatted {
+            white-space: pre-wrap;
+        }
+        
+        .scrollable-container {
+    		width: 400px;
+    		height: 300px;
+    		overflow: auto;
+    		background-color: #f0f0f0;
+    		border-radius: 8px;
+    		padding: 10px;
+    		white-space: pre-wrap;
+    		border: 1px solid #ccc;
+    		text-align: center;
+		}
     </style>
 </head>
 <body>
     <h1>YCP Finals Frenzy</h1>
     <!-- Render the initial state from the server -->
     <div id="initialDisplay">
-        <p>Message: ${response.message}</p>
-        <p>Room Inventory: ${response.roomInventory}</p>
-        <p>Player Inventory: ${response.playerInventory}</p>
-        <p>Characters InRoom: ${response.charactersInRoom}</p>
-        <p>Player Info: ${response.playerInfo}</p>
-        <p>Room Connections: ${response.roomConnections}</p>
+        <div class="scrollable-container">
+            ${response.message}
+        </div>
+        <pre class="formatted">Room Inventory: ${response.roomInventory}</pre>
+        <pre class="formatted">Player Inventory: ${response.playerInventory}</pre>
+        <pre class="formatted">Characters InRoom: ${response.charactersInRoom}</pre>
+        <pre class="formatted">Player Info: ${response.playerInfo}</pre>
+        <pre class="formatted">Room Connections: ${response.roomConnections}</pre>
     </div>
     
     <form action="${pageContext.request.contextPath}/dashboard" method="post">
