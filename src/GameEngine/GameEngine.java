@@ -16,7 +16,7 @@ import models.Weapon;
 public class GameEngine
 {
 	private static final Set<String> VALID_VERBS = new HashSet<>(Arrays.asList(
-	        "pickup", "drop", "use", "examine", "go", "talk"
+	        "pickup", "drop", "use", "examine", "go", "talk", "attack", "slash", "strike", "hit" 
 	));
 	
 	private static final Set<String> PREPOSITIONS = new HashSet<>(Arrays.asList(
@@ -456,14 +456,17 @@ public class GameEngine
 
         switch (verb) {
             case "pickup":
-                pickupItem(ItemNameToID(noun));
+                this.runningMessage += pickupItem(ItemNameToID(noun));
+                break;
             case "drop":
-            	dropItem(ItemNameToID(noun));
+            	this.runningMessage += dropItem(ItemNameToID(noun));
+                break;
             case "swing": // for hand-held weapons that can be swung, this is like an "or" 
             case "slash":
             case "hit":
             case "strike":
-            	playerAttackChar(CharNameToID(noun), ItemNameToID(noun2));
+            	this.runningMessage += playerAttackChar(CharNameToID(noun), ItemNameToID(noun2));
+                break;
             //case "throw": throwable weapons?	
                 
             //case "go":
