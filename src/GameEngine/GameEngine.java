@@ -102,10 +102,10 @@ public class GameEngine
 		Inventory inventory3 = new Inventory(itemContainer3, 300);
 		
 		Connections connections3 = new Connections();
-		connections2.setConnection("North", null);
-		connections2.setConnection("East", 2);
-		connections2.setConnection("South", 0);
-		connections2.setConnection("West", null);
+		connections3.setConnection("North", null);
+		connections3.setConnection("East", null);
+		connections3.setConnection("South", null);
+		connections3.setConnection("West", 1);
 		
 		
 		ArrayList<Item> itemContainerFriend = new ArrayList<>();
@@ -408,15 +408,16 @@ public class GameEngine
 		final Set<String> EAST = new HashSet<>(Arrays.asList(
 		        "East", "east", "E", "e"
 		));
+		
 		if(NORTH.contains(noun)) {
 			nextRoomNum = currentRoom.getConnectedRoom("North");
-			if(nextRoomNum != currentRoomNum) {
+			if(nextRoomNum != -1) {
 				message = "Moved to Room " + nextRoomNum;
+				this.currentRoomNum = nextRoomNum;
 			}
 			else {
 				message = "There is no room in this direction";
 			}
-			this.currentRoomNum = nextRoomNum;
 		}
 		else if(SOUTH.contains(noun)) {
 			nextRoomNum = currentRoom.getConnectedRoom("South");
