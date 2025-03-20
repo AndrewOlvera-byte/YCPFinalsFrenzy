@@ -16,7 +16,7 @@ import models.Weapon;
 public class GameEngine
 {
 	private static final Set<String> VALID_VERBS = new HashSet<>(Arrays.asList(
-	        "pickup", "drop", "use", "examine", "go", "talk", "attack", "swing", "slash", "strike", "hit" 
+	        "pickup", "drop", "use", "get", "grab", "take", "examine", "go", "talk", "attack", "swing", "slash", "strike", "hit" 
 	));
 	
 	private static final Set<String> PREPOSITIONS = new HashSet<>(Arrays.asList(
@@ -271,12 +271,17 @@ public class GameEngine
 		{
 			return "Drop what?";
 		}
-		Room currentRoom = rooms.get(currentRoomNum);
-		Item item = player.getItem(itemNum);
-		currentRoom.addItem(item);
-		player.removeItem(itemNum);
 		
-		return currentRoom.getItemName(itemNum) + " was dropped.";
+		if (itemNum < 0 || itemNum >= player.getInventorySize()) {
+	        return "Invalid item selection.";
+	    }
+		
+		Room currentRoom = rooms.get(currentRoomNum);
+		Item InvenItem = player.getItem(itemNum);
+		player.removeItem(itemNum);
+	    currentRoom.addItem(InvenItem);
+		
+		return InvenItem.getName() + " was dropped.";
 	}
 	
 	// method to get character name for display()
@@ -458,6 +463,7 @@ public class GameEngine
 	}
 	
 	public static String[] parseInput(String command) {
+		command = command.toLowerCase();
         String[] words = command.split("\\s+");
         if (words.length == 0) return new String[]{null, null, null, null};
 
@@ -522,7 +528,7 @@ public class GameEngine
 		
 		
 		// String parsing logic and calling methods inside
-		String[] parsedInput = parseInput(input);
+		String[] parsedInput = parseInput(input.toLowerCase());
         String verb = parsedInput[0];
         String noun = parsedInput[1];
         String preposition = parsedInput[2];
@@ -536,7 +542,10 @@ public class GameEngine
             this.runningMessage += "Unknown command: " + verb;
         }
 
-        switch (verb) {
+        switch (verb.toLowerCase()) {
+        	case "take":
+        	case "get":
+        	case "grab":
             case "pickup":
                 this.runningMessage += pickupItem(RoomItemNameToID(noun));
                 break;
