@@ -57,7 +57,7 @@ public class GameEngine
 		// example implementation but will be looped over data in the .csv file to load the rooms state last left off
 		String roomName1 = "First Room";
 		String[] components = {};
-		Weapon weapon1 = new Weapon(20, 30, "Sword", components, 40);
+		Weapon weapon1 = new Weapon(20, 30, "Sword", components, 80);
 		ArrayList<Item> itemContainer1 = new ArrayList<>();
 		itemContainer1.add(weapon1);
 		Inventory inventory1 = new Inventory(itemContainer1, 300);
@@ -179,7 +179,10 @@ public class GameEngine
 		{
 			String temp = currentRoom.getCharacterName(characterNum);
 			currentRoom.removeCharacter(characterNum);
-			return temp + " has died!";
+			
+			currentRoom.handleCharacterDeath(characterNum);
+			
+			return temp + " has been slain and dropped its inventory!";
 		}
 		else
 		{
@@ -214,7 +217,7 @@ public class GameEngine
 			
 		}
 		Room currentRoom = rooms.get(currentRoomNum);
-		String itemName = currentRoom.getItemName(itemNum); // tempname for the item name when we remove it
+		String itemName = currentRoom.getItemName(itemNum); // temp name for the item name when we remove it
 		Item item = currentRoom.getItem(itemNum);
 		currentRoom.removeItem(itemNum);
 		this.player.addItem(item);
@@ -239,7 +242,7 @@ public class GameEngine
 	public int CharItemNameToID(String Name) 
 	{
 		int itemNum = -1; // set to -1 so if there is no item found it will return -1 to pick up / drop item, triggering "what item"
-		Room currentRoom = rooms.get(currentRoomNum);
+		
 		for (int i = 0; i < player.getInventorySize(); i++) {
 			if (Name.equalsIgnoreCase(player.getItemName(i))) {
 				itemNum = i;

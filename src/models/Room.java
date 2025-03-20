@@ -64,6 +64,22 @@ public class Room
 		return currentCharacter.getAttackDmg(itemNum);
 	}
 	
+	public void handleCharacterDeath(int characterNum) {
+	    Character slainChar = characterContainer.get(characterNum);
+	    
+	 // Get the dropped items from character
+	    ArrayList<Item> droppedItems = slainChar.dropAllItems();
+
+	    // Add dropped items to the room's inventory
+	    for (Item item : droppedItems) {
+	        this.addItem(item);
+	    }
+
+
+	    // Remove character from room
+	    removeCharacter(characterNum);
+	}
+	
 	// returns the actual item object to add into the player's inventory, and in gameEngine it calls removeItem() for the same item as well
 	public Item getItem(int itemNum)
 	{

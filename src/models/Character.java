@@ -76,5 +76,16 @@ public class Character {
 	   return this.inventory.getItemName(itemNum);
    }
    
-   
+   public ArrayList<Item> dropAllItems() 
+   {
+	   ArrayList<Item> droppedItems = new ArrayList<>();
+
+	    while (inventory.getSize() > 0) {
+	        Item droppedItem = inventory.getItem(0);
+	        droppedItems.add(droppedItem);
+	        inventory.removeItem(0);
+	    }
+
+	    return droppedItems;
+	}
 }
