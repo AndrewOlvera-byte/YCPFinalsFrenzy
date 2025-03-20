@@ -1,169 +1,154 @@
-/*package GameEngineTest;
+package GameEngineTest;
 
 import static org.junit.Assert.*;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-
 import org.junit.Before;
 import org.junit.Test;
+import models.Room;
+import models.Response;
+import models.Player;
+import models.Inventory;
+import models.Item;
+import models.Weapon;
 
 import GameEngine.GameEngine;
-import models.Room;
-import models.Player;
-import models.Item;
-import models.Inventory;
-import models.Response;
-import models.Character; // our game-specific character class
+
+import java.util.ArrayList;
 
 public class GameEngineTest {
-
-    private GameEngine engine;
-    private Room room;
-
+    private GameEngine gameEngine;
+    
     @Before
-    public void setUp() throws Exception {
-        engine = new GameEngine();
-        engine.loadData();  // load rooms, player, etc.
-        
-        // Access the private 'rooms' field using reflection.
-        Field roomsField = GameEngine.class.getDeclaredField("rooms");
-        roomsField.setAccessible(true);
-        ArrayList<Room> rooms = (ArrayList<Room>) roomsField.get(engine);
-        room = rooms.get(0);  // use the first room for our tests
+    public void setUp() {
+        gameEngine = new GameEngine();
+        gameEngine.loadData();
     }
     
-    // Dummy implementation of models.Character for testing.
-    private class DummyCharacter extends models.Character {
-		private int health;
-		
-
-        public DummyCharacter(int health) {
-        	
-        	super("DummyCharacter", new Inventory(new ArrayList<Item>(), 32), 100);  // assumes a default constructor is available
-            this.health = health;
-        }
-        
-        @Override
-        public int getAttackDmg(int itemNum) {
-            return 10;
-        }
-        
-        @Override
-        public int getHealth() {
-            return health;
-        }
-        
-        @Override
-        public void setHealth(int health) {
-            this.health = health;
-        }
-        
-        @Override
-        public String getName() {
-            return "DummyCharacter";
-        }
+    @Test
+    public void testInitialRoom() {
+        // After loadData(), the initial room should be "First Room".
+        assertEquals("First Room", gameEngine.getCurrentRoomName());
     }
     
     @Test
     public void testUpdateCurrentRoom() {
-        // Since loadRooms() does not set any connections,
-        // updateCurrentRoom should return false for any direction.
-        assertFalse(engine.updateCurrentRoom("north"));
+        // From "First Room", updateCurrentRoom("North") should work (as set in loadRooms).
+        boolean updated = gameEngine.updateCurrentRoom("North");
+        assertTrue(updated);
+        // After moving north, current room should be "Second Room".
+        assertEquals("Second Room", gameEngine.getCurrentRoomName());
     }
     
     @Test
-    public void testPlayerAttackChar() throws Exception {
-        // Use reflection to access the room's private character container.
-        Field charContainerField = room.getClass().getDeclaredField("characterContainer");
-        charContainerField.setAccessible(true);
-        ArrayList<models.Character> charContainer = (ArrayList<models.Character>) charContainerField.get(room);
+    public void testGetMapOutput() {
+        // Initially in "First Room", the "North" connection should return 1.
+        int mapOutput = gameEngine.getMapOutput("North");
+        assertEquals(1, mapOutput);
         
-        // Add a dummy character with 50 health.
-        DummyCharacter dummyChar = new DummyCharacter(50);
-        charContainer.add(dummyChar);
-        
-        // Call playerAttackChar with any item number (0) and character index (0).
-        // Player's attack damage (getAttackDmg) should be 10.
-        engine.playerAttackChar(0, 0);
-        
-        // The dummy character’s health should have decreased from 50 to 40.
-        assertEquals(40, dummyChar.getHealth());
+        // For an unset direction, expect -1.
+        int eastOutput = gameEngine.getMapOutput("East");
+        assertEquals(-1, eastOutput);
     }
     
     @Test
-    public void testCharAttackPlayer() throws Exception {
-        // Use reflection to access the room's character container.
-        Field charContainerField = room.getClass().getDeclaredField("characterContainer");
-        charContainerField.setAccessible(true);
-        ArrayList<models.Character> charContainer = (ArrayList<models.Character>) charContainerField.get(room);
+    public void testPlayerAttackChar() {
+        // Move to "Second Room" where a character ("Moe") exists.
+        gameEngine.updateCurrentRoom("North");
+        // The player's weapon from loadPlayer ("Dagger") has attack damage 40.
+        // Attack the character "Moe".
+        String attackMessage = gameEngine.playerAttackChar(gameEngine.CharItemNameToID("Dagger"), gameEngine.CharNameToID("Moe"));
+        // Expected outcome: since 400-40 > 0, the boss's health should reduce.
+        assertEquals("\nMoe has taken 40 damage.", attackMessage);
         
-        // Add a dummy character with 50 health.
-        DummyCharacter dummyChar = new DummyCharacter(50);
-        charContainer.add(dummyChar);
-        
-        // Access the private player field using reflection.
-        Field playerField = GameEngine.class.getDeclaredField("player");
-        playerField.setAccessible(true);
-        Player player = (Player) playerField.get(engine);
-        int initialHealth = player.getHealth();
-        
-        // When the character attacks the player, the player's health should drop by 10.
-        engine.charAttackPlayer(0, 0);
-        assertEquals(initialHealth - 10, player.getHealth());
+        // Use reflection to access the current room (private field "rooms") and check "Moe"'s health.
+        Room currentRoom = getCurrentRoomFromGameEngine();
+        assertNotNull(currentRoom);
+        assertEquals(360, currentRoom.getCharacterHealth(0));
     }
     
     @Test
-    public void testPickupAndDropItem() throws Exception {
-        // Create a dummy item. We assume an Item(String name, int weight) constructor.
-    	String[] stringArr = {"Screw"};
-        Item dummyItem = new Item(10, 2, "Sword", stringArr);
+    public void testCharAttackPlayer() {
+        // Move to "Second Room" where "Moe" is located.
+        gameEngine.updateCurrentRoom("North");
+        int playerHpBefore = getPlayerHpViaReflection(gameEngine);
+        // Boss "Moe" uses his weapon (the "Trident" with 90 damage) to attack.
+        gameEngine.charAttackPlayer(0, 0);
+        int playerHpAfter = getPlayerHpViaReflection(gameEngine);
+        // Player's HP should decrease by 90.
+        assertEquals(playerHpBefore - 90, playerHpAfter);
+    }
+    
+    @Test
+    public void testPickupAndDropItem() {
+        // In the initial room ("First Room"), there is one item: "Sword".
+        String pickupMessage = gameEngine.pickupItem(0);
+        assertEquals("\nSword was picked up.", pickupMessage);
         
-        // Add the dummy item to the room's inventory.
-        room.addItem(dummyItem);
+        // After pickup, the room inventory should be empty.
+        String roomItems = gameEngine.getCurrentRoomItems();
+        // Either it shows an empty inventory message or no items.
+        assertTrue(roomItems.contains("Inventory is empty") || roomItems.trim().endsWith(":\n"));
         
-        // The player picks up the item from index 0 in the room inventory.
-        engine.pickupItem(0);
+        // Now test drop item from the player's inventory.
+        String dropMessage = gameEngine.dropItem(gameEngine.CharItemNameToID("Sword"));
+        assertEquals("\nSword was dropped.", dropMessage);
+    }
+    
+    @Test
+    public void testGetGo() {
+        // In "First Room", "go north" should move to "Second Room".
+        String message = gameEngine.getGo("North");
+        assertTrue(message.contains("Moved to Room Second Room"));
         
-        // Access the private player field to check the player's inventory.
-        Field playerField = GameEngine.class.getDeclaredField("player");
-        playerField.setAccessible(true);
-        Player player = (Player) playerField.get(engine);
-        
-        // Verify that the player's inventory now has the item.
-        Item itemFromPlayer = player.getItem(0);
-        assertEquals("Goggles", itemFromPlayer.getName());
-        
-        // Now, drop the item back to the room.
-        engine.dropItem(0);
-        
-        // After dropping, the player's inventory should be empty.
+        // Trying an invalid direction should return an appropriate message.
+        String invalidMessage = gameEngine.getGo("Up");
+        assertEquals("\nThis is not a valid direction", invalidMessage);
+    }
+    
+    @Test
+    public void testProcessInput() {
+        // Starting in "First Room", process a command to go north.
+        gameEngine.processInput("go north");
+        Response response = gameEngine.display();
+        // The running message should indicate the room change.
+        assertTrue(response.getMessage().contains("Moved to Room Second Room"));
+    }
+    
+    @Test
+    public void testDisplayResponse() {
+        Response response = gameEngine.display();
+        // Verify that the Response object fields are not null.
+        assertNotNull(response.getRoomInventory());
+        assertNotNull(response.getPlayerInventory());
+        assertNotNull(response.getCharactersInRoom());
+        assertNotNull(response.getPlayerInfo());
+        assertNotNull(response.getRoomConnections());
+        assertNotNull(response.getMessage());
+        assertNotNull(response.getError());
+    }
+    
+    // Helper method: use reflection to get the current room from GameEngine.
+    @SuppressWarnings("unchecked")
+    private Room getCurrentRoomFromGameEngine() {
         try {
-            player.getItem(0);
-            fail("Player inventory should be empty after dropping the item.");
-        } catch (IndexOutOfBoundsException e) {
-            // Expected behavior if the inventory is empty.
+            java.lang.reflect.Field roomsField = GameEngine.class.getDeclaredField("rooms");
+            roomsField.setAccessible(true);
+            ArrayList<Room> rooms = (ArrayList<Room>) roomsField.get(gameEngine);
+            return rooms.get(gameEngine.getCurrentRoomNum());
+        } catch(Exception e) {
+            return null;
         }
-        
-        // Verify that the room's inventory now contains the item.
-        Item itemFromRoom = room.getItem(0);
-        assertEquals("Sword", itemFromRoom.getName());
     }
     
-    @Test
-    public void testDisplayAndProcessInput() {
-        // processInput should return true for valid input.
-        assertTrue(engine.processInput("test input"));
-        
-        // Test that display() returns a Response object with the expected dummy data.
-        Response response = engine.display();
-        assertNotNull(response);
-        // Assuming Response has getters for its attributes.
-        assertEquals("Test Room Inventory", response.getRoomInventory());
-        assertEquals("Test Player Inventory", response.getPlayerInventory());
-        assertEquals("Test room connections", response.getRoomConnections());
-        assertEquals("Test message", response.getMessage());
-        assertEquals("Test error", response.getError());
+    // Helper method: use reflection to get the player's HP from GameEngine.
+    private int getPlayerHpViaReflection(GameEngine ge) {
+        try {
+            java.lang.reflect.Field playerField = GameEngine.class.getDeclaredField("player");
+            playerField.setAccessible(true);
+            Player player = (Player) playerField.get(ge);
+            return player.getHp();
+        } catch(Exception e) {
+            return -1;
+        }
     }
 }
-*/
