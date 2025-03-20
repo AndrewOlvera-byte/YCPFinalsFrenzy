@@ -85,12 +85,12 @@ public class GameEngine
 		
 		ArrayList<Item> itemContainerBoss = new ArrayList<>();
 		String[] componentsBoss = {};
-		Weapon weaponBoss = new Weapon(20, 30, "Boss Sword", componentsBoss, 90);
+		Weapon weaponBoss = new Weapon(20, 30, "Trident", componentsBoss, 90);
 		itemContainerBoss.add(weaponBoss);
 		Inventory inventoryBoss = new Inventory(itemContainerBoss, 300);
 		
 		ArrayList<models.Character> characterContainer2 = new ArrayList<>();
-		Character boss = new Character("Boss", 400, inventoryBoss);
+		Character boss = new Character("Moe", 400, inventoryBoss);
 		characterContainer2.add(boss);
 		Room newRoom2 = new Room(roomName2, inventory2, connections2, characterContainer2);
 		this.rooms.add(newRoom2);
@@ -115,7 +115,7 @@ public class GameEngine
 		Inventory inventoryFriend = new Inventory(itemContainerFriend, 300);
 		
 		ArrayList<models.Character> characterContainer3 = new ArrayList<>();
-		Character Friend = new Character("Big Boss", 400, inventoryFriend);
+		Character Friend = new Character("Curly", 400, inventoryFriend);
 		characterContainer2.add(Friend);
 		Room newRoom3 = new Room(roomName3, inventory3, connections3, characterContainer3);
 		this.rooms.add(newRoom3);
@@ -127,7 +127,7 @@ public class GameEngine
 	public void loadPlayer()
 	{
 		String[] components = {};
-		Weapon weaponPlayer = new Weapon(20, 30, "Sword", components, 80);
+		Weapon weaponPlayer = new Weapon(20, 30, "Dagger", components, 40);
 		ArrayList<Item> itemContainer = new ArrayList<>();
 		itemContainer.add(weaponPlayer);
 		String playerName = "Cooper";
