@@ -19,6 +19,10 @@ public class GameEngine
 	        "pickup", "drop", "use", "examine", "go", "talk"
 	));
 	
+	private static final Set<String> PREPOSITIONS = new HashSet<>(Arrays.asList(
+	        "on", "with", "at", "in", "to"
+	    ));
+	
 	private Player player;
 	private boolean isRunning = false;
 	private int currentRoomNum;
@@ -66,13 +70,15 @@ public class GameEngine
 		Room newRoom1 = new Room(roomName1, inventory1, connections1, characterContainer1);
 		this.rooms.add(newRoom1);
 		
+		//start
+		
 		String roomName2 = "Second Room";
 		ArrayList<Item> itemContainer2 = new ArrayList<>();
 		Inventory inventory2 = new Inventory(itemContainer2, 300);
 		
 		Connections connections2 = new Connections();
 		connections2.setConnection("North", null);
-		connections2.setConnection("East", null);
+		connections2.setConnection("East", 2);
 		connections2.setConnection("South", 0);
 		connections2.setConnection("West", null);
 		
@@ -88,6 +94,33 @@ public class GameEngine
 		characterContainer2.add(boss);
 		Room newRoom2 = new Room(roomName2, inventory2, connections2, characterContainer2);
 		this.rooms.add(newRoom2);
+		
+		
+		
+		String roomName3 = "Third Room";
+		ArrayList<Item> itemContainer3 = new ArrayList<>();
+		Inventory inventory3 = new Inventory(itemContainer3, 300);
+		
+		Connections connections3 = new Connections();
+		connections2.setConnection("North", null);
+		connections2.setConnection("East", 2);
+		connections2.setConnection("South", 0);
+		connections2.setConnection("West", null);
+		
+		
+		ArrayList<Item> itemContainerFriend = new ArrayList<>();
+		String[] componentsFriend = {};
+		Weapon weaponFriend = new Weapon(20, 30, "Paint Brush", componentsFriend, 1);
+		itemContainerBoss.add(weaponFriend);
+		Inventory inventoryFriend = new Inventory(itemContainerFriend, 300);
+		
+		ArrayList<models.Character> characterContainer3 = new ArrayList<>();
+		Character Friend = new Character("Big Boss", 400, inventoryFriend);
+		characterContainer2.add(Friend);
+		Room newRoom3 = new Room(roomName3, inventory3, connections3, characterContainer3);
+		this.rooms.add(newRoom3);
+		
+
 	}
 	
 	// loading of player data
@@ -97,7 +130,7 @@ public class GameEngine
 		Weapon weaponPlayer = new Weapon(20, 30, "Badass Sword", components, 80);
 		ArrayList<Item> itemContainer = new ArrayList<>();
 		itemContainer.add(weaponPlayer);
-		String playerName = "Bob";
+		String playerName = "Cooper";
 		Inventory inventory = new Inventory(itemContainer, 30);
 		Player newPlayer = new Player(playerName, 200, 0, inventory);
 		this.player = newPlayer;
@@ -126,8 +159,18 @@ public class GameEngine
 	}
 	
 	// method for the player attacking a character - needs the characterNum to attack and item being used to attack
-	public void playerAttackChar(int itemNum, int characterNum)
+	public String playerAttackChar(int itemNum, int characterNum)
 	{
+		if (characterNum == -1 && itemNum == -1) {
+			return "Attack who with what?";
+		}
+		else if (characterNum == -1) 
+		{
+			return "Attack who?";
+		}
+		else if (itemNum == -1) {
+			return "Attack with what?";
+		}
 		Room currentRoom = rooms.get(currentRoomNum);
 		int attackDmg = player.getAttackDmg(itemNum);//Needed
 		int charHealth = currentRoom.getCharacterHealth(characterNum);
@@ -135,10 +178,12 @@ public class GameEngine
 		if(newHealth <= 0)
 		{
 			currentRoom.removeCharacter(characterNum);
+			return currentRoom.getCharacterName(characterNum) + " has died!";
 		}
 		else
 		{
 			currentRoom.setCharacterHealth(characterNum, newHealth);
+			return currentRoom.getCharacterName(characterNum) + " has taken " + attackDmg + " damage.";
 		}
 	}
 	
@@ -160,21 +205,59 @@ public class GameEngine
 	}
 	
 	// method for player to pickup item itemNum from room inventory
-	public void pickupItem(int itemNum)
+	public String pickupItem(int itemNum)
 	{
+		if (itemNum == -1) 
+		{
+			return "Pick up what?";
+		}
 		Room currentRoom = rooms.get(currentRoomNum);
 		Item item = currentRoom.getItem(itemNum);
 		currentRoom.removeItem(itemNum);
 		this.player.addItem(item);
+		
+		return currentRoom.getItemName(itemNum) + " was picked up.";
+	}
+	
+	// helper method to convert from an items name to its ID
+	public int ItemNameToID(String Name) 
+	{
+		int itemNum = -1; // set to -1 so if there is no item found it will return -1 to pick up / drop item, triggering "what item"
+		Room currentRoom = rooms.get(currentRoomNum);
+		for (int i = 0; i < currentRoom.getInventorySize(); i++) {
+			if (Name == currentRoom.getItemName(i)) {
+				itemNum = i;
+			}
+		}
+		return itemNum;
+	}
+	
+	// helper method to convert from an char name to its ID
+	public int CharNameToID(String Name) 
+	{
+		int charNum = -1; // set to -1 so if there is no char found it will return -1 to PlayerAttackChar, triggering "what char"
+		Room currentRoom = rooms.get(currentRoomNum);
+		for (int i = 0; i < currentRoom.getCharacterTotal(); i++) {
+			if (Name == currentRoom.getCharacterName(i)) {
+				charNum = i;
+			}
+		}
+		return charNum;
 	}
 	
 	// method to drop an item from player inventory into room inventory
-	public void dropItem(int itemNum)
+	public String dropItem(int itemNum)
 	{
+		if (itemNum == -1) 
+		{
+			return "Drop what?";
+		}
 		Room currentRoom = rooms.get(currentRoomNum);
 		Item item = player.getItem(itemNum);
 		currentRoom.addItem(item);
 		player.removeItem(itemNum);
+		
+		return currentRoom.getItemName(itemNum) + " was dropped.";
 	}
 	
 	// method to get character name for display()
@@ -294,13 +377,25 @@ public class GameEngine
 	
 	public static String[] parseInput(String command) {
         String[] words = command.split("\\s+");
-        if (words.length == 0) return new String[]{null, null};
+        if (words.length == 0) return new String[]{null, null, null, null};
 
         String verb = words[0];
-        String noun = (words.length > 1) ? words[1] : null;
+        String noun = null;
+        String preposition = null;
+        String noun2 = null;
+        
+        for (int i = 1; i < words.length; i++) {
+            if (PREPOSITIONS.contains(words[i])) {
+                preposition = words[i];
+                noun2 = (i + 1 < words.length) ? String.join(" ", Arrays.copyOfRange(words, i + 1, words.length)) : null;
+                break;
+            }
+            noun = (noun == null) ? words[i] : noun + " " + words[i];
+        }
 
-        return new String[]{verb, noun};
+        return new String[]{verb, noun, preposition, noun2};
     }
+    
 	
 	// method called in servlet to get input and call methods based on it, need to figure out optimal CLI parsing technique
 	// if the input is valid and processed return true, and if it is an invalid input return false, so the servlet knows when to send error message
@@ -344,10 +439,12 @@ public class GameEngine
 		
 		
 		
-		//String parsing logic and calling methods inside
+		// String parsing logic and calling methods inside
 		String[] parsedInput = parseInput(input);
         String verb = parsedInput[0];
         String noun = parsedInput[1];
+        String preposition = parsedInput[2];
+        String noun2 = parsedInput[3];
 
         if (verb == null || verb.isEmpty()) {
             this.runningMessage += "I don't understand that.";
@@ -359,16 +456,23 @@ public class GameEngine
 
         switch (verb) {
             case "pickup":
-                
+                pickupItem(ItemNameToID(noun));
             case "drop":
+            	dropItem(ItemNameToID(noun));
+            case "swing": // for hand-held weapons that can be swung, this is like an "or" 
+            case "slash":
+            case "hit":
+            case "strike":
+            	playerAttackChar(CharNameToID(noun), ItemNameToID(noun2));
+            //case "throw": throwable weapons?	
                 
-            case "go":
+            //case "go":
                 
-            case "examine":
+            //case "examine":
                 
-            case "talk":
+            //case "talk":
                 
-            case "use":
+            //case "use":
                 
             default:
                 this.runningMessage += "Command not implemented.";
