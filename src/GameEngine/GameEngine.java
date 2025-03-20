@@ -178,7 +178,6 @@ public class GameEngine
 		if(newHealth <= 0)
 		{
 			String temp = currentRoom.getCharacterName(characterNum);
-			currentRoom.removeCharacter(characterNum);
 			
 			currentRoom.handleCharacterDeath(characterNum);
 			
