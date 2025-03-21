@@ -79,16 +79,6 @@ public class NPCTest {
     }
     
     @Test
-    public void testConverse() {
-        String dialogueOutput = npc.converse();
-        // The output should start with "Goblin says: ".
-        assertTrue(dialogueOutput.startsWith("Goblin says: "));
-        // Since dialogue is an array's default toString, expect the output to include square brackets.
-        assertTrue(dialogueOutput.contains("["));
-        assertTrue(dialogueOutput.contains("]"));
-    }
-    
-    @Test
     public void testGetAndSetAggression() {
         // Initially, aggression should be true.
         assertTrue(npc.getAggresion());

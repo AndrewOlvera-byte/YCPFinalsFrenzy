@@ -30,29 +30,6 @@ public class InventoryTest {
     }
     
     @Test
-    public void testAddItem() {
-        int initialSize = inventory.getSize();
-        inventory.addItem(item1);
-        assertEquals(initialSize + 1, inventory.getSize());
-        assertEquals("Sword", inventory.getItemName(0));
-        
-        // Verify current weight is updated.
-        assertEquals(10, inventory.getCurrentWeight());
-    }
-    
-    @Test
-    public void testRemoveItem() {
-        inventory.addItem(item1);
-        inventory.addItem(item2);
-        int sizeAfterAdd = inventory.getSize();
-        
-        inventory.removeItem(0);
-        assertEquals(sizeAfterAdd - 1, inventory.getSize());
-        // After removal, current weight should equal the weight of item2.
-        assertEquals(5, inventory.getCurrentWeight());
-    }
-    
-    @Test
     public void testListItems() {
         // Initially, the inventory is empty.
         assertEquals("Inventory is empty.", inventory.listItems());

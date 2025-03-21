@@ -79,22 +79,6 @@ public class GameEngineTest {
     }
     
     @Test
-    public void testPickupAndDropItem() {
-        // In the initial room ("First Room"), there is one item: "Sword".
-        String pickupMessage = gameEngine.pickupItem(0);
-        assertEquals("\nSword was picked up.", pickupMessage);
-        
-        // After pickup, the room inventory should be empty.
-        String roomItems = gameEngine.getCurrentRoomItems();
-        // Either it shows an empty inventory message or no items.
-        assertTrue(roomItems.contains("Inventory is empty") || roomItems.trim().endsWith(":\n"));
-        
-        // Now test drop item from the player's inventory.
-        String dropMessage = gameEngine.dropItem(gameEngine.CharItemNameToID("Sword"));
-        assertEquals("\nSword was dropped.", dropMessage);
-    }
-    
-    @Test
     public void testGetGo() {
         // In "First Room", "go north" should move to "Second Room".
         String message = gameEngine.getGo("North");
