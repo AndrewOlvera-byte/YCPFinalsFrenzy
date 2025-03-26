@@ -11,17 +11,11 @@ import models.Inventory;
 import models.Item;
 import models.Response;
 import models.Weapon;
+import models.GameInputHandler;
 
 
 public class GameEngine
 {
-	private static final Set<String> VALID_VERBS = new HashSet<>(Arrays.asList(
-	        "pickup", "drop", "use", "get", "grab", "take", "examine", "go", "talk", "attack", "swing", "slash", "strike", "hit" 
-	));
-	
-	private static final Set<String> PREPOSITIONS = new HashSet<>(Arrays.asList(
-	        "on", "with", "at", "in", "to"
-	    ));
 	
 	private Player player;
 	private boolean isRunning = false;
@@ -29,10 +23,15 @@ public class GameEngine
 	private ArrayList<Room> rooms = new ArrayList<>();
 	private String runningMessage = "";
 	private String error = "";
+	private GameInputHandler inputHandler;
 	
 	// Empty instantiation so data can be loaded using loadData()
 	public GameEngine()
-	{}
+	{
+		this.inputHandler = new GameInputHandler(this);
+		}
+	
+	
 	
 	// called after creating the GameEngine instantiation in the session to load the current data and set isRunning to true
 	public void start()
@@ -468,120 +467,18 @@ public class GameEngine
 		return message;
 	}
 	
-	public static String[] parseInput(String command) {
-		command = command.toLowerCase();
-        String[] words = command.split("\\s+");
-        if (words.length == 0) return new String[]{null, null, null, null};
 
-        String verb = words[0];
-        String noun = null;
-        String preposition = null;
-        String noun2 = null;
-        
-        for (int i = 1; i < words.length; i++) {
-            if (PREPOSITIONS.contains(words[i])) {
-                preposition = words[i];
-                noun2 = (i + 1 < words.length) ? String.join(" ", Arrays.copyOfRange(words, i + 1, words.length)) : null;
-                break;
-            }
-            noun = (noun == null) ? words[i] : noun + " " + words[i];
-        }
-
-        return new String[]{verb, noun, preposition, noun2};
-    }
-    
 	
 	// method called in servlet to get input and call methods based on it, need to figure out optimal CLI parsing technique
 	// if the input is valid and processed return true, and if it is an invalid input return false, so the servlet knows when to send error message
-	public boolean processInput(String input)
-	{
-		
-		//-----------------
-		//Do at beginning of every turn
-		// Check if any character's have aggression in the room
-		ArrayList<Integer> aggressiveCharacters = new ArrayList<>();
-		Room currentRoom = rooms.get(currentRoomNum);
-		int size = currentRoom.getCharacterTotal();
-		for (int i = 0; i < size; i++)
-		{
-			if (currentRoom.isCharAgressive(i))
-			{
-				aggressiveCharacters.add(i);
-			}
-		}
-		int aggCharSize = aggressiveCharacters.size();
-		if (aggCharSize > 0)
-		{
-			this.runningMessage+="\nThere are aggressive enemies in this room!";
-		}
-		for (int i = 0; i < aggCharSize; i ++)
-		{
-			int characterNum = aggressiveCharacters.get(i);
-			if (currentRoom.getCharacterJustAttacked(characterNum))
-			{
-				currentRoom.setCharacterJustAttacked(characterNum, false);
-			}
-			else
-			{
-				charAttackPlayer(0, characterNum);
-				this.runningMessage+="\nYou have been attacked!";
-			}
-		}
-		
-		//updateCurrentRoom("North");
-		
-		
-		
-		
-		// String parsing logic and calling methods inside
-		String[] parsedInput = parseInput(input.toLowerCase());
-        String verb = parsedInput[0];
-        String noun = parsedInput[1];
-        String preposition = parsedInput[2];
-        String noun2 = parsedInput[3];
-
-        if (verb == null || verb.isEmpty()) {
-            this.runningMessage += "\nI don't understand that.";
-        }
-
-        if (!VALID_VERBS.contains(verb)) {
-            this.runningMessage += "\nUnknown command: " + verb;
-        }
-
-        switch (verb.toLowerCase()) {
-        	case "take":
-        	case "get":
-        	case "grab":
-            case "pickup":
-                this.runningMessage += pickupItem(RoomItemNameToID(noun));
-                break;
-            case "drop":
-            	this.runningMessage += dropItem(CharItemNameToID(noun));
-                break;
-            case "attack":
-            case "swing": // for hand-held weapons that can be swung, this is like an "or" 
-            case "slash":
-            case "hit":
-            case "strike":
-            	this.runningMessage += playerAttackChar(CharItemNameToID(noun2), CharNameToID(noun));
-                break;
-            //case "throw": throwable weapons?	
-                
-            case "go":
-            	this.runningMessage += getGo(noun);
-               	break;
-            //case "examine":
-                
-            //case "talk":
-                
-            //case "use":
-                
-            default:
-                this.runningMessage += "\nCommand not implemented.";
-        }
+    public boolean processInput(String input) {
+        return inputHandler.processInput(input);
+    }
     
-		return true;
-	}
+    public void appendMessage(String message) { 
+        this.runningMessage += message;
+    }
+	
 	
 	// returns a Response object to be sent over the get and post request so that the page displays the current game state at all times and updates based on post request input
 	public Response display()
