@@ -9,6 +9,7 @@ import models.Character;
 import models.Connections;
 import models.Inventory;
 import models.Item;
+import models.NPC;
 import models.Response;
 import models.Weapon;
 import models.GameInputHandler;
@@ -89,7 +90,7 @@ public class GameEngine
 		Inventory inventoryBoss = new Inventory(itemContainerBoss, 300);
 		
 		ArrayList<models.Character> characterContainer2 = new ArrayList<>();
-		Character boss = new Character("Moe", 400, inventoryBoss);
+		NPC boss = new NPC("Moe", 400,true,null,80, inventoryBoss);
 		characterContainer2.add(boss);
 		Room newRoom2 = new Room(roomName2, inventory2, connections2, characterContainer2);
 		this.rooms.add(newRoom2);
@@ -110,7 +111,7 @@ public class GameEngine
 		ArrayList<Item> itemContainerFriend = new ArrayList<>();
 		String[] componentsFriend = {};
 		Weapon weaponFriend = new Weapon(20, 30, "Paint Brush", componentsFriend, 1);
-		itemContainerBoss.add(weaponFriend);
+		itemContainerFriend.add(weaponFriend);
 		Inventory inventoryFriend = new Inventory(itemContainerFriend, 300);
 		
 		ArrayList<models.Character> characterContainer3 = new ArrayList<>();
@@ -185,7 +186,15 @@ public class GameEngine
 		else
 		{
 			currentRoom.setCharacterHealth(characterNum, newHealth);
-			return "\n" + currentRoom.getCharacterName(characterNum) + " has taken " + attackDmg + " damage.";
+			charAttackPlayer(0, characterNum);
+			if(player.getHp() <= 0)
+			{
+				return "\nYou Died!";
+			}
+			else
+			{
+				return "\n" + currentRoom.getCharacterName(characterNum) + " has taken " + attackDmg + " damage." + "\n"+currentRoom.getCharacterName(characterNum)+" Hit back for "+ currentRoom.getCharacterAttackDmg(characterNum, 0);
+		}
 		}
 	}
 	
@@ -196,14 +205,8 @@ public class GameEngine
 		int attackDmg = currentRoom.getCharacterAttackDmg(characterNum, itemNum);
 		int playerHealth = player.getHp();
 		int newHealth = playerHealth - attackDmg;
-		if(newHealth <= 0)
-		{
-			this.error = "\nYou Died!";
-		}
-		else
-		{
-			player.setHp(playerHealth - attackDmg);
-		}	
+		
+		player.setHp(playerHealth - attackDmg);
 	}
 	
 	// method for player to pickup item itemNum from room inventory
