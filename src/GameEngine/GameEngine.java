@@ -90,7 +90,7 @@ public class GameEngine
 		Inventory inventoryBoss = new Inventory(itemContainerBoss, 300);
 		
 		ArrayList<models.Character> characterContainer2 = new ArrayList<>();
-		NPC boss = new NPC("Moe", 400,true,null,80, inventoryBoss);
+		NPC boss = new NPC("Moe", 160,true,null,80, inventoryBoss);
 		characterContainer2.add(boss);
 		Room newRoom2 = new Room(roomName2, inventory2, connections2, characterContainer2);
 		this.rooms.add(newRoom2);
