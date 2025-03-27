@@ -115,7 +115,7 @@ public class GameEngine
 		Inventory inventoryFriend = new Inventory(itemContainerFriend, 300);
 		
 		ArrayList<models.Character> characterContainer3 = new ArrayList<>();
-		Character Friend = new Character("Curly", 400, inventoryFriend);
+		NPC Friend = new NPC("Curly", 400, false, null, 5,inventoryFriend);
 		characterContainer2.add(Friend);
 		Room newRoom3 = new Room(roomName3, inventory3, connections3, characterContainer3);
 		this.rooms.add(newRoom3);
@@ -175,6 +175,10 @@ public class GameEngine
 		int attackDmg = player.getAttackDmg(itemNum);//Needed
 		int charHealth = currentRoom.getCharacterHealth(characterNum);
 		int newHealth = charHealth - attackDmg;
+		
+		boolean aggressive = currentRoom.isCharAgressive(characterNum);
+		
+		
 		if(newHealth <= 0)
 		{
 			String temp = currentRoom.getCharacterName(characterNum);
@@ -186,27 +190,33 @@ public class GameEngine
 		else
 		{
 			currentRoom.setCharacterHealth(characterNum, newHealth);
-			charAttackPlayer(0, characterNum);
+			charAttackPlayer(0, characterNum, aggressive);
 			if(player.getHp() <= 0)
 			{
 				return "\nYou Died!";
 			}
-			else
+			else if (aggressive == true)
 			{
 				return "\n" + currentRoom.getCharacterName(characterNum) + " has taken " + attackDmg + " damage." + "\n"+currentRoom.getCharacterName(characterNum)+" Hit back for "+ currentRoom.getCharacterAttackDmg(characterNum, 0);
+				
 		}
+			else {
+				return "\n" + currentRoom.getCharacterName(characterNum) + " has taken " + attackDmg + " damage.";
+			}
 		}
 	}
 	
 	// method for the character characterNum attacking the player with itemNum (can be 0 for now and only give enemies 1 weapon for MS1 demo)
-	public void charAttackPlayer(int itemNum, int characterNum)
+	public void charAttackPlayer(int itemNum, int characterNum, boolean aggressive)
 	{
 		Room currentRoom = rooms.get(currentRoomNum);
 		int attackDmg = currentRoom.getCharacterAttackDmg(characterNum, itemNum);
 		int playerHealth = player.getHp();
 		int newHealth = playerHealth - attackDmg;
-		
-		player.setHp(playerHealth - attackDmg);
+
+		if (aggressive == true) {
+			player.setHp(playerHealth - attackDmg);
+		}
 	}
 	
 	// method for player to pickup item itemNum from room inventory
