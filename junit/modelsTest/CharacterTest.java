@@ -19,7 +19,7 @@ public class CharacterTest {
     public void setUp() {
         // Create a weapon for the character's inventory.
         String[] components = {"Steel"};
-        weapon = new Weapon(50, 5, "Sword", components, 30);
+        weapon = new Weapon(50, 5, "Sword", components, 30, "It is a rusty Sword");
         ArrayList<Item> items = new ArrayList<>();
         items.add(weapon);
         Inventory inventory = new Inventory(items, 100);
@@ -70,7 +70,7 @@ public class CharacterTest {
         
         // Create another weapon.
         String[] components = {"Iron"};
-        Weapon newWeapon = new Weapon(40, 4, "Dagger", components, 20);
+        Weapon newWeapon = new Weapon(40, 4, "Dagger", components, 20, "Trusty dagger in the back pocket");
         character.addItem(newWeapon);
         assertEquals(2, character.getInventorySize());
         assertEquals("Dagger", character.getItem(1).getName());

@@ -57,7 +57,7 @@ public class GameEngine
 		// example implementation but will be looped over data in the .csv file to load the rooms state last left off
 		String roomName1 = "First Room";
 		String[] components = {};
-		Weapon weapon1 = new Weapon(20, 30, "Sword", components, 80);
+		Weapon weapon1 = new Weapon(20, 30, "Sword", components, 80, "A rusty starter sword good for early combat");
 		ArrayList<Item> itemContainer1 = new ArrayList<>();
 		itemContainer1.add(weapon1);
 		Inventory inventory1 = new Inventory(itemContainer1, 300);
@@ -85,7 +85,7 @@ public class GameEngine
 		
 		ArrayList<Item> itemContainerBoss = new ArrayList<>();
 		String[] componentsBoss = {};
-		Weapon weaponBoss = new Weapon(20, 30, "Trident", componentsBoss, 90);
+		Weapon weaponBoss = new Weapon(20, 30, "Trident", componentsBoss, 90, "A sharp three pronged weapon");
 		itemContainerBoss.add(weaponBoss);
 		Inventory inventoryBoss = new Inventory(itemContainerBoss, 300);
 		
@@ -110,7 +110,7 @@ public class GameEngine
 		
 		ArrayList<Item> itemContainerFriend = new ArrayList<>();
 		String[] componentsFriend = {};
-		Weapon weaponFriend = new Weapon(20, 30, "Paint Brush", componentsFriend, 1);
+		Weapon weaponFriend = new Weapon(20, 30, "Paint Brush", componentsFriend, 1, "Paint your Enemies??");
 		itemContainerFriend.add(weaponFriend);
 		Inventory inventoryFriend = new Inventory(itemContainerFriend, 300);
 		
@@ -127,7 +127,7 @@ public class GameEngine
 	public void loadPlayer()
 	{
 		String[] components = {};
-		Weapon weaponPlayer = new Weapon(20, 30, "Dagger", components, 40);
+		Weapon weaponPlayer = new Weapon(20, 30, "Dagger", components, 40, "Trusty dagger hidden in your back pocket");
 		ArrayList<Item> itemContainer = new ArrayList<>();
 		itemContainer.add(weaponPlayer);
 		String playerName = "Cooper";
@@ -264,6 +264,31 @@ public class GameEngine
 			}
 		}
 		return charNum;
+	}
+	
+	//method to get description of an item
+	public String examineItemName(int itemNum) {
+		if(itemNum == -1) 
+		{
+			return "\nExamine what Item?";
+		}
+		
+		if(itemNum < 0 || itemNum >= player.getInventorySize())
+		{
+			return "\nInvalid item selection.";
+		}
+		
+		Item InvenItem = player.getItem(itemNum);
+		return "\n" + InvenItem.getDescription();
+	}
+	
+	//InputProcess Method that gets the description of an items
+	public String getExamine(String noun)
+	{
+		String message = "";
+		int itemNum = CharItemNameToID(noun);
+		message = examineItemName(itemNum);
+		return message;
 	}
 	
 	// method to drop an item from player inventory into room inventory

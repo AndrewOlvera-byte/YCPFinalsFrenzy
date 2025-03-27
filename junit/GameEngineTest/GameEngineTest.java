@@ -58,7 +58,7 @@ public class GameEngineTest {
         // Attack the character "Moe".
         String attackMessage = gameEngine.playerAttackChar(gameEngine.CharItemNameToID("Dagger"), gameEngine.CharNameToID("Moe"));
         // Expected outcome: since 400-40 > 0, the boss's health should reduce.
-        assertEquals("\nMoe has taken 40 damage.", attackMessage);
+        assertEquals("\nMoe has taken 40 damage.\nMoe Hit back for 90", attackMessage);
         
         // Use reflection to access the current room (private field "rooms") and check "Moe"'s health.
         Room currentRoom = getCurrentRoomFromGameEngine();
