@@ -24,7 +24,7 @@ public class GameEngineMockRun
 
 		System.out.println(gameEngine.getRoomCharactersInfo());
 		
-		gameEngine.charAttackPlayer(0, 0);
+		gameEngine.charAttackPlayer(0, 0, true);
 		gameEngine.playerAttackChar(0, 0);
 		gameEngine.dropItem(1);
 		
