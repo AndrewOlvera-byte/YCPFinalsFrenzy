@@ -9,14 +9,20 @@ public class Room
 	private Inventory inventory;
 	private Connections connections;
 	private ArrayList<models.Character> characterContainer;
+	private String longdescription;
+	private String shortdescription;
+	private Boolean examined;
 	
 	//Constructor to initialize the room for loadData() in GameEngine which instantiates the room states for the game
-	public Room(String roomName, Inventory inventory, Connections connections, ArrayList<Character> characterContainer)
+	public Room(String roomName, Inventory inventory, Connections connections, ArrayList<Character> characterContainer, String longdescription, String shortdescription)
 	{
 		this.roomName = roomName;
 		this.inventory = inventory;
 		this.connections = connections;
 		this.characterContainer = characterContainer;
+		this.longdescription = longdescription;
+		this.shortdescription = shortdescription;
+		this.examined = false;
 	}
 	
 	// Returns the index of the available room to switch to based on direction input, and returns -1 if it is null
@@ -105,6 +111,10 @@ public class Room
 		return currentCharacter.getName();
 	}
 	
+	public Character getCharacter(int characterNum) {
+		return characterContainer.get(characterNum);
+	}
+	
 	public void removeCharacter(int characterNum)
 	{
 		this.characterContainer.remove(characterNum);
@@ -150,4 +160,21 @@ public class Room
 	{
 		return characterContainer.size();
 	}
+	
+	
+	public String getRoomDescription() {
+		if(!examined) {
+			examined = true;
+			return longdescription;
+		}
+		else {
+			return shortdescription;
+		}
+	}
+	
+	public void setDescription(String longdescription, String shortdescription) {
+		this.longdescription = longdescription;
+		this.shortdescription = shortdescription;
+	}
+	
 }

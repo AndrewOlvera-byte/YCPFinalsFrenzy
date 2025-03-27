@@ -7,10 +7,16 @@ public class Character {
    protected int hp;
    protected Inventory inventory;
    private boolean justAttacked = false;
-   public Character(String name, int hp, Inventory inventory) {
+   private String longdescription;
+   private String shortdescription;
+   private Boolean examined;
+   public Character(String name, int hp, Inventory inventory, String longdescription, String shortdescription) {
        this.name = name;
        this.hp = hp;
        this.inventory = inventory;
+       this.longdescription = longdescription;
+       this.shortdescription = shortdescription;
+       this.examined = false;
    }
      public void callInventory() {
       //inventory.showItems();
@@ -88,4 +94,19 @@ public class Character {
 
 	    return droppedItems;
 	}
+   
+   public String getCharDescription() {
+	   if(!examined) {
+		   examined = true;
+		   return longdescription;
+	   }
+	   else {
+		   return shortdescription;
+	   }
+   }
+   
+   public void setCharDescription(String longdescription, String shortdescription) {
+	   this.longdescription = longdescription;
+	   this.shortdescription = shortdescription;
+   }
 }

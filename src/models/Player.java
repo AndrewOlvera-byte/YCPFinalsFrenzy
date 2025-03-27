@@ -3,8 +3,8 @@ package models;
 public class Player extends Character {
    private int skillPoints;
    // private Room location;
-   public Player(String name, int hp, int skillPoints, Inventory inventory) {
-       super(name, hp, inventory);
+   public Player(String name, int hp, int skillPoints, Inventory inventory, String longdescription, String shortdescription) {
+       super(name, hp, inventory, longdescription, shortdescription);
        this.skillPoints = skillPoints;
    }
    public void move(String direction) {

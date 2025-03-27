@@ -4,8 +4,8 @@ public class NPC extends Character {
    private boolean aggression;
    private String[] dialogue;
    private int damage;
-   public NPC(String name, int hp, boolean aggression, String[] dialogue, int damage, Inventory inventory) {
-       super(name, hp, inventory);
+   public NPC(String name, int hp, boolean aggression, String[] dialogue, int damage, Inventory inventory, String longdescription, String shortdescription) {
+       super(name, hp, inventory, longdescription, shortdescription);
        this.aggression = aggression;
        this.dialogue = dialogue;
        this.damage = damage;

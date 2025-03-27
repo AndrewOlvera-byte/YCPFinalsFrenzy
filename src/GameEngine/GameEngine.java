@@ -57,7 +57,7 @@ public class GameEngine
 		// example implementation but will be looped over data in the .csv file to load the rooms state last left off
 		String roomName1 = "First Room";
 		String[] components = {};
-		Weapon weapon1 = new Weapon(20, 30, "Sword", components, 80, "A rusty starter sword good for early combat");
+		Weapon weapon1 = new Weapon(20, 30, "Sword", components, 80, "A rusty starter sword good for early combat", "A Sword");
 		ArrayList<Item> itemContainer1 = new ArrayList<>();
 		itemContainer1.add(weapon1);
 		Inventory inventory1 = new Inventory(itemContainer1, 300);
@@ -67,7 +67,7 @@ public class GameEngine
 		connections1.setConnection("South", null);
 		connections1.setConnection("West", null);
 		ArrayList<models.Character> characterContainer1 = new ArrayList<>();
-		Room newRoom1 = new Room(roomName1, inventory1, connections1, characterContainer1);
+		Room newRoom1 = new Room(roomName1, inventory1, connections1, characterContainer1, "You glance around the lobby of the manor south floor", "you glance around room 1");
 		this.rooms.add(newRoom1);
 		
 		//start
@@ -85,14 +85,14 @@ public class GameEngine
 		
 		ArrayList<Item> itemContainerBoss = new ArrayList<>();
 		String[] componentsBoss = {};
-		Weapon weaponBoss = new Weapon(20, 30, "Trident", componentsBoss, 90, "A sharp three pronged weapon");
+		Weapon weaponBoss = new Weapon(20, 30, "Trident", componentsBoss, 90, "A sharp three pronged weapon", "A Trident");
 		itemContainerBoss.add(weaponBoss);
 		Inventory inventoryBoss = new Inventory(itemContainerBoss, 300);
 		
 		ArrayList<models.Character> characterContainer2 = new ArrayList<>();
-		NPC boss = new NPC("Moe", 160,true,null,80, inventoryBoss);
+		NPC boss = new NPC("Moe", 160,true,null,80, inventoryBoss, "Powerful man. Don't mess around", "Thats Moe!");
 		characterContainer2.add(boss);
-		Room newRoom2 = new Room(roomName2, inventory2, connections2, characterContainer2);
+		Room newRoom2 = new Room(roomName2, inventory2, connections2, characterContainer2, "You glance out at the road out front of the Manors", "You glance around Room 2");
 		this.rooms.add(newRoom2);
 		
 		
@@ -110,14 +110,14 @@ public class GameEngine
 		
 		ArrayList<Item> itemContainerFriend = new ArrayList<>();
 		String[] componentsFriend = {};
-		Weapon weaponFriend = new Weapon(20, 30, "Paint Brush", componentsFriend, 1, "Paint your Enemies??");
+		Weapon weaponFriend = new Weapon(20, 30, "Paint Brush", componentsFriend, 1, "Paint your Enemies??", "A Paint Brush");
 		itemContainerFriend.add(weaponFriend);
 		Inventory inventoryFriend = new Inventory(itemContainerFriend, 300);
 		
 		ArrayList<models.Character> characterContainer3 = new ArrayList<>();
-		NPC Friend = new NPC("Curly", 400, false, null, 5,inventoryFriend);
+		NPC Friend = new NPC("Curly", 400, false, null, 5,inventoryFriend, "Heard he was named that because of his curly hair", "It's Curly!");
 		characterContainer2.add(Friend);
-		Room newRoom3 = new Room(roomName3, inventory3, connections3, characterContainer3);
+		Room newRoom3 = new Room(roomName3, inventory3, connections3, characterContainer3, "You glance around the inside of the Student lobby", "You glance around room 3");
 		this.rooms.add(newRoom3);
 		
 
@@ -127,12 +127,12 @@ public class GameEngine
 	public void loadPlayer()
 	{
 		String[] components = {};
-		Weapon weaponPlayer = new Weapon(20, 30, "Dagger", components, 40, "Trusty dagger hidden in your back pocket");
+		Weapon weaponPlayer = new Weapon(20, 30, "Dagger", components, 40, "Trusty dagger hidden in your back pocket", "A dagger");
 		ArrayList<Item> itemContainer = new ArrayList<>();
 		itemContainer.add(weaponPlayer);
 		String playerName = "Cooper";
 		Inventory inventory = new Inventory(itemContainer, 30);
-		Player newPlayer = new Player(playerName, 200, 0, inventory);
+		Player newPlayer = new Player(playerName, 200, 0, inventory, "This is You!", "You");
 		this.player = newPlayer;
 	}
 	
@@ -292,12 +292,34 @@ public class GameEngine
 		return "\n" + InvenItem.getDescription();
 	}
 	
+	public String examineCharacter(int charNum) {
+		if(charNum == -1) {
+			return "\nExamine what Character?";
+		}
+		
+		if(charNum < 0 || charNum >= rooms.get(currentRoomNum).getCharacterContainerSize()) {
+			return "\nInvalid Character selection.";
+		}
+		
+		Character character = rooms.get(currentRoomNum).getCharacter(charNum);
+		return"\n" + character.getCharDescription();
+	}
+	
 	//InputProcess Method that gets the description of an items
 	public String getExamine(String noun)
 	{
 		String message = "";
 		int itemNum = CharItemNameToID(noun);
-		message = examineItemName(itemNum);
+		int charNum = CharNameToID(noun);
+		if(noun.toLowerCase().equals("room")) {
+			message = "\n"+rooms.get(currentRoomNum).getRoomDescription();
+		}
+		if(charNum >= 0) {
+			message = examineCharacter(charNum);
+		}
+		if(itemNum >= 0) {
+			message = examineItemName(itemNum);
+		}
 		return message;
 	}
 	

@@ -2,23 +2,34 @@ package models;
 public class Item {
 	private int value, weight;
 	private String name;
-	private String description;
+	private String longdescription;
+	private String shortdescription;
 	private String[] components;
+	private Boolean examined;
 	
-	public Item(int value, int weight, String name, String[] components, String description) {
+	public Item(int value, int weight, String name, String[] components, String longdescription, String shortdescription) {
 		this.weight = weight;
 		this.value = value;
 		this.name = name;
 		this.components = components;
-		this.description = description;
+		this.longdescription = longdescription;
+		this.shortdescription = shortdescription;
+		examined = false;
 	}
 	
 	public String getDescription() {
-		return description;
+		if(!examined) {
+			examined = true;
+			return longdescription;
+		}
+		else {
+			return shortdescription;
+		}
 	}
 	
-	public void setDescription(String description) {
-		this.description = description;
+	public void setDescription(String longdescription, String shortdescription) {
+		this.longdescription = longdescription;
+		this.shortdescription = shortdescription;
 	}
 	
 	public int getWeight() {
