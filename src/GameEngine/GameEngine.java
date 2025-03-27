@@ -495,6 +495,15 @@ public class GameEngine
 		return message;
 	}
 	
+	public String getHelp(String verb) 
+	{
+		String message ="\ntake, get, grab, pickup are for picking up an item (ex. (get|grab|pickup) sword)\n";
+		message += "\ndrop is to drop an item (ex. drop dagger)\n";
+		message += "\nattack, swing, slash, hit, strike are for attacking an enemy (ex. (attack|swing|slash|hit|strike) moe with trident)\n";
+		message += "\ngo, move, walk are for moving in a direction (ex. (walk|move) north)\n";
+		message += "\nexamine, look are for looking at the description of an item (ex. (examine|look) dagger)";
+		return message;
+	}
 
 	
 	// method called in servlet to get input and call methods based on it, need to figure out optimal CLI parsing technique
