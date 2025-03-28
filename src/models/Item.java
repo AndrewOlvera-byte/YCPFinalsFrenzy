@@ -42,4 +42,8 @@ public class Item {
 	public void setComponents(String[] components) {
 		this.components = components;
 	}
+
+	public String getDescription() {
+		return null;
+	}
 }

@@ -9,6 +9,7 @@ import models.Character;
 import models.Connections;
 import models.Inventory;
 import models.Item;
+import models.NPC;
 import models.Response;
 import models.Weapon;
 import models.GameInputHandler;
@@ -56,7 +57,7 @@ public class GameEngine
 		// example implementation but will be looped over data in the .csv file to load the rooms state last left off
 		String roomName1 = "First Room";
 		String[] components = {};
-		Weapon weapon1 = new Weapon(20, 30, "Sword", components, 80);
+		Weapon weapon1 = new Weapon(20, 30, "Sword", components, 80, "A rusty starter sword good for early combat");
 		ArrayList<Item> itemContainer1 = new ArrayList<>();
 		itemContainer1.add(weapon1);
 		Inventory inventory1 = new Inventory(itemContainer1, 300);
@@ -84,12 +85,12 @@ public class GameEngine
 		
 		ArrayList<Item> itemContainerBoss = new ArrayList<>();
 		String[] componentsBoss = {};
-		Weapon weaponBoss = new Weapon(20, 30, "Trident", componentsBoss, 90);
+		Weapon weaponBoss = new Weapon(20, 30, "Trident", componentsBoss, 90, "A sharp three pronged weapon");
 		itemContainerBoss.add(weaponBoss);
 		Inventory inventoryBoss = new Inventory(itemContainerBoss, 300);
 		
 		ArrayList<models.Character> characterContainer2 = new ArrayList<>();
-		Character boss = new Character("Moe", 400, inventoryBoss);
+		NPC boss = new NPC("Moe", 160,true,null,80, inventoryBoss);
 		characterContainer2.add(boss);
 		Room newRoom2 = new Room(roomName2, inventory2, connections2, characterContainer2);
 		this.rooms.add(newRoom2);
@@ -109,8 +110,8 @@ public class GameEngine
 		
 		ArrayList<Item> itemContainerFriend = new ArrayList<>();
 		String[] componentsFriend = {};
-		Weapon weaponFriend = new Weapon(20, 30, "Paint Brush", componentsFriend, 1);
-		itemContainerBoss.add(weaponFriend);
+		Weapon weaponFriend = new Weapon(20, 30, "Paint Brush", componentsFriend, 1, "Paint your Enemies??");
+		itemContainerFriend.add(weaponFriend);
 		Inventory inventoryFriend = new Inventory(itemContainerFriend, 300);
 		
 		ArrayList<models.Character> characterContainer3 = new ArrayList<>();
@@ -126,7 +127,7 @@ public class GameEngine
 	public void loadPlayer()
 	{
 		String[] components = {};
-		Weapon weaponPlayer = new Weapon(20, 30, "Dagger", components, 40);
+		Weapon weaponPlayer = new Weapon(20, 30, "Dagger", components, 40, "Trusty dagger hidden in your back pocket");
 		ArrayList<Item> itemContainer = new ArrayList<>();
 		itemContainer.add(weaponPlayer);
 		String playerName = "Cooper";
@@ -185,7 +186,15 @@ public class GameEngine
 		else
 		{
 			currentRoom.setCharacterHealth(characterNum, newHealth);
-			return "\n" + currentRoom.getCharacterName(characterNum) + " has taken " + attackDmg + " damage.";
+			charAttackPlayer(0, characterNum);
+			if(player.getHp() <= 0)
+			{
+				return "\nYou Died!";
+			}
+			else
+			{
+				return "\n" + currentRoom.getCharacterName(characterNum) + " has taken " + attackDmg + " damage." + "\n"+currentRoom.getCharacterName(characterNum)+" Hit back for "+ currentRoom.getCharacterAttackDmg(characterNum, 0);
+		}
 		}
 	}
 	
@@ -196,14 +205,8 @@ public class GameEngine
 		int attackDmg = currentRoom.getCharacterAttackDmg(characterNum, itemNum);
 		int playerHealth = player.getHp();
 		int newHealth = playerHealth - attackDmg;
-		if(newHealth <= 0)
-		{
-			this.error = "\nYou Died!";
-		}
-		else
-		{
-			player.setHp(playerHealth - attackDmg);
-		}	
+		
+		player.setHp(playerHealth - attackDmg);
 	}
 	
 	// method for player to pickup item itemNum from room inventory
@@ -261,6 +264,31 @@ public class GameEngine
 			}
 		}
 		return charNum;
+	}
+	
+	//method to get description of an item
+	public String examineItemName(int itemNum) {
+		if(itemNum == -1) 
+		{
+			return "\nExamine what Item?";
+		}
+		
+		if(itemNum < 0 || itemNum >= player.getInventorySize())
+		{
+			return "\nInvalid item selection.";
+		}
+		
+		Item InvenItem = player.getItem(itemNum);
+		return "\n" + InvenItem.getDescription();
+	}
+	
+	//InputProcess Method that gets the description of an items
+	public String getExamine(String noun)
+	{
+		String message = "";
+		int itemNum = CharItemNameToID(noun);
+		message = examineItemName(itemNum);
+		return message;
 	}
 	
 	// method to drop an item from player inventory into room inventory
@@ -467,6 +495,15 @@ public class GameEngine
 		return message;
 	}
 	
+	public String getHelp(String verb) 
+	{
+		String message ="\ntake, get, grab, pickup are for picking up an item (ex. (get|grab|pickup) sword)\n";
+		message += "\ndrop is to drop an item (ex. drop dagger)\n";
+		message += "\nattack, swing, slash, hit, strike are for attacking an enemy (ex. (attack|swing|slash|hit|strike) moe with trident)\n";
+		message += "\ngo, move, walk are for moving in a direction (ex. (walk|move) north)\n";
+		message += "\nexamine, look are for looking at the description of an item (ex. (examine|look) dagger)";
+		return message;
+	}
 
 	
 	// method called in servlet to get input and call methods based on it, need to figure out optimal CLI parsing technique
@@ -479,12 +516,31 @@ public class GameEngine
         this.runningMessage += message;
     }
 	
-	
+    public String getCurrentRoomImage() {
+	    String roomName = getCurrentRoomName();
+	    switch(roomName) {
+	        case "First Room":
+	            return "images/firstRoom.jpg";
+	        case "Second Room":
+	            return "images/firstRoom.jpg";
+	        case "Third Room":
+	            return "images/firstRoom.jpg";
+	        default:
+	            return "images/default.jpg";
+	    }
+	}
+    
+    public String getCurrentRoomNumber() {
+        // Adding 1 so that room 0 becomes "1", room 1 becomes "2", etc.
+        return String.valueOf(currentRoomNum + 1);
+    }
 	// returns a Response object to be sent over the get and post request so that the page displays the current game state at all times and updates based on post request input
 	public Response display()
 	{
-		Response response = new Response(getCurrentRoomItems(), getPlayerInventoryString(), getRoomCharactersInfo(), getPlayerInfo(), getRoomConnectionOutput(), runningMessage, "Test error");// put fields inside here which will be called with ${response.attribute} in jsp and html
+		Response response = new Response(getCurrentRoomItems(), getPlayerInventoryString(), getRoomCharactersInfo(), getPlayerInfo(), getRoomConnectionOutput(),runningMessage, "Test error",getCurrentRoomImage(),getCurrentRoomNumber());// put fields inside here which will be called with ${response.attribute} in jsp and html
 		return response;
 	}
+	
+	
 	
 }

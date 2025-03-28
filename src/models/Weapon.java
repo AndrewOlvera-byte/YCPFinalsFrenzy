@@ -4,7 +4,7 @@ public class Weapon extends Item
 {
 	private int attackDmg;
 	
-	public Weapon(int value, int weight, String name, String[] components, int attackDmg)
+	public Weapon(int value, int weight, String name, String[] components, int attackDmg, String string)
 	{
 		super(value, weight, name, components);
 		this.attackDmg = attackDmg;
