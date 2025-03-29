@@ -125,12 +125,19 @@ public class Room
 		return this.characterContainer.size();
 	}
 	
-	public boolean isCharAgressive(int characterNum)
-	{
-		Character currentCharacter = characterContainer.get(characterNum);
-		boolean aggressive = currentCharacter.isAgressive();
-		return aggressive;
+	public boolean isCharAgressive(int characterNum) {
+	    Character currentCharacter = characterContainer.get(characterNum);
+	    
+	    // Check if the character is an instance of NPC
+	    if (currentCharacter instanceof NPC) {
+	        NPC npc = (NPC) currentCharacter;  // Cast to NPC
+	        return npc.getAggresion();  // Access aggression property
+	    }
+	    
+	    // If not an NPC, return false or handle the logic for non-NPC characters (like Player)
+	    return false;  // Assuming non-NPC characters are not aggressive
 	}
+
 	
 	public boolean getCharacterJustAttacked(int characterNum)
 	{
