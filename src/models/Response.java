@@ -13,10 +13,14 @@ public class Response
     private String message;
     private String error;
     private String roomImage; 
-    private String roomNumber;  // New field for dynamic room number overlay
+    private String roomNumber;  // Field for dynamic room number overlay
+    
+    // New fields for HTML overlays of items and characters
+    private String roomItemsOverlay;
+    private String roomCharactersOverlay;
 
-    // Updated constructor to include roomNumber
-    public Response(String roomInventory, String playerInventory, String charactersInRoom, String playerInfo, String roomConnections, String message, String error, String roomImage, String roomNumber)
+    // Updated constructor to include roomNumber, roomItemsOverlay, and roomCharactersOverlay
+    public Response(String roomInventory, String playerInventory, String charactersInRoom, String playerInfo, String roomConnections, String message, String error, String roomImage, String roomNumber, String roomItemsOverlay, String roomCharactersOverlay)
     {
         this.roomInventory = roomInventory;
         this.playerInventory = playerInventory;
@@ -27,6 +31,8 @@ public class Response
         this.error = error;
         this.roomImage = roomImage;
         this.roomNumber = roomNumber;
+        this.roomItemsOverlay = roomItemsOverlay;
+        this.roomCharactersOverlay = roomCharactersOverlay;
     }
     
     // Getters for JSP/HTML
@@ -69,9 +75,16 @@ public class Response
         return this.roomImage;
     }
 
-    // New getter for room number
     public String getRoomNumber() {
         return this.roomNumber;
+    }
+    
+    public String getRoomItemsOverlay() {
+        return this.roomItemsOverlay;
+    }
+    
+    public String getRoomCharactersOverlay() {
+        return this.roomCharactersOverlay;
     }
     
     public String toJson() {
@@ -83,7 +96,9 @@ public class Response
                 "\", \"message\":\"" + escapeJson(message) +
                 "\", \"error\":\"" + escapeJson(error) +
                 "\", \"roomImage\":\"" + escapeJson(roomImage) +
-                "\", \"roomNumber\":\"" + escapeJson(roomNumber) + "\"}";
+                "\", \"roomNumber\":\"" + escapeJson(roomNumber) +
+                "\", \"roomItemsOverlay\":\"" + escapeJson(roomItemsOverlay) +
+                "\", \"roomCharactersOverlay\":\"" + escapeJson(roomCharactersOverlay) + "\"}";
     }
     
     // Simple helper method to escape double quotes for JSON safety.

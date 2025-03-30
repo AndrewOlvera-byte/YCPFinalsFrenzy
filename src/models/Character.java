@@ -76,6 +76,10 @@ public class Character {
 	   return this.inventory.getItemName(itemNum);
    }
    
+   public Inventory getInventory() {
+       return inventory;
+   }
+   
    public ArrayList<Item> dropAllItems() 
    {
 	   ArrayList<Item> droppedItems = new ArrayList<>();

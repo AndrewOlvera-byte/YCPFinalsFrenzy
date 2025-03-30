@@ -49,7 +49,8 @@ public class GameInputHandler {
                 gameEngine.appendMessage(gameEngine.playerAttackChar(gameEngine.CharItemNameToID(noun2), gameEngine.CharNameToID(noun)));
                 break;
             case "go":
-                gameEngine.appendMessage(gameEngine.getGo(noun));
+                // Just call getGo; it already appends to runningMessage.
+                gameEngine.getGo(noun);
                 break;
             default:
                 gameEngine.appendMessage("\nCommand not implemented.");

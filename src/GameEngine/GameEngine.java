@@ -2,6 +2,8 @@ package GameEngine;
 
 import java.util.ArrayList;
 import java.util.*;
+import java.util.Random;
+import java.util.HashMap;
 
 import models.Room;
 import models.Player;
@@ -27,129 +29,134 @@ public class GameEngine
 	private GameInputHandler inputHandler;
 	
 	// Empty instantiation so data can be loaded using loadData()
-	public GameEngine()
-	{
-		this.inputHandler = new GameInputHandler(this);
-		}
-	
-	
-	
-	// called after creating the GameEngine instantiation in the session to load the current data and set isRunning to true
-	public void start()
-	{
-		loadData();
-		this.isRunning = true;
-	}
-	
-	// "loads data" from .csv file in future but for now is where we create the instantiation of the game state for out MS1 demo
-	public void loadData()
-	{
-		loadRooms();
-		loadPlayer();
-		this.currentRoomNum = 0;
-		String roomName = getCurrentRoomName();
-		
-	}
-	
-	// loading of rooms
-	public void loadRooms()
-	{
-		// example implementation but will be looped over data in the .csv file to load the rooms state last left off
-		String roomName1 = "First Room";
-		String[] components = {};
-		Weapon weapon1 = new Weapon(20, 30, "Sword", components, 80, "A rusty starter sword good for early combat");
-		ArrayList<Item> itemContainer1 = new ArrayList<>();
-		itemContainer1.add(weapon1);
-		Inventory inventory1 = new Inventory(itemContainer1, 300);
-		Connections connections1 = new Connections();
-		connections1.setConnection("North", 1);
-		connections1.setConnection("East", null);
-		connections1.setConnection("South", null);
-		connections1.setConnection("West", null);
-		ArrayList<models.Character> characterContainer1 = new ArrayList<>();
-		Room newRoom1 = new Room(roomName1, inventory1, connections1, characterContainer1);
-		this.rooms.add(newRoom1);
-		
-		//start
-		
-		String roomName2 = "Second Room";
-		ArrayList<Item> itemContainer2 = new ArrayList<>();
-		Inventory inventory2 = new Inventory(itemContainer2, 300);
-		
-		Connections connections2 = new Connections();
-		connections2.setConnection("North", null);
-		connections2.setConnection("East", 2);
-		connections2.setConnection("South", 0);
-		connections2.setConnection("West", null);
-		
-		
-		ArrayList<Item> itemContainerBoss = new ArrayList<>();
-		String[] componentsBoss = {};
-		Weapon weaponBoss = new Weapon(20, 30, "Trident", componentsBoss, 90, "A sharp three pronged weapon");
-		itemContainerBoss.add(weaponBoss);
-		Inventory inventoryBoss = new Inventory(itemContainerBoss, 300);
-		
-		ArrayList<models.Character> characterContainer2 = new ArrayList<>();
-		NPC boss = new NPC("Moe", 160,true,null,80, inventoryBoss);
-		characterContainer2.add(boss);
-		Room newRoom2 = new Room(roomName2, inventory2, connections2, characterContainer2);
-		this.rooms.add(newRoom2);
-		
-		
-		
-		String roomName3 = "Third Room";
-		ArrayList<Item> itemContainer3 = new ArrayList<>();
-		Inventory inventory3 = new Inventory(itemContainer3, 300);
-		
-		Connections connections3 = new Connections();
-		connections3.setConnection("North", null);
-		connections3.setConnection("East", null);
-		connections3.setConnection("South", null);
-		connections3.setConnection("West", 1);
-		
-		
-		ArrayList<Item> itemContainerFriend = new ArrayList<>();
-		String[] componentsFriend = {};
-		Weapon weaponFriend = new Weapon(20, 30, "Paint Brush", componentsFriend, 1, "Paint your Enemies??");
-		itemContainerFriend.add(weaponFriend);
-		Inventory inventoryFriend = new Inventory(itemContainerFriend, 300);
-		
-		ArrayList<models.Character> characterContainer3 = new ArrayList<>();
-		Character Friend = new Character("Curly", 400, inventoryFriend);
-		characterContainer2.add(Friend);
-		Room newRoom3 = new Room(roomName3, inventory3, connections3, characterContainer3);
-		this.rooms.add(newRoom3);
-		
+    public GameEngine()
+    {
+        this.inputHandler = new GameInputHandler(this);
+    }
+    
+    // called after creating the GameEngine instantiation in the session to load the current data and set isRunning to true
+    public void start()
+    {
+        loadData();
+        this.isRunning = true;
+    }
+    
+    // "loads data" from .csv file in future but for now is where we create the instantiation of the game state for our demo
+    public void loadData()
+    {
+        loadRooms();
+        loadPlayer();
+        this.currentRoomNum = 0;
+        String roomName = getCurrentRoomName();
+    }
+    
+    // loading of rooms
+    public void loadRooms()
+    {
+        // Room One: No key required
+        String roomName1 = "First Room";
+        String[] components = {};
+        Weapon weapon1 = new Weapon(20, 30, "Sword", components, 80, "A rusty starter sword good for early combat");
+        ArrayList<Item> itemContainer1 = new ArrayList<>();
+        itemContainer1.add(weapon1);
+        Inventory inventory1 = new Inventory(itemContainer1, 300);
+        Connections connections1 = new Connections();
+        connections1.setConnection("North", 1);
+        connections1.setConnection("East", null);
+        connections1.setConnection("South", null);
+        connections1.setConnection("West", null);
+        ArrayList<models.Character> characterContainer1 = new ArrayList<>();
+        Room newRoom1 = new Room(roomName1, inventory1, connections1, characterContainer1);
+        this.rooms.add(newRoom1);
+        
+        // Room Two: No key required
+        String roomName2 = "Second Room";
+        ArrayList<Item> itemContainer2 = new ArrayList<>();
+        Inventory inventory2 = new Inventory(itemContainer2, 300);
+        Connections connections2 = new Connections();
+        connections2.setConnection("North", null);
+        connections2.setConnection("East", 2);
+        connections2.setConnection("South", 0);
+        connections2.setConnection("West", null);
+        
+        ArrayList<Item> itemContainerBoss = new ArrayList<>();
+        String[] componentsBoss = {};
+        Weapon weaponBoss = new Weapon(20, 30, "Trident", componentsBoss, 90, "A sharp three pronged weapon");
+        itemContainerBoss.add(weaponBoss);
+        Item goldKey = new Item(0, 1, "gold key", new String[]{});
+        itemContainerBoss.add(goldKey);
+        Inventory inventoryBoss = new Inventory(itemContainerBoss, 300);
+        ArrayList<models.Character> characterContainer2 = new ArrayList<>();
+        // Example NPC boss added to room two
+        models.NPC boss = new NPC("Moe", 160, true, null, 80, inventoryBoss);
+        characterContainer2.add(boss);
+        Room newRoom2 = new Room(roomName2, inventory2, connections2, characterContainer2);
+        this.rooms.add(newRoom2);
+        
+        // Room Three: Requires the "gold key" to enter
+        String roomName3 = "Third Room";
+        ArrayList<Item> itemContainer3 = new ArrayList<>();
+        Inventory inventory3 = new Inventory(itemContainer3, 300);
+        Connections connections3 = new Connections();
+        connections3.setConnection("North", null);
+        connections3.setConnection("East", null);
+        connections3.setConnection("South", null);
+        connections3.setConnection("West", 1);
+        
+        ArrayList<Item> itemContainerFriend = new ArrayList<>();
+        String[] componentsFriend = {};
+        Weapon weaponFriend = new Weapon(20, 30, "Paint Brush", componentsFriend, 1, "Paint your Enemies??");
+        itemContainerFriend.add(weaponFriend);
+        Inventory inventoryFriend = new Inventory(itemContainerFriend, 300);
+        ArrayList<models.Character> characterContainer3 = new ArrayList<>();
+        models.Character friend = new models.Character("Curly", 400, inventoryFriend);
+        characterContainer3.add(friend);
+        // Room three requires the "gold key"
+        Room newRoom3 = new Room(roomName3, inventory3, connections3, characterContainer3, "gold key");
+        this.rooms.add(newRoom3);
+    }
+    
+    // loading of player data
+    public void loadPlayer()
+    {
+        String[] components = {};
+        Weapon weaponPlayer = new Weapon(20, 30, "Dagger", components, 40, "Trusty dagger hidden in your back pocket");
+        ArrayList<Item> itemContainer = new ArrayList<>();
+        itemContainer.add(weaponPlayer);
+        String playerName = "Cooper";
+        Inventory inventory = new Inventory(itemContainer, 30);
+        Player newPlayer = new Player(playerName, 200, 0, inventory);
+        this.player = newPlayer;
+    }
+    
+    // updates currentRoom to returned int if room is available, and returns true if updated; false otherwise
+    public String updateCurrentRoom(String direction) {
+        Room currentRoom = rooms.get(currentRoomNum);
+        int newRoomNum = currentRoom.getConnectedRoom(direction);
+        if (newRoomNum != -1) {
+            Room destination = rooms.get(newRoomNum);
+            String requiredKey = destination.getRequiredKey();
+            
+            // Debug prints (optional)
+            System.out.println("Attempting to enter " + destination.getRoomName() +
+                               " which requires key: " + requiredKey);
+            System.out.println("Player has gold key? " + player.hasKey("gold key"));
+            
+            // If a key is required, check if the player has it.
+            if (requiredKey != null && !requiredKey.isEmpty()) {
+                if (!player.hasKey(requiredKey)) {
+                    return "\nYou do not have the required key (" + requiredKey + ") to enter " + destination.getRoomName() + ".";
+                }
+            }
+            
+            // Allow the room change.
+            this.currentRoomNum = newRoomNum;
+            return "\nYou have entered " + destination.getRoomName() + "!";
+        }
+        return "\nThere is no room in this direction";
+    }
+    
 
-	}
-	
-	// loading of player data
-	public void loadPlayer()
-	{
-		String[] components = {};
-		Weapon weaponPlayer = new Weapon(20, 30, "Dagger", components, 40, "Trusty dagger hidden in your back pocket");
-		ArrayList<Item> itemContainer = new ArrayList<>();
-		itemContainer.add(weaponPlayer);
-		String playerName = "Cooper";
-		Inventory inventory = new Inventory(itemContainer, 30);
-		Player newPlayer = new Player(playerName, 200, 0, inventory);
-		this.player = newPlayer;
-	}
-	
-	// updates currentRoom to returned int if room is available, and returns true (that the room was updated) and returns false if it isn't reachable, for the response to the user
-	public Boolean updateCurrentRoom(String direction)
-	{
-		Room currentRoom = rooms.get(currentRoomNum);
-		int newRoomNum = currentRoom.getConnectedRoom(direction);
-		if(newRoomNum != -1)
-		{
-			this.currentRoomNum = newRoomNum;
-			String roomName = getCurrentRoomName();
-			this.runningMessage += "\nYou have entered " + roomName + "!\t";
-			return true;
-		}
-		return false;
-	}
 	
 	public int getMapOutput(String direction)
 	{
@@ -433,67 +440,34 @@ public class GameEngine
 	}
 	
 	public String getGo(String noun) {
-		Room currentRoom = rooms.get(currentRoomNum);
-		int nextRoomNum;
-		String message = "";
-		final Set<String> NORTH = new HashSet<>(Arrays.asList(
-		        "North", "north", "N", "n"
-		));
-		final Set<String> SOUTH = new HashSet<>(Arrays.asList(
-		        "South", "south", "s", "S"
-		));
-		final Set<String> WEST = new HashSet<>(Arrays.asList(
-		        "West", "west", "W", "w"
-		));
-		final Set<String> EAST = new HashSet<>(Arrays.asList(
-		        "East", "east", "E", "e"
-		));
-		
-		if(NORTH.contains(noun)) {
-			nextRoomNum = currentRoom.getConnectedRoom("North");
-			if(nextRoomNum != -1) {
-				message = "\nMoved to Room " + getRoomName(nextRoomNum);
-				this.currentRoomNum = nextRoomNum;
-			}
-			else {
-				message = "\nThere is no room in this direction";
-			}
-		}
-		else if(SOUTH.contains(noun)) {
-			nextRoomNum = currentRoom.getConnectedRoom("South");
-			if(nextRoomNum > -1) {
-				message = "\nMoved to Room " + getRoomName(nextRoomNum);
-				this.currentRoomNum = nextRoomNum;
-			}
-			else {
-				message = "\nThere is no room in this direction";
-			}
-		}
-		else if (EAST.contains(noun)) {
-			nextRoomNum = currentRoom.getConnectedRoom("East");
-			if(nextRoomNum > -1) {
-				message = "\nMoved to Room " + getRoomName(nextRoomNum);
-				this.currentRoomNum = nextRoomNum;
-			}
-			else {
-				message = "\nThere is no room in this direction";
-			}
-		}
-		else if (WEST.contains(noun)) {
-			nextRoomNum = currentRoom.getConnectedRoom("West");
-			if(nextRoomNum > -1) {
-				message = "\nMoved to Room " + getRoomName(nextRoomNum);
-				this.currentRoomNum = nextRoomNum;
-			}
-			else {
-				message = "\nThere is no room in this direction";
-			}
-		}
-		else {
-			message = "\nThis is not a valid direction";
-		}
-		return message;
+	    String direction = "";
+	    final Set<String> NORTH = new HashSet<>(Arrays.asList("North", "north", "N", "n"));
+	    final Set<String> SOUTH = new HashSet<>(Arrays.asList("South", "south", "s", "S"));
+	    final Set<String> EAST  = new HashSet<>(Arrays.asList("East", "east", "E", "e"));
+	    final Set<String> WEST  = new HashSet<>(Arrays.asList("West", "west", "W", "w"));
+	    
+	    if (NORTH.contains(noun)) {
+	        direction = "North";
+	    } else if (SOUTH.contains(noun)) {
+	        direction = "South";
+	    } else if (EAST.contains(noun)) {
+	        direction = "East";
+	    } else if (WEST.contains(noun)) {
+	        direction = "West";
+	    } else {
+	        return "\nThis is not a valid direction";
+	    }
+	    
+	    // Call updateCurrentRoom once and capture its returned message.
+	    String newMessage = updateCurrentRoom(direction);
+	    
+	    // Append the new message once to runningMessage.
+	    runningMessage += newMessage;
+	    
+	    // Return only the new message (so you don't repeat the entire history).
+	    return newMessage;
 	}
+
 	
 	public String getHelp(String verb) 
 	{
@@ -528,18 +502,106 @@ public class GameEngine
 	        default:
 	            return "images/default.jpg";
 	    }
+	    
+	 
+	    
 	}
+    
+    private Map<Integer, List<double[]>> roomItemPositions = new HashMap<>();
+    
+    public String getRoomItemsOverlay() {
+        Room currentRoom = rooms.get(currentRoomNum);
+        StringBuilder sb = new StringBuilder();
+        int roomIndex = currentRoomNum;
+        
+        // Get stored positions for the current room, if available.
+        List<double[]> positions = roomItemPositions.get(roomIndex);
+        Random rand = new Random();
+        if (positions == null) {
+            positions = new ArrayList<>();
+        }
+        // If stored positions are fewer than items in the room, generate additional ones.
+        while (positions.size() < currentRoom.getInventorySize()) {
+            double leftPercent = 40 +rand.nextDouble() * 40;         // anywhere from 0% to 90%
+            double topPercent = 65 + rand.nextDouble() * 15;       // between 65% and 80%
+            positions.add(new double[]{leftPercent, topPercent});
+        }
+        // Update the map with the (possibly extended) list.
+        roomItemPositions.put(roomIndex, positions);
+        
+        // Build the overlay using the stored positions.
+        for (int i = 0; i < currentRoom.getInventorySize(); i++) {
+            String itemName = currentRoom.getItemName(i);
+            double[] pos = positions.get(i);
+            sb.append("<img src='images/").append(itemName).append(".png' alt='").append(itemName)
+              .append("' style='position:absolute; left:").append(pos[0])
+              .append("%; top:").append(pos[1])
+              .append("%; width:1in; height:auto; background-color: transparent;'/>");
+        }
+        return sb.toString();
+    }
+
+    public String getRoomCharactersOverlay() {
+        Room currentRoom = rooms.get(currentRoomNum);
+        StringBuilder sb = new StringBuilder();
+        // Arrange characters side by side
+        for (int i = 0; i < currentRoom.getCharacterContainerSize(); i++) {
+            String charName = currentRoom.getCharacterName(i);
+            int charHealth = currentRoom.getCharacterHealth(i);
+            // Calculate number of full hearts and check for a half heart
+            int fullHearts = charHealth / 50;
+            boolean showHalfHeart = (charHealth % 50) > 0;
+            
+            double leftOffsetInches = i * 2;   // horizontal offset for each character
+
+            // Container div for hearts and character image
+            sb.append("<div style='position:absolute; left:")
+              .append(leftOffsetInches)
+              .append("in; top:40%; width:2.5in; text-align:center;'>");
+            
+            // Row of hearts above the character image
+            sb.append("<div style='height:0.5in;'>");
+            // Append full hearts
+            for (int h = 0; h < fullHearts; h++) {
+                sb.append("<img src='images/heart.png' alt='heart' style='width:0.25in; height:auto; display:inline-block;'/>");
+            }
+            // Append a half heart if needed
+            if (showHalfHeart) {
+                sb.append("<img src='images/halfheart.png' alt='half heart' style='width:0.25in; height:auto; display:inline-block;'/>");
+            }
+            sb.append("</div>");
+            
+            // Character image
+            sb.append("<img src='images/").append(charName).append(".png' alt='").append(charName)
+              .append("' style='width:2.5in; height:auto; background-color: transparent;'/>");
+            
+            sb.append("</div>");
+        }
+        return sb.toString();
+    }
     
     public String getCurrentRoomNumber() {
         // Adding 1 so that room 0 becomes "1", room 1 becomes "2", etc.
         return String.valueOf(currentRoomNum + 1);
     }
 	// returns a Response object to be sent over the get and post request so that the page displays the current game state at all times and updates based on post request input
-	public Response display()
-	{
-		Response response = new Response(getCurrentRoomItems(), getPlayerInventoryString(), getRoomCharactersInfo(), getPlayerInfo(), getRoomConnectionOutput(),runningMessage, "Test error",getCurrentRoomImage(),getCurrentRoomNumber());// put fields inside here which will be called with ${response.attribute} in jsp and html
-		return response;
-	}
+    public Response display()
+    {
+        Response response = new Response(
+            getCurrentRoomItems(), 
+            getPlayerInventoryString(), 
+            getRoomCharactersInfo(), 
+            getPlayerInfo(), 
+            getRoomConnectionOutput(),
+            runningMessage, 
+            "Test error",
+            getCurrentRoomImage(),
+            getCurrentRoomNumber(),
+            getRoomItemsOverlay(),         // New field: items overlay
+            getRoomCharactersOverlay()     // New field: characters overlay
+        );
+        return response;
+    }
 	
 	
 	

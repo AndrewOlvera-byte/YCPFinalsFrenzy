@@ -94,10 +94,13 @@
         </div>
         
         <!-- Sidebar: Room image with dynamic room number overlay -->
-        <div class="sidebar">
-            <img src="${response.roomImage}" alt="Current Room Image" />
-            <div class="number-label">${response.roomNumber}</div>
-        </div>
+		<div class="sidebar" style="position: relative;">
+		    <img src="${response.roomImage}" alt="Current Room Image" style="width:100%; height:auto;"/>
+		    <div class="number-label">${response.roomNumber}</div>
+		    <!-- Directly output the overlay HTML for items and characters -->
+		    ${response.roomItemsOverlay}
+		    ${response.roomCharactersOverlay}
+		</div>
     </div>
 
     <!-- JavaScript to scroll the container to the bottom on page load -->
