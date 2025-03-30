@@ -1,17 +1,31 @@
 package models;
+
+import orm.annotations.*;
 import java.util.ArrayList;
 
+import javax.persistence.GeneratedValue;
 
-
+@Entity
+@Table(name = "rooms")
 public class Room
 {
+	@Id
+	@GeneratedValue
+	@Column(name = "id")
+	private int id;
+	
+	@Column(name = "room_name")
 	private String roomName = "";
 	private Inventory inventory;
 	private Connections connections;
 	private ArrayList<models.Character> characterContainer;
+	@Column(name = "longdescription")
 	private String longdescription;
+	@Column(name = "shortdescription")
 	private String shortdescription;
 	private Boolean examined;
+	
+	public Room() {}
 	
 	//Constructor to initialize the room for loadData() in GameEngine which instantiates the room states for the game
 	public Room(String roomName, Inventory inventory, Connections connections, ArrayList<Character> characterContainer, String longdescription, String shortdescription)
@@ -37,6 +51,12 @@ public class Room
 		return -1;
 	}
 	
+	public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+    
+    public Connections getConnections() { return connections; }
+    public void setConnections(Connections connections) { this.connections = connections; }
+	
 	// Adds item to room inventory (player dropping item)
 	public void addItem(Item item)
 	{
@@ -47,6 +67,11 @@ public class Room
 	public void removeItem(int itemNum)
 	{
 		this.inventory.removeItem(itemNum);
+	}
+	
+	public Inventory getInventory() {
+		Inventory inventory = this.inventory;
+		return inventory;
 	}
 	
 	// returns the int of the current character characterNum in characterContainer
@@ -183,5 +208,8 @@ public class Room
 		this.longdescription = longdescription;
 		this.shortdescription = shortdescription;
 	}
+	
+	public ArrayList<Character> getCharacterContainer() { return characterContainer; }
+    public void setCharacterContainer(ArrayList<Character> characters) { this.characterContainer = characters; }
 	
 }

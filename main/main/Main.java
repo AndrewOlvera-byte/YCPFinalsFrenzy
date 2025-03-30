@@ -1,11 +1,16 @@
 package main;
 
 import java.io.File;
+import init.DatabaseInitializer;
+import orm.OrmManager;
 
 import org.eclipse.jetty.server.Server;
 
 public class Main {
 	public static void main(String[] args) throws Exception {
+		OrmManager orm = new OrmManager("YCPGameDB");
+		DatabaseInitializer.initialize(orm);
+		
 		String webappCodeBase = "./war";
 		File warFile = new File(webappCodeBase);
 		Launcher launcher = new Launcher();

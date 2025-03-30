@@ -1,11 +1,37 @@
 package models;
+
+import orm.annotations.*;
 import java.util.HashMap;
 
+import javax.persistence.GeneratedValue;
+
+@Entity
+@Table(name = "connections")
 public class Connections {
     private HashMap<Integer, Room> rooms; // Map of room IDs to Room objects
     private HashMap<Integer, HashMap<String, Integer>> roomConnections; // Map of room IDs to possible directions
     private HashMap<String, Integer> connectionsMap;
+    
+    @Id
+    @GeneratedValue
+    @Column(name = "id")
+    private int id;
+    
+    @Column(name = "north")
+    private Integer north;
 
+    @Column(name = "east")
+    private Integer east;
+
+    @Column(name = "south")
+    private Integer south;
+
+    @Column(name = "west")
+    private Integer west;
+
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+    
     public Connections() {
         rooms = new HashMap<>();
         roomConnections = new HashMap<>();

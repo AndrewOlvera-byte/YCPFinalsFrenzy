@@ -1,11 +1,30 @@
 package models;
+
+import javax.persistence.GeneratedValue;
+
+import orm.annotations.*;
+
+@Entity
+@Table(name = "items")
 public class Item {
-	private int value, weight;
+	@Id
+	@GeneratedValue
+	@Column(name = "id")
+    private int id;
+	@Column(name = "value")
+	private int value; 
+	@Column(name = "weight")
+	private int weight;
+    @Column(name = "name")
 	private String name;
+    @Column(name = "longdescription")
 	private String longdescription;
+    @Column(name = "shortdescription")
 	private String shortdescription;
 	private String[] components;
 	private Boolean examined;
+	
+    public Item() {}
 	
 	public Item(int value, int weight, String name, String[] components, String longdescription, String shortdescription) {
 		this.weight = weight;
@@ -16,6 +35,9 @@ public class Item {
 		this.shortdescription = shortdescription;
 		examined = false;
 	}
+	
+	 public int getId() { return id; }
+	 public void setId(int id) { this.id = id; }
 	
 	public String getDescription() {
 		if(!examined) {

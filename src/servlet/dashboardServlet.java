@@ -1,58 +1,73 @@
 package servlet;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import javax.servlet.http.*;
 
 import GameEngine.GameEngine;
+import init.DatabaseInitializer;
+import init.DataSeeder;
+import models.Player;
 import models.Response;
+import orm.OrmManager;
 
 public class dashboardServlet extends HttpServlet {
-	private static final long serialVersionUID = 1L;
-	@Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
-        
-		// Create or retrieve the session and GameEngine instance.
+    private static final long serialVersionUID = 1L;
+
+    private static boolean seeded = false;
+    
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    	
+    	OrmManager orm = new OrmManager("YCPGameDB");
+    	
         HttpSession session = req.getSession(true);
         GameEngine gameEngine = (GameEngine) session.getAttribute("gameEngine");
+
         if (gameEngine == null) {
-            gameEngine = new GameEngine();
-            gameEngine.start();
-            session.setAttribute("gameEngine", gameEngine);
+            try {
+                
+            	if (!seeded) { 
+                    DatabaseInitializer.initialize(orm);
+                    DataSeeder.seed(orm);
+                    seeded = true;
+                }
+
+                gameEngine = new GameEngine();
+                gameEngine.start(orm);
+                session.setAttribute("gameEngine", gameEngine);
+
+            } catch (Exception e) {
+                throw new ServletException("Database initialization failed", e);
+            }
         }
-        
-        // Get the initial game state.
+
         Response response = gameEngine.display();
-        
-        // Set the response as a request attribute for the JSP.
         req.setAttribute("response", response);
         req.getRequestDispatcher("/_view/Dashboard.jsp").forward(req, resp);
     }
-	
-	@Override
+
+    @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        
-		// Retrieve the GameEngine from session.
+
         HttpSession session = req.getSession(false);
         if (session == null || session.getAttribute("gameEngine") == null) {
             resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Session expired or not found.");
             return;
         }
+
         GameEngine gameEngine = (GameEngine) session.getAttribute("gameEngine");
-
-        // Process the input from the request.
         String input = req.getParameter("input");
-        boolean success = gameEngine.processInput(input);
+        gameEngine.processInput(input);
+        
+        OrmManager orm = null;
+		orm = new OrmManager("YCPGameDB");
+        gameEngine.saveGameState(orm);
 
-        // Get updated game state.
         Response updatedResponse = gameEngine.display();
-
         req.setAttribute("response", updatedResponse);
         req.getRequestDispatcher("/_view/Dashboard.jsp").forward(req, resp);
     }

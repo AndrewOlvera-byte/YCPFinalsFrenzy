@@ -6,6 +6,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.*;
 import GameEngine.GameEngine;
 import models.Response;
+import orm.OrmManager;
 
 public class dashboardAjaxServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
@@ -24,6 +25,13 @@ public class dashboardAjaxServlet extends HttpServlet {
         // Process the user input.
         String input = req.getParameter("input");
         gameEngine.processInput(input);
+        
+        try {
+            OrmManager orm = new OrmManager("YCPGameDB");
+            gameEngine.saveGameState(orm);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         
         // Get updated game state.
         Response updatedResponse = gameEngine.display();
