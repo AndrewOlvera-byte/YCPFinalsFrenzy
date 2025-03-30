@@ -16,6 +16,8 @@ public class Room
 	
 	@Column(name = "room_name")
 	private String roomName = "";
+	@OneToOne
+	@JoinColumn(name = "inventory_id")
 	private Inventory inventory;
 	private Connections connections;
 	private ArrayList<models.Character> characterContainer;

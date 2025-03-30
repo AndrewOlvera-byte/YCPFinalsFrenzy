@@ -150,19 +150,41 @@ public class OrmManager {
         EntityMetaData meta = new EntityMetaData(clazz);
         List<T> results = new ArrayList<>();
         Field idField = meta.getIdField();
-
+        
         String sql = "SELECT * FROM " + meta.getTableName();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     T obj = clazz.getDeclaredConstructor().newInstance();
+                    
+                    // Set the ID field
                     idField.setAccessible(true);
-                    idField.set(obj, rs.getObject(idField.getAnnotation(Column.class).name()));
-                    for (Field field : meta.getColumns()) { // ✅ UPDATED
+                    Column idColumn = idField.getAnnotation(Column.class);
+                    // It's safe to assume the id field is always annotated with @Column
+                    Object idValue = rs.getObject(idColumn.name());
+                    idField.set(obj, idValue);
+                    
+                    // Set all other fields
+                    for (Field field : meta.getColumns()) {
                         if (field.equals(idField)) continue;
                         field.setAccessible(true);
-                        Column column = field.getAnnotation(Column.class);
-                        field.set(obj, rs.getObject(column.name())); // ✅ UPDATED
+                        
+                        // Handle simple columns
+                        if (field.isAnnotationPresent(Column.class)) {
+                            Column column = field.getAnnotation(Column.class);
+                            field.set(obj, rs.getObject(column.name()));
+                        }
+                        // Handle join columns (one-to-one relationships)
+                        else if (field.isAnnotationPresent(JoinColumn.class)) {
+                            JoinColumn joinColumn = field.getAnnotation(JoinColumn.class);
+                            Object fk = rs.getObject(joinColumn.name());
+                            if (fk != null) {
+                                // Recursively load the related entity; ensure related entity has a getId() method
+                                Object relatedObj = find(field.getType(), fk);
+                                field.set(obj, relatedObj);
+                            }
+                        }
+                        // If the field is not annotated with either, you might want to skip it.
                     }
                     results.add(obj);
                 }
@@ -170,4 +192,5 @@ public class OrmManager {
         }
         return results;
     }
+
 }
