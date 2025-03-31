@@ -4,14 +4,14 @@ import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import GameEngine.GameEngine;
 import models.Room;
 import models.Response;
 import models.Player;
 import models.Inventory;
 import models.Item;
 import models.Weapon;
-
-import GameEngine.GameEngine;
 
 import java.util.ArrayList;
 

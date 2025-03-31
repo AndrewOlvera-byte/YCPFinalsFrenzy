@@ -14,7 +14,7 @@
   <!-- AJAX servlets. -->
   <servlet>
     <servlet-name>DashboardAjaxServlet</servlet-name>
-    <servlet-class>servlet.ajax.dashboardAjaxServlet</servlet-class>
+    <servlet-class>servlet.ajax.DashboardAjaxServlet</servlet-class>
   </servlet>
 
   <!-- Servlet mappings -->

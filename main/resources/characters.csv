@@ -1,0 +1,3 @@
+name,inventory_id,attack,defense,hp,room_id,justAttacked,isNPC,aggression
+Prof. Yoda,A wise professor from CS dept.,Short green mentor,150,20,2
+Campus Cat,Roams freely across campus,Fluffy feline,50,5,3

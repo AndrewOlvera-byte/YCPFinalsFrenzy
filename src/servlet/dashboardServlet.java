@@ -22,7 +22,12 @@ public class dashboardServlet extends HttpServlet {
         GameEngine gameEngine = (GameEngine) session.getAttribute("gameEngine");
         if (gameEngine == null) {
             gameEngine = new GameEngine();
-            gameEngine.start();
+            try {
+				gameEngine.start();
+			} catch (Exception e) {
+				
+				e.printStackTrace();
+			}
             session.setAttribute("gameEngine", gameEngine);
         }
         

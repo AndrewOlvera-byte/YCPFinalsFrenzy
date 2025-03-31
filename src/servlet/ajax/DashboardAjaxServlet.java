@@ -4,10 +4,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
+
 import GameEngine.GameEngine;
 import models.Response;
 
-public class dashboardAjaxServlet extends HttpServlet {
+public class DashboardAjaxServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     
     @Override

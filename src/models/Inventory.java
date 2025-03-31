@@ -1,18 +1,40 @@
 package models;
-import java.util.ArrayList;
 
+import java.util.ArrayList;
+import orm.OrmManager;
+import orm.annotations.*;
+import java.util.List;
+
+import javax.persistence.GeneratedValue;
+
+@Entity
+@Table(name = "inventories")
 public class Inventory {
 	private ArrayList<Item> inventory;
+	@Column(name = "current_weight")
 	private int currentWeight;
+	@Column(name = "max_weight")
 	private int maxWeight;
+	
+	@Id
+	@GeneratedValue
+	@Column(name = "id")
+    private int id;
 	
 	public Inventory(ArrayList<Item> inventory, int maxWeight) {
 		this.inventory = inventory;
+		this.maxWeight = maxWeight;
 		currentWeight = 0;
 		for(int i = 0; i < inventory.size(); i++) {
 			currentWeight += inventory.get(i).getWeight();
 		}
-		this.maxWeight = maxWeight;
+	}
+	
+	public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+	
+	public Inventory() {
+		this.inventory = new ArrayList<>();
 	}
 	
 	public void addItem(Item item) {
@@ -21,6 +43,7 @@ public class Inventory {
 			currentWeight += item.getWeight();
 		}*/
 		inventory.add(item);
+		currentWeight += item.getWeight();
 	}
 	
 	public void removeItem(int itemNumber) {
@@ -83,5 +106,23 @@ public class Inventory {
 	{
 		Item item = inventory.get(itemNum);
 		return item.getName();
+	}
+	
+	public void loadItemsFromDB(OrmManager orm) throws Exception {
+		List<InventoryItemLink> links = orm.findAll(InventoryItemLink.class);
+		List<Item> allItems = orm.findAll(Item.class);
+		ArrayList<Item> result = new ArrayList<>();
+
+		for (InventoryItemLink link : links) {
+			if (link.getInventoryId() == this.id) {
+				for (Item item : allItems) {
+					if (item.getId() == link.getItemId()) {
+						result.add(item);
+						break;
+					}
+				}
+			}
+		}
+		this.setInventory(result);
 	}
 }

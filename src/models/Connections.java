@@ -1,11 +1,33 @@
 package models;
-import java.util.HashMap;
 
+import java.util.HashMap;
+import orm.annotations.*;
+import models.*;
+
+@Entity
+@Table(name = "connections")
 public class Connections {
     private HashMap<Integer, Room> rooms; // Map of room IDs to Room objects
     private HashMap<Integer, HashMap<String, Integer>> roomConnections; // Map of room IDs to possible directions
     private HashMap<String, Integer> connectionsMap;
-
+    
+    @Id
+    @GeneratedValue
+    @Column(name = "id")
+    private int id;
+    
+    @Column(name = "north_room_id")
+    private int northRoomId;
+    
+    @Column(name = "south_room_id")
+    private int southRoomId;
+    
+    @Column(name = "east_room_id")
+    private int eastRoomId;
+    
+    @Column(name = "west_room_id")
+    private int westRoomId;
+    
     public Connections() {
         rooms = new HashMap<>();
         roomConnections = new HashMap<>();
@@ -49,6 +71,46 @@ public class Connections {
     
     public Integer getConnection(String key) {
         return connectionsMap.get(key);
+    }
+    
+    public int getId() {
+        return id;
+    }
+    
+    public void setId(int id) {
+        this.id = id;
+    }
+    
+    public int getNorthRoomId() {
+        return northRoomId;
+    }
+    
+    public void setNorthRoomId(int northRoomId) {
+        this.northRoomId = northRoomId;
+    }
+    
+    public int getSouthRoomId() {
+        return southRoomId;
+    }
+    
+    public void setSouthRoomId(int southRoomId) {
+        this.southRoomId = southRoomId;
+    }
+    
+    public int getEastRoomId() {
+        return eastRoomId;
+    }
+    
+    public void setEastRoomId(int eastRoomId) {
+        this.eastRoomId = eastRoomId;
+    }
+    
+    public int getWestRoomId() {
+        return westRoomId;
+    }
+    
+    public void setWestRoomId(int westRoomId) {
+        this.westRoomId = westRoomId;
     }
     
     /*public Set<String> getAllKeys() {

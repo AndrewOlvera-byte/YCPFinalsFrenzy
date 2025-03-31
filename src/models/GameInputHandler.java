@@ -3,7 +3,9 @@ package models;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+
 import GameEngine.GameEngine;
+import orm.annotations.*;
 
 public class GameInputHandler {
     private GameEngine gameEngine;
@@ -16,8 +18,8 @@ public class GameInputHandler {
         "on", "with", "at", "in", "to"
     ));
 
-    public GameInputHandler(GameEngine gameEngine) {
-        this.gameEngine = gameEngine;
+    public GameInputHandler(GameEngine engine) {
+        this.gameEngine = engine;
     }
 
     public boolean processInput(String input) {

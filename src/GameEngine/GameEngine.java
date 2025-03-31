@@ -1,6 +1,10 @@
 package GameEngine;
 
+
 import java.util.ArrayList;
+
+import init.DataSeeder;
+
 import java.util.*;
 
 import models.Room;
@@ -13,11 +17,13 @@ import models.NPC;
 import models.Response;
 import models.Weapon;
 import models.GameInputHandler;
+import models.RoomCharacterLink;
+
+import orm.OrmManager;
 
 
 public class GameEngine
 {
-	
 	private Player player;
 	private boolean isRunning = false;
 	private int currentRoomNum;
@@ -26,33 +32,64 @@ public class GameEngine
 	private String error = "";
 	private GameInputHandler inputHandler;
 	
+	private OrmManager orm;
+	
 	// Empty instantiation so data can be loaded using loadData()
 	public GameEngine()
 	{
 		this.inputHandler = new GameInputHandler(this);
+		this.orm = new OrmManager("YCPDB");
 		}
 	
-	
+	// ADDED: Setter for player (needed by DataSeeder)
+    public void setPlayer(Player player) {
+        this.player = player;
+    }
 	
 	// called after creating the GameEngine instantiation in the session to load the current data and set isRunning to true
-	public void start()
+	public void start() throws Exception
 	{
 		loadData();
 		this.isRunning = true;
 	}
 	
 	// "loads data" from .csv file in future but for now is where we create the instantiation of the game state for out MS1 demo
-	public void loadData()
+	public void loadData() throws Exception
 	{
-		loadRooms();
-		loadPlayer();
+		rooms.clear(); // ✅ Ensure rooms don't duplicate
+		DataSeeder.seedAll(orm, rooms, this);
 		this.currentRoomNum = 0;
 		String roomName = getCurrentRoomName();
-		
+		printPersistenceSummary();
 	}
 	
+	public ArrayList<Room> getRooms() {
+	    return rooms;
+	}
+	
+	public void printPersistenceSummary() {
+	    try {
+	        List<Room> allRooms = orm.findAll(Room.class);
+	        System.out.println("📦 Room Count in DB: " + allRooms.size());
+
+	        List<Player> players = orm.findAll(Player.class);
+	        if (!players.isEmpty()) {
+	            Player player = players.get(0);
+	            System.out.println("🧍 Player: " + player.getName() + " (ID: " + player.getId() + ")");
+	        } else {
+	            System.out.println("⚠️ No player found in database.");
+	        }
+
+	        System.out.println("📍 Current Room: " + getCurrentRoomName() + " (Room ID: " + currentRoomNum + ")");
+	    } catch (Exception e) {
+	        System.out.println("❌ Error while printing game state summary: " + e.getMessage());
+	        e.printStackTrace();
+	    }
+	}
+
+	
 	// loading of rooms
-	public void loadRooms()
+	/*public void loadRooms()
 	{
 		// example implementation but will be looped over data in the .csv file to load the rooms state last left off
 		String roomName1 = "First Room";
@@ -69,6 +106,17 @@ public class GameEngine
 		ArrayList<models.Character> characterContainer1 = new ArrayList<>();
 		Room newRoom1 = new Room(roomName1, inventory1, connections1, characterContainer1, "You glance around the lobby of the manor south floor", "you glance around room 1");
 		this.rooms.add(newRoom1);
+		
+		try {
+		    orm.save(newRoom1); // Persist the room to get an auto-generated ID
+		    // For each character in the room, persist a RoomCharacterLink entry
+		    for (Character c : newRoom1.getCharacterContainer()) {
+		        // Make sure the character is persisted (if not, you might need to call orm.save(c) first)
+		        orm.save(new RoomCharacterLink(newRoom1.getId(), c.getId()));
+		    }
+		} catch(Exception e) {
+		    e.printStackTrace();
+		}
 		
 		//start
 		
@@ -94,7 +142,14 @@ public class GameEngine
 		characterContainer2.add(boss);
 		Room newRoom2 = new Room(roomName2, inventory2, connections2, characterContainer2, "You glance out at the road out front of the Manors", "You glance around Room 2");
 		this.rooms.add(newRoom2);
-		
+		try {
+		    orm.save(newRoom2);
+		    for (Character c : newRoom2.getCharacterContainer()) {
+		        orm.save(new RoomCharacterLink(newRoom2.getId(), c.getId()));
+		    }
+		} catch(Exception e) {
+		    e.printStackTrace();
+		}
 		
 		
 		String roomName3 = "Third Room";
@@ -116,10 +171,18 @@ public class GameEngine
 		
 		ArrayList<models.Character> characterContainer3 = new ArrayList<>();
 		NPC Friend = new NPC("Curly", 400, false, null, 5,inventoryFriend, "Heard he was named that because of his curly hair", "It's Curly!");
-		characterContainer2.add(Friend);
+		characterContainer3.add(Friend);
 		Room newRoom3 = new Room(roomName3, inventory3, connections3, characterContainer3, "You glance around the inside of the Student lobby", "You glance around room 3");
 		this.rooms.add(newRoom3);
 		
+		try {
+		    orm.save(newRoom3);
+		    for (Character c : newRoom3.getCharacterContainer()) {
+		        orm.save(new RoomCharacterLink(newRoom3.getId(), c.getId()));
+		    }
+		} catch(Exception e) {
+		    e.printStackTrace();
+		}
 
 	}
 	
@@ -134,7 +197,13 @@ public class GameEngine
 		Inventory inventory = new Inventory(itemContainer, 30);
 		Player newPlayer = new Player(playerName, 200, 0, inventory, "This is You!", "You");
 		this.player = newPlayer;
-	}
+		
+		try {
+		    orm.save(newPlayer);
+		} catch(Exception e) {
+		    e.printStackTrace();
+		}
+	} */
 	
 	// updates currentRoom to returned int if room is available, and returns true (that the room was updated) and returns false if it isn't reachable, for the response to the user
 	public Boolean updateCurrentRoom(String direction)
@@ -359,9 +428,13 @@ public class GameEngine
 	
 	public String getCurrentRoomName()
 	{
+		if (rooms == null || rooms.size() == 0) {
+			return "Unknown Room"; // ✅ Avoid crash when rooms are not loaded
+		}
 		Room currentRoom = rooms.get(currentRoomNum);
 		return currentRoom.getRoomName();
 	}
+
 	
 	public String getRoomName(int roomNum)
 	{
@@ -369,18 +442,22 @@ public class GameEngine
 		return currentRoom.getRoomName();
 	}
 	
-	public String getCurrentRoomItems()
-	{
-		String currentRoomItems = "Room Inventory:\n";
-		Room currentRoom = rooms.get(currentRoomNum);
-		int size = currentRoom.getInventorySize();
-		for (int i = 0; i < size; i ++)
-		{
-			currentRoomItems += i+1 + "\t" + currentRoom.getItemName(i) + "\n";
-		}
-		
-		return currentRoomItems;
+	public String getCurrentRoomItems() {
+	    StringBuilder currentRoomItems = new StringBuilder("Room Inventory:\n");
+	    Room currentRoom = rooms.get(currentRoomNum);
+	    int size = currentRoom.getInventorySize();
+	    
+	    if (size == 0) {
+	        currentRoomItems.append("No items in this room.");
+	        return currentRoomItems.toString();
+	    }
+	    
+	    for (int i = 0; i < size; i++) {
+	        currentRoomItems.append((i+1) + "\t" + currentRoom.getItemName(i) + "\n");
+	    }
+	    return currentRoomItems.toString();
 	}
+
 	
 	public String getPlayerInventoryString()
 	{

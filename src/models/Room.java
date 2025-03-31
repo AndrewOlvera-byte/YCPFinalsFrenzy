@@ -1,16 +1,31 @@
 package models;
+
 import java.util.ArrayList;
 
+import orm.annotations.*;
 
-
+@Entity
+@Table(name = "rooms")
 public class Room
 {
+	@Id
+    @GeneratedValue
+    @Column(name = "id")
+    private int id;
+	@Column(name = "room_name")
 	private String roomName = "";
+	@OneToOne
+    @JoinColumn(name = "inventory_id")
 	private Inventory inventory;
+	@OneToOne
+    @JoinColumn(name = "connections_id")
 	private Connections connections;
 	private ArrayList<models.Character> characterContainer;
+	@Column(name = "longdescription")
 	private String longdescription;
+	@Column(name = "shortdescription")
 	private String shortdescription;
+	@Column(name = "examined")
 	private Boolean examined;
 	
 	//Constructor to initialize the room for loadData() in GameEngine which instantiates the room states for the game
@@ -23,6 +38,13 @@ public class Room
 		this.longdescription = longdescription;
 		this.shortdescription = shortdescription;
 		this.examined = false;
+	}
+	
+	public Room() {
+		this.characterContainer = new ArrayList<>();
+	    if (this.inventory == null) {
+	        this.inventory = new Inventory();
+	    }
 	}
 	
 	// Returns the index of the available room to switch to based on direction input, and returns -1 if it is null
@@ -182,6 +204,16 @@ public class Room
 	public void setDescription(String longdescription, String shortdescription) {
 		this.longdescription = longdescription;
 		this.shortdescription = shortdescription;
+	}
+
+	public ArrayList<Character> getCharacterContainer() {
+		ArrayList<Character> container = this.characterContainer;
+		return container;
+	}
+
+	public int getId() {
+		int id = this.id;
+		return id;
 	}
 	
 }
