@@ -51,7 +51,7 @@ public class GameInputHandler {
             case "go":
             case "move":
             case "walk":
-                gameEngine.appendMessage(gameEngine.getGo(noun));
+            	gameEngine.getGo(noun);
                 break;
             case "examine":
             case "look":

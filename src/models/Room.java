@@ -28,7 +28,7 @@ public class Room
     // Overloaded constructor for rooms with no key requirement
     public Room(String roomName, Inventory inventory, Connections connections, ArrayList<Character> characterContainer, String longdescription, String shortdescription)
     {
-        this(roomName, inventory, connections, characterContainer, null);
+        this(roomName, inventory, connections, characterContainer, null, longdescription, shortdescription);
     }
     
     // Returns the index of the available room to switch to based on direction input, and returns -1 if it is null

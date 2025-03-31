@@ -64,7 +64,5 @@ public class Item {
 		this.components = components;
 	}
 
-	public String getDescription() {
-		return null;
-	}
+
 }
