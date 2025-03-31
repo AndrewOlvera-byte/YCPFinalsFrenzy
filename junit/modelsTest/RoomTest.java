@@ -36,11 +36,11 @@ public class RoomTest {
         
         // Create a test item (Weapon) for testing addItem/getItem methods.
         String[] components = {"Iron"};
-        testItem = new Weapon(50, 5, "Test Sword", components, 25);
+        testItem = new Weapon(50, 5, "Test Sword", components, 25, "It is a rusty Test Sword");
         
         // Create a test character with a weapon in its inventory.
         ArrayList<Item> charItems = new ArrayList<>();
-        charItems.add(new Weapon(30, 3, "Test Dagger", components, 15));
+        charItems.add(new Weapon(30, 3, "Test Dagger", components, 15, "Trusty Test Dagger in the back pocket"));
         Inventory charInventory = new Inventory(charItems, 50);
         testCharacter = new Character("Goblin", 100, charInventory);
     }

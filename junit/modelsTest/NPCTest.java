@@ -28,7 +28,7 @@ public class NPCTest {
         String[] dialogue = {"Hello", "Adventurer!"};
         // Create a simple weapon for the NPC's inventory.
         String[] components = {"Steel"};
-        Weapon npcWeapon = new Weapon(40, 4, "Club", components, 15);
+        Weapon npcWeapon = new Weapon(40, 4, "Club", components, 15, "Club goes bonk");
         ArrayList<Item> npcItems = new ArrayList<>();
         npcItems.add(npcWeapon);
         Inventory npcInventory = new Inventory(npcItems, 50);
@@ -38,7 +38,7 @@ public class NPCTest {
         
         // Create a simple Player.
         String[] playerComponents = {"Iron"};
-        Weapon playerWeapon = new Weapon(50, 5, "Sword", playerComponents, 20);
+        Weapon playerWeapon = new Weapon(50, 5, "Sword", playerComponents, 20, "It is a rusty Sword");
         ArrayList<Item> playerItems = new ArrayList<>();
         playerItems.add(playerWeapon);
         Inventory playerInventory = new Inventory(playerItems, 100);

@@ -8,12 +8,17 @@ public class Character {
    protected int maxHp;           // New field for maximum health
    protected Inventory inventory;
    private boolean justAttacked = false;
-   
-   public Character(String name, int hp, Inventory inventory) {
+   private String longdescription;
+   private String shortdescription;
+   private Boolean examined;
+   public Character(String name, int hp, Inventory inventory, String longdescription, String shortdescription) {
        this.name = name;
        this.hp = hp;
        this.maxHp = hp;         // Assume starting hp is the max health
        this.inventory = inventory;
+       this.longdescription = longdescription;
+       this.shortdescription = shortdescription;
+       this.examined = false;
    }
    
    public void callInventory() {
@@ -91,5 +96,21 @@ public class Character {
            inventory.removeItem(0);
        }
        return droppedItems;
+   }
+   
+   
+   public String getCharDescription() {
+	   if(!examined) {
+		   examined = true;
+		   return longdescription;
+	   }
+	   else {
+		   return shortdescription;
+	   }
+   }
+   
+   public void setCharDescription(String longdescription, String shortdescription) {
+	   this.longdescription = longdescription;
+	   this.shortdescription = shortdescription;
    }
 }

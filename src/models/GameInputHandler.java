@@ -9,7 +9,7 @@ public class GameInputHandler {
     private GameEngine gameEngine;
 
     private static final Set<String> VALID_VERBS = new HashSet<>(Arrays.asList(
-        "pickup", "drop", "use", "get", "grab", "take", "examine", "go", "talk", "attack", "swing", "slash", "strike", "hit"
+        "pickup", "drop", "use", "get", "grab", "take", "examine", "go", "move", "walk", "talk", "attack", "swing", "slash", "strike", "hit", "look", "help"
     ));
 
     private static final Set<String> PREPOSITIONS = new HashSet<>(Arrays.asList(
@@ -49,9 +49,17 @@ public class GameInputHandler {
                 gameEngine.appendMessage(gameEngine.playerAttackChar(gameEngine.CharItemNameToID(noun2), gameEngine.CharNameToID(noun)));
                 break;
             case "go":
-                // Just call getGo; it already appends to runningMessage.
-                gameEngine.getGo(noun);
+            case "move":
+            case "walk":
+                gameEngine.appendMessage(gameEngine.getGo(noun));
                 break;
+            case "examine":
+            case "look":
+            	gameEngine.appendMessage(gameEngine.getExamine(noun));
+            	break;
+            case "help":
+            	gameEngine.appendMessage(gameEngine.getHelp(verb.toLowerCase()));
+            	break;
             default:
                 gameEngine.appendMessage("\nCommand not implemented.");
         }

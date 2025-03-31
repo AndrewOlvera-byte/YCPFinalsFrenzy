@@ -23,10 +23,10 @@ public class InventoryTest {
         
         // Create two items.
         String[] components1 = {"Iron"};
-        item1 = new Weapon(50, 10, "Sword", components1, 25);
+        item1 = new Weapon(50, 10, "Sword", components1, 25,"It is a rusty Sword");
         
         String[] components2 = {"Wood"};
-        item2 = new Weapon(30, 5, "Club", components2, 15);
+        item2 = new Weapon(30, 5, "Club", components2, 15, "Club goes bonk");
     }
     
     @Test

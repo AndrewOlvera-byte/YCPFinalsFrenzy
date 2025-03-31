@@ -14,7 +14,7 @@ public class ItemTest {
     public void setUp() {
         // Create an Item with specific values.
         String[] components = {"Wood", "Metal"};
-        item = new Item(75, 12, "Axe", components);
+        item = new Item(75, 12, "Axe", components, "Good for cutting down wood!");
     }
     
     @Test

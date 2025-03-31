@@ -13,7 +13,7 @@ public class WeaponTest {
     public void setUp() {
         // Create a weapon with specific attributes.
         String[] components = {"Steel", "Wood"};
-        weapon = new Weapon(100, 10, "Sword", components, 50);
+        weapon = new Weapon(100, 10, "Sword", components, 50, "It is a rusty Sword");
     }
 
     @Test

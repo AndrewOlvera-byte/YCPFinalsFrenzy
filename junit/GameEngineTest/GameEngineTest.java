@@ -58,7 +58,7 @@ public class GameEngineTest {
         // Attack the character "Moe".
         String attackMessage = gameEngine.playerAttackChar(gameEngine.CharItemNameToID("Dagger"), gameEngine.CharNameToID("Moe"));
         // Expected outcome: since 400-40 > 0, the boss's health should reduce.
-        assertEquals("\nMoe has taken 40 damage.", attackMessage);
+        assertEquals("\nMoe has taken 40 damage.\nMoe Hit back for 80", attackMessage);
         
         // Use reflection to access the current room (private field "rooms") and check "Moe"'s health.
         Room currentRoom = getCurrentRoomFromGameEngine();
@@ -72,7 +72,7 @@ public class GameEngineTest {
         gameEngine.updateCurrentRoom("North");
         int playerHpBefore = getPlayerHpViaReflection(gameEngine);
         // Boss "Moe" uses his weapon (the "Trident" with 90 damage) to attack.
-        gameEngine.charAttackPlayer(0, 0);
+        gameEngine.charAttackPlayer(0, 0, true);
         int playerHpAfter = getPlayerHpViaReflection(gameEngine);
         // Player's HP should decrease by 90.
         assertEquals(playerHpBefore - 90, playerHpAfter);

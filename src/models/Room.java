@@ -7,22 +7,26 @@ public class Room
     private Inventory inventory;
     private Connections connections;
     private ArrayList<models.Character> characterContainer;
-    
-    // New field for a required key (null or empty means no key is required)
     private String requiredKey;
+	private String longdescription;
+	private String shortdescription;
+	private Boolean examined;
 
     // Updated constructor to include requiredKey
-    public Room(String roomName, Inventory inventory, Connections connections, ArrayList<Character> characterContainer, String requiredKey)
+    public Room(String roomName, Inventory inventory, Connections connections, ArrayList<Character> characterContainer, String requiredKey, String longdescription, String shortdescription)
     {
         this.roomName = roomName;
         this.inventory = inventory;
         this.connections = connections;
         this.characterContainer = characterContainer;
         this.requiredKey = requiredKey;
+		this.longdescription = longdescription;
+		this.shortdescription = shortdescription;
+		this.examined = false;
     }
     
     // Overloaded constructor for rooms with no key requirement
-    public Room(String roomName, Inventory inventory, Connections connections, ArrayList<Character> characterContainer)
+    public Room(String roomName, Inventory inventory, Connections connections, ArrayList<Character> characterContainer, String longdescription, String shortdescription)
     {
         this(roomName, inventory, connections, characterContainer, null);
     }
@@ -104,6 +108,9 @@ public class Room
         Character currentCharacter = characterContainer.get(characterNum);
         return currentCharacter.getName();
     }
+	public Character getCharacter(int characterNum) {
+		return characterContainer.get(characterNum);
+	}
     
     public void removeCharacter(int characterNum)
     {
@@ -118,13 +125,20 @@ public class Room
     public boolean isCharAgressive(int characterNum)
     {
         Character currentCharacter = characterContainer.get(characterNum);
-        return currentCharacter.isAgressive();
+        if (currentCharacter instanceof NPC) {
+	        NPC npc = (NPC) currentCharacter;  // Cast to NPC
+	        return npc.getAggresion();  // Access aggression property
+	    }
+	    
+	    // If not an NPC, return false or handle the logic for non-NPC characters (like Player)
+	    return false;  // Assuming non-NPC characters are not aggressive
     }
     
     public boolean getCharacterJustAttacked(int characterNum)
     {
         Character currentCharacter = characterContainer.get(characterNum);
-        return currentCharacter.getJustAttacked();
+        boolean justAttacked = currentCharacter.getJustAttacked();
+		return justAttacked;
     }
     
     public void setCharacterJustAttacked(int characterNum, boolean value)
@@ -135,7 +149,8 @@ public class Room
     
     public int getInventorySize()
     {
-        return inventory.getSize();
+        int size = inventory.getSize();
+		return size;
     }
     
     public String getItemName(int itemNum)
@@ -158,4 +173,19 @@ public class Room
     public int getCharacterMaxHealth(int index) {
         return characterContainer.get(index).getMaxHp();
     }
+	
+	public String getRoomDescription() {
+		if(!examined) {
+			examined = true;
+			return longdescription;
+		}
+		else {
+			return shortdescription;
+		}
+	}
+	
+	public void setDescription(String longdescription, String shortdescription) {
+		this.longdescription = longdescription;
+		this.shortdescription = shortdescription;
+	}
 }

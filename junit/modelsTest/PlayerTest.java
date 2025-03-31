@@ -25,7 +25,7 @@ public class PlayerTest {
     public void setUp() {
         // Create a simple weapon for the player's inventory.
         String[] components = {"Iron"};
-        Weapon weapon = new Weapon(50, 5, "Dagger", components, 20);
+        Weapon weapon = new Weapon(50, 5, "Dagger", components, 20, "Trusty dagger in the back pocket");
         ArrayList<Item> items = new ArrayList<>();
         items.add(weapon);
         Inventory inventory = new Inventory(items, 100);

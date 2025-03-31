@@ -3,22 +3,22 @@ package models;
 public class Player extends Character {
     private int skillPoints;
     
-    public Player(String name, int hp, int skillPoints, Inventory inventory) {
-        super(name, hp, inventory);
+    public Player(String name, int hp, int skillPoints, Inventory inventory, String longdescription, String shortdescription) {
+        super(name, hp, inventory, longdescription, shortdescription);
         this.skillPoints = skillPoints;
     }
     
     public void move(String direction) {
-        System.out.println(getName() + " moves " + direction + " to a new location.");
+        System.out.println(name + " moves " + direction + " to a new location.");
         // Implement movement logic based on Room class
     }
     
     public void useSkillPoints() {
         if (skillPoints > 0) {
             skillPoints--;
-            System.out.println(getName() + " used a skill point. Remaining: " + skillPoints);
+            System.out.println(name + " used a skill point. Remaining: " + skillPoints);
         } else {
-            System.out.println(getName() + " has no skill points left.");
+            System.out.println(name + " has no skill points left.");
         }
     }
     
