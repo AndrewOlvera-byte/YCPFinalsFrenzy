@@ -132,7 +132,7 @@ public class GameEngine
 		itemContainer.add(weaponPlayer);
 		String playerName = "Cooper";
 		Inventory inventory = new Inventory(itemContainer, 30);
-		Player newPlayer = new Player(playerName, 200, 0, inventory, "This is You!", "You");
+		Player newPlayer = new Player(playerName, 200, 0, inventory, "This is You!", "You",1);
 		this.player = newPlayer;
 	}
 	
@@ -172,7 +172,8 @@ public class GameEngine
 			return "\nAttack with what?";
 		}
 		Room currentRoom = rooms.get(currentRoomNum);
-		int attackDmg = player.getAttackDmg(itemNum);//Needed
+		int damageMulti = player.getdamageMulti();
+		int attackDmg = player.getAttackDmg(itemNum)*damageMulti;//Needed
 		int charHealth = currentRoom.getCharacterHealth(characterNum);
 		int newHealth = charHealth - attackDmg;
 		
@@ -212,7 +213,6 @@ public class GameEngine
 		Room currentRoom = rooms.get(currentRoomNum);
 		int attackDmg = currentRoom.getCharacterAttackDmg(characterNum, itemNum);
 		int playerHealth = player.getHp();
-		int newHealth = playerHealth - attackDmg;
 
 		if (aggressive == true) {
 			player.setHp(playerHealth - attackDmg);
