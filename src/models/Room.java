@@ -50,7 +50,7 @@ public class Room
         this.inventory.removeItem(itemNum);
     }
     
-    // returns the int of the current character characterNum in characterContainer
+    // returns the int of the current character's health for character at index characterNum
     public int getCharacterHealth(int characterNum)
     {
         Character currentCharacter = characterContainer.get(characterNum);
@@ -151,5 +151,11 @@ public class Room
     // New getter for the required key
     public String getRequiredKey() {
         return this.requiredKey;
+    }
+    
+    // NEW: Getter for a character's maximum health.
+    // Assumes the Character class has a getMaxHp() method.
+    public int getCharacterMaxHealth(int index) {
+        return characterContainer.get(index).getMaxHp();
     }
 }

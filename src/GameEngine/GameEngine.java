@@ -547,10 +547,14 @@ public class GameEngine
         // Arrange characters side by side
         for (int i = 0; i < currentRoom.getCharacterContainerSize(); i++) {
             String charName = currentRoom.getCharacterName(i);
-            int charHealth = currentRoom.getCharacterHealth(i);
-            // Calculate number of full hearts and check for a half heart
-            int fullHearts = charHealth / 50;
-            boolean showHalfHeart = (charHealth % 50) > 0;
+            int currentHp = currentRoom.getCharacterHealth(i);
+            int maxHp = currentRoom.getCharacterMaxHealth(i);
+            
+            // Calculate total heart slots using Math.ceil in case maxHp isn't an exact multiple of 50.
+            int totalHearts = (int) Math.ceil(maxHp / 50.0);
+            int fullHearts = currentHp / 50;
+            boolean hasHalfHeart = (currentHp % 50) > 0;
+            int emptyHearts = totalHearts - fullHearts - (hasHalfHeart ? 1 : 0);
             
             double leftOffsetInches = i * 2;   // horizontal offset for each character
 
@@ -565,9 +569,13 @@ public class GameEngine
             for (int h = 0; h < fullHearts; h++) {
                 sb.append("<img src='images/heart.png' alt='heart' style='width:0.25in; height:auto; display:inline-block;'/>");
             }
-            // Append a half heart if needed
-            if (showHalfHeart) {
+            // Append half heart if applicable
+            if (hasHalfHeart) {
                 sb.append("<img src='images/halfheart.png' alt='half heart' style='width:0.25in; height:auto; display:inline-block;'/>");
+            }
+            // Append empty hearts for the remaining slots
+            for (int h = 0; h < emptyHearts; h++) {
+                sb.append("<img src='images/emptyheart.png' alt='empty heart' style='width:0.25in; height:auto; display:inline-block;'/>");
             }
             sb.append("</div>");
             
