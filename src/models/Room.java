@@ -184,6 +184,41 @@ public class Room
 		}
 	}
 	
+	public String talkToNPC(int NPCnum)
+	{
+		Character character = characterContainer.get(NPCnum);
+		NPC npc = (NPC)character;
+		return npc.getMessage();
+	}
+	
+	public String[] getNPCResponseOptions(int NPCnum)
+	{
+		Character character = characterContainer.get(NPCnum);
+		NPC npc = (NPC)character;
+		return npc.getResponseOptions();
+	}
+	
+	public String interactWithNPC(String choice, int NPCnum)
+	{
+		Character character = characterContainer.get(NPCnum);
+		NPC npc = (NPC)character;
+		String message = npc.interact(choice);
+		if (npc.isCurrentNodeToAggressive())
+		{
+			npc.setAgression(true);
+			message += "\n" + npc.getName() + " is now aggressive!";
+		}
+		if (npc.isCurrentNodeDropItem())
+		{
+			int itemNum = npc.getItemToDrop();
+			Item item = npc.getItem(itemNum);
+			this.inventory.addItem(item);
+			npc.removeItem(itemNum);
+			message += "\n" + npc.getName() + " dropped" + item.getName();
+		}
+		return message;
+	}
+	
 	public void setDescription(String longdescription, String shortdescription) {
 		this.longdescription = longdescription;
 		this.shortdescription = shortdescription;

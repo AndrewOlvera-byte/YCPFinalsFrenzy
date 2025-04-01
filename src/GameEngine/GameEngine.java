@@ -15,6 +15,8 @@ import models.NPC;
 import models.Response;
 import models.Weapon;
 import models.GameInputHandler;
+import models.ConversationTree;
+import models.ConversationNode;
 
 
 public class GameEngine
@@ -65,6 +67,7 @@ public class GameEngine
         connections1.setConnection("East", null);
         connections1.setConnection("South", null);
         connections1.setConnection("West", null);
+        connections1.setConnection("Shuttle", 2);
         ArrayList<models.Character> characterContainer1 = new ArrayList<>();
         Room newRoom1 = new Room(roomName1, inventory1, connections1, characterContainer1, "You glance around the lobby of the manor south floor", "you glance around room 1");
         this.rooms.add(newRoom1);
@@ -102,6 +105,7 @@ public class GameEngine
         connections3.setConnection("East", null);
         connections3.setConnection("South", null);
         connections3.setConnection("West", 1);
+        connections3.setConnection("Shuttle", 3);
         
         ArrayList<Item> itemContainerFriend = new ArrayList<>();
         String[] componentsFriend = {};
@@ -110,24 +114,43 @@ public class GameEngine
         Inventory inventoryFriend = new Inventory(itemContainerFriend, 300);
         ArrayList<models.Character> characterContainer3 = new ArrayList<>();
         NPC Friend = new NPC("Curly", 400, false, null, 5,inventoryFriend, "Heard he was named that because of his curly hair", "It's Curly!");
+        
+        ConversationNode root = new ConversationNode("What's up!");
+        
+        ConversationNode good = new ConversationNode("A paint brush check this out!");
+        good.setDropItem(true);
+        good.setItemToDrop(0);
+        
+        ConversationNode bad = new ConversationNode("I thought we were friends!");
+        bad.setBecomeAggressive(true);
+        
+        ConversationTree conversationTree = new ConversationTree(root);
+        root.addResponse("1.Hey Curly, what's that you got?", good);
+        root.addResponse("2.AHHHH [Attack]", bad);
+
+        
+        Friend.addConversationTree(conversationTree);
 		characterContainer3.add(Friend);
         // Room three requires the "gold key"
         Room newRoom3 = new Room(roomName3, inventory3, connections3, characterContainer3, "gold key", "You glance around the inside of the Student lobby", "You glance around room 3");
         this.rooms.add(newRoom3);
+        
+        //Room Four: To Show off Shuttle
+        String roomName4 = "Fourth Room";
+        ArrayList<Item> itemContainer4 = new ArrayList<>();
+        Inventory inventory4 = new Inventory(itemContainer4, 300);
+        Connections connection4 = new Connections();
+        connection4.setConnection("North", null);
+        connection4.setConnection("East", null);
+        connection4.setConnection("South", null);
+        connection4.setConnection("West", null);
+        connection4.setConnection("Shuttle", 0);
+        
+        ArrayList<models.Character> characterContainer4 = new ArrayList<>();
+        Room newRoom4 = new Room(roomName4, inventory4, connection4, characterContainer4, "You glance around West Campus", "You glance around room 4");
+        this.rooms.add(newRoom4);
     }
     
-    // loading of player data
-    public void loadPlayer()
-    {
-        String[] components = {};
-        Weapon weaponPlayer = new Weapon(20, 30, "Dagger", components, 40, "Trusty dagger hidden in your back pocket", "A dagger");
-        ArrayList<Item> itemContainer = new ArrayList<>();
-        itemContainer.add(weaponPlayer);
-        String playerName = "Cooper";
-        Inventory inventory = new Inventory(itemContainer, 30);
-        Player newPlayer = new Player(playerName, 200, 0, inventory, "This is You!", "You");
-        this.player = newPlayer;
-    }
     
     // updates currentRoom to returned int if room is available, and returns true if updated; false otherwise
     public String updateCurrentRoom(String direction) {
@@ -158,6 +181,23 @@ public class GameEngine
     
 
 	
+	
+	// loading of player data
+	public void loadPlayer()
+	{
+		String[] components = {};
+		Weapon weaponPlayer = new Weapon(20, 30, "Dagger", components, 40, "Trusty dagger hidden in your back pocket", "A dagger");
+		ArrayList<Item> itemContainer = new ArrayList<>();
+		itemContainer.add(weaponPlayer);
+		String playerName = "Cooper";
+		Inventory inventory = new Inventory(itemContainer, 30);
+		Player newPlayer = new Player(playerName, 200, 0, inventory, "This is You!", "You",1);
+		this.player = newPlayer;
+	}
+	
+	// updates currentRoom to returned int if room is available, and returns true (that the room was updated) and returns false if it isn't reachable, for the response to the user
+
+	
 	public int getMapOutput(String direction)
 	{
 		Room currentRoom = rooms.get(currentRoomNum);
@@ -179,7 +219,8 @@ public class GameEngine
 			return "\nAttack with what?";
 		}
 		Room currentRoom = rooms.get(currentRoomNum);
-		int attackDmg = player.getAttackDmg(itemNum);//Needed
+		int damageMulti = player.getdamageMulti();
+		int attackDmg = player.getAttackDmg(itemNum)*damageMulti;//Needed
 		int charHealth = currentRoom.getCharacterHealth(characterNum);
 		int newHealth = charHealth - attackDmg;
 		
@@ -219,7 +260,6 @@ public class GameEngine
 		Room currentRoom = rooms.get(currentRoomNum);
 		int attackDmg = currentRoom.getCharacterAttackDmg(characterNum, itemNum);
 		int playerHealth = player.getHp();
-		int newHealth = playerHealth - attackDmg;
 
 		if (aggressive == true) {
 			player.setHp(playerHealth - attackDmg);
@@ -317,7 +357,6 @@ public class GameEngine
 	{
 		String message = "";
 		int itemNum = CharItemNameToID(noun);
-		message = examineItemName(itemNum);
 		int charNum = CharNameToID(noun);
 		if(noun.toLowerCase().equals("room")) {
 			message = "\n"+rooms.get(currentRoomNum).getRoomDescription();
@@ -428,6 +467,7 @@ public class GameEngine
 		int outputEast = getMapOutput("East");
 		int outputSouth = getMapOutput("South");
 		int outputWest = getMapOutput("West");
+		int outputShuttle = getMapOutput("Shuttle");
 		
 		if (outputNorth == -1)
 		{
@@ -468,6 +508,16 @@ public class GameEngine
 			roomConnectionOutput += "West : " + getRoomName(sum) + "\n";
 		}
 		
+		if(outputShuttle == -1) 
+		{
+			roomConnectionOutput += "Shuttle : None\n";
+		}
+		else
+		{
+			int sum = outputShuttle;
+			roomConnectionOutput += "Shuttle : " +getRoomName(sum) + "\n";
+		}
+		
 		return roomConnectionOutput;
 		
 	}
@@ -502,13 +552,23 @@ public class GameEngine
 	}
 
 	
-	public String getHelp(String verb) 
+	public String getOnShuttle() {
+		String direction = "Shuttle";
+		String newMessage = updateCurrentRoom(direction);
+		
+		runningMessage += newMessage;
+		
+		return newMessage;
+	}
+	
+	public String getHelp() 
 	{
 		String message ="\ntake, get, grab, pickup are for picking up an item (ex. (get|grab|pickup) sword)\n";
 		message += "\ndrop is to drop an item (ex. drop dagger)\n";
 		message += "\nattack, swing, slash, hit, strike are for attacking an enemy (ex. (attack|swing|slash|hit|strike) moe with trident)\n";
 		message += "\ngo, move, walk are for moving in a direction (ex. (walk|move) north)\n";
-		message += "\nexamine, look are for looking at the description of an item (ex. (examine|look) dagger)";
+		message += "\nexamine and look are for looking at the description of an item (ex. (examine|look) dagger)\n";
+		message += "\nshuttle is the same as movement but for longer distances (ex. shuttle | drive) ";
 		return message;
 	}
 
@@ -522,6 +582,29 @@ public class GameEngine
     public void appendMessage(String message) { 
         this.runningMessage += message;
     }
+    
+    public String talkToNPC(int characterNum)
+    {
+    	Room currentRoom = rooms.get(currentRoomNum);
+    	return currentRoom.talkToNPC(characterNum);
+    }
+    
+    public String[] getResponseOptions(int characterNum)
+    {
+    	Room currentRoom = rooms.get(currentRoomNum);
+    	return currentRoom.getNPCResponseOptions(characterNum);
+    }
+    
+    public String interactWithNPC(String choice, int characterNum)
+    {
+    	Room currentRoom = rooms.get(currentRoomNum);
+    	return currentRoom.interactWithNPC(choice, characterNum);
+    }
+    
+    public boolean reachedFinalNode()
+    {
+    	return true;
+    }
 	
     public String getCurrentRoomImage() {
 	    String roomName = getCurrentRoomName();
@@ -532,6 +615,8 @@ public class GameEngine
 	            return "images/firstRoom.jpg";
 	        case "Third Room":
 	            return "images/firstRoom.jpg";
+	        case "Fourth Room":
+	        	return "images/firstRoom.jpg";
 	        default:
 	            return "images/default.jpg";
 	    }
