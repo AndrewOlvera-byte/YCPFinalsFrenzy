@@ -9,12 +9,17 @@ public class GameInputHandler {
     private GameEngine gameEngine;
 
     private static final Set<String> VALID_VERBS = new HashSet<>(Arrays.asList(
-        "pickup", "drop", "use", "get", "grab", "take", "examine", "go", "move", "walk", "talk", "attack", "swing", "slash", "strike", "hit", "look", "help"
+        "pickup", "drop", "use", "get", "grab", "take", "examine", "go", "move", "walk", "talk", "attack", "swing", "slash", "strike", "hit", "look", "help", "respond"
     ));
 
     private static final Set<String> PREPOSITIONS = new HashSet<>(Arrays.asList(
         "on", "with", "at", "in", "to"
     ));
+    
+    private boolean conversationInitiated = false;
+    private String firstOption = "";
+    private String secondOption = "";
+    private String currentCharName = "";
 
     public GameInputHandler(GameEngine gameEngine) {
         this.gameEngine = gameEngine;
@@ -30,6 +35,8 @@ public class GameInputHandler {
             gameEngine.appendMessage("\nInvalid command.");
             return false;
         }
+        
+        gameEngine.appendMessage("\n" + input);
 
         switch (verb.toLowerCase()) {
             case "take":
@@ -59,6 +66,46 @@ public class GameInputHandler {
             	break;
             case "help":
             	gameEngine.appendMessage(gameEngine.getHelp(verb.toLowerCase()));
+            	break;
+            case "talk":
+            	this.conversationInitiated = true;
+            	this.currentCharName = noun;
+            	gameEngine.appendMessage("\n"+gameEngine.talkToNPC(gameEngine.CharNameToID(currentCharName)));
+            	String[] stringArr = gameEngine.getResponseOptions(gameEngine.CharNameToID(currentCharName));
+            	firstOption = stringArr[1];
+            	secondOption = stringArr[0];
+            	gameEngine.appendMessage("\nResponse Options:\n" + firstOption + "\n" + secondOption);
+            	break;
+            case "respond":
+            	if (conversationInitiated) {
+	            	if (noun.equals("1"))
+	            	{
+	            		gameEngine.appendMessage("\n" + gameEngine.interactWithNPC(firstOption, gameEngine.CharNameToID(currentCharName)));
+	            		
+	            		if (!gameEngine.reachedFinalNode()) 
+	            		{
+	            		String[] stringArrResp = gameEngine.getResponseOptions(gameEngine.CharNameToID(currentCharName));
+	                	firstOption = stringArrResp[1];
+	                	secondOption = stringArrResp[0];
+	                	gameEngine.appendMessage("\nResponse Options:\n" + firstOption + "\n" + secondOption);
+	            		}
+	            	}
+	            	if (noun.equals("2"))
+	            	{
+	            		gameEngine.appendMessage("\n" + gameEngine.interactWithNPC(secondOption, gameEngine.CharNameToID(currentCharName)));
+	            		
+	            		if (!gameEngine.reachedFinalNode()) 
+	            		{
+	            		String[] stringArrResp = gameEngine.getResponseOptions(gameEngine.CharNameToID(currentCharName));
+	                	firstOption = stringArrResp[1];
+	                	secondOption = stringArrResp[0];
+	                	gameEngine.appendMessage("\nResponse Options:\n" + firstOption + "\n" + secondOption);
+	            		}
+	            		else
+	            			conversationInitiated = false;
+	            			currentCharName = "";
+	            	}
+            	}
             	break;
             default:
                 gameEngine.appendMessage("\nCommand not implemented.");

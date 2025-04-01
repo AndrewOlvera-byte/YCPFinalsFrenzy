@@ -15,6 +15,8 @@ import models.NPC;
 import models.Response;
 import models.Weapon;
 import models.GameInputHandler;
+import models.ConversationTree;
+import models.ConversationNode;
 
 
 public class GameEngine
@@ -110,6 +112,22 @@ public class GameEngine
         Inventory inventoryFriend = new Inventory(itemContainerFriend, 300);
         ArrayList<models.Character> characterContainer3 = new ArrayList<>();
         NPC Friend = new NPC("Curly", 400, false, null, 5,inventoryFriend, "Heard he was named that because of his curly hair", "It's Curly!");
+        
+        ConversationNode root = new ConversationNode("What's up!");
+        
+        ConversationNode good = new ConversationNode("A paint brush check this out!");
+        good.setDropItem(true);
+        good.setItemToDrop(0);
+        
+        ConversationNode bad = new ConversationNode("I thought we were friends!");
+        bad.setBecomeAggressive(true);
+        
+        ConversationTree conversationTree = new ConversationTree(root);
+        root.addResponse("1.Hey Curly, what's that you got?", good);
+        root.addResponse("2.AHHHH [Attack]", bad);
+
+        
+        Friend.addConversationTree(conversationTree);
 		characterContainer3.add(Friend);
         // Room three requires the "gold key"
         Room newRoom3 = new Room(roomName3, inventory3, connections3, characterContainer3, "gold key", "You glance around the inside of the Student lobby", "You glance around room 3");
@@ -528,6 +546,29 @@ public class GameEngine
     
     public void appendMessage(String message) { 
         this.runningMessage += message;
+    }
+    
+    public String talkToNPC(int characterNum)
+    {
+    	Room currentRoom = rooms.get(currentRoomNum);
+    	return currentRoom.talkToNPC(characterNum);
+    }
+    
+    public String[] getResponseOptions(int characterNum)
+    {
+    	Room currentRoom = rooms.get(currentRoomNum);
+    	return currentRoom.getNPCResponseOptions(characterNum);
+    }
+    
+    public String interactWithNPC(String choice, int characterNum)
+    {
+    	Room currentRoom = rooms.get(currentRoomNum);
+    	return currentRoom.interactWithNPC(choice, characterNum);
+    }
+    
+    public boolean reachedFinalNode()
+    {
+    	return true;
     }
 	
     public String getCurrentRoomImage() {
