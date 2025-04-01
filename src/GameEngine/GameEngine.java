@@ -157,6 +157,35 @@ public class GameEngine
     }
     
 
+	}
+	
+	// loading of player data
+	public void loadPlayer()
+	{
+		String[] components = {};
+		Weapon weaponPlayer = new Weapon(20, 30, "Dagger", components, 40, "Trusty dagger hidden in your back pocket", "A dagger");
+		ArrayList<Item> itemContainer = new ArrayList<>();
+		itemContainer.add(weaponPlayer);
+		String playerName = "Cooper";
+		Inventory inventory = new Inventory(itemContainer, 30);
+		Player newPlayer = new Player(playerName, 200, 0, inventory, "This is You!", "You",1);
+		this.player = newPlayer;
+	}
+	
+	// updates currentRoom to returned int if room is available, and returns true (that the room was updated) and returns false if it isn't reachable, for the response to the user
+	public Boolean updateCurrentRoom(String direction)
+	{
+		Room currentRoom = rooms.get(currentRoomNum);
+		int newRoomNum = currentRoom.getConnectedRoom(direction);
+		if(newRoomNum != -1)
+		{
+			this.currentRoomNum = newRoomNum;
+			String roomName = getCurrentRoomName();
+			this.runningMessage += "\nYou have entered " + roomName + "!\t";
+			return true;
+		}
+		return false;
+	}
 	
 	public int getMapOutput(String direction)
 	{
@@ -179,7 +208,8 @@ public class GameEngine
 			return "\nAttack with what?";
 		}
 		Room currentRoom = rooms.get(currentRoomNum);
-		int attackDmg = player.getAttackDmg(itemNum);//Needed
+		int damageMulti = player.getdamageMulti();
+		int attackDmg = player.getAttackDmg(itemNum)*damageMulti;//Needed
 		int charHealth = currentRoom.getCharacterHealth(characterNum);
 		int newHealth = charHealth - attackDmg;
 		
@@ -219,7 +249,6 @@ public class GameEngine
 		Room currentRoom = rooms.get(currentRoomNum);
 		int attackDmg = currentRoom.getCharacterAttackDmg(characterNum, itemNum);
 		int playerHealth = player.getHp();
-		int newHealth = playerHealth - attackDmg;
 
 		if (aggressive == true) {
 			player.setHp(playerHealth - attackDmg);
