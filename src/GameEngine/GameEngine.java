@@ -339,7 +339,6 @@ public class GameEngine
 	{
 		String message = "";
 		int itemNum = CharItemNameToID(noun);
-		message = examineItemName(itemNum);
 		int charNum = CharNameToID(noun);
 		if(noun.toLowerCase().equals("room")) {
 			message = "\n"+rooms.get(currentRoomNum).getRoomDescription();
