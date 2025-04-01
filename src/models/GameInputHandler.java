@@ -9,7 +9,8 @@ public class GameInputHandler {
     private GameEngine gameEngine;
 
     private static final Set<String> VALID_VERBS = new HashSet<>(Arrays.asList(
-        "pickup", "drop", "use", "get", "grab", "take", "examine", "go", "move", "walk", "talk", "attack", "swing", "slash", "strike", "hit", "look", "help", "respond"
+        "pickup", "drop", "use", "get", "grab", "take", "examine", "go", "move", "walk", "talk", "attack", "swing", "slash", "strike", "hit", "look", "help"
+        , "shuttle", "drive", "respond"
     ));
 
     private static final Set<String> PREPOSITIONS = new HashSet<>(Arrays.asList(
@@ -65,7 +66,11 @@ public class GameInputHandler {
             	gameEngine.appendMessage(gameEngine.getExamine(noun));
             	break;
             case "help":
-            	gameEngine.appendMessage(gameEngine.getHelp(verb.toLowerCase()));
+            	gameEngine.appendMessage(gameEngine.getHelp());
+            	break;
+            case "shuttle":
+            case "drive":
+            	gameEngine.getOnShuttle();
             	break;
             case "talk":
             	this.conversationInitiated = true;

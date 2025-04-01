@@ -67,6 +67,7 @@ public class GameEngine
         connections1.setConnection("East", null);
         connections1.setConnection("South", null);
         connections1.setConnection("West", null);
+        connections1.setConnection("Shuttle", 2);
         ArrayList<models.Character> characterContainer1 = new ArrayList<>();
         Room newRoom1 = new Room(roomName1, inventory1, connections1, characterContainer1, "You glance around the lobby of the manor south floor", "you glance around room 1");
         this.rooms.add(newRoom1);
@@ -104,6 +105,7 @@ public class GameEngine
         connections3.setConnection("East", null);
         connections3.setConnection("South", null);
         connections3.setConnection("West", 1);
+        connections3.setConnection("Shuttle", 3);
         
         ArrayList<Item> itemContainerFriend = new ArrayList<>();
         String[] componentsFriend = {};
@@ -132,10 +134,23 @@ public class GameEngine
         // Room three requires the "gold key"
         Room newRoom3 = new Room(roomName3, inventory3, connections3, characterContainer3, "gold key", "You glance around the inside of the Student lobby", "You glance around room 3");
         this.rooms.add(newRoom3);
+        
+        //Room Four: To Show off Shuttle
+        String roomName4 = "Fourth Room";
+        ArrayList<Item> itemContainer4 = new ArrayList<>();
+        Inventory inventory4 = new Inventory(itemContainer4, 300);
+        Connections connection4 = new Connections();
+        connection4.setConnection("North", null);
+        connection4.setConnection("East", null);
+        connection4.setConnection("South", null);
+        connection4.setConnection("West", null);
+        connection4.setConnection("Shuttle", 0);
+        
+        ArrayList<models.Character> characterContainer4 = new ArrayList<>();
+        Room newRoom4 = new Room(roomName4, inventory4, connection4, characterContainer4, "You glance around West Campus", "You glance around room 4");
+        this.rooms.add(newRoom4);
     }
     
-    // loading of player data
-
     
     // updates currentRoom to returned int if room is available, and returns true if updated; false otherwise
     public String updateCurrentRoom(String direction) {
@@ -342,7 +357,6 @@ public class GameEngine
 	{
 		String message = "";
 		int itemNum = CharItemNameToID(noun);
-		message = examineItemName(itemNum);
 		int charNum = CharNameToID(noun);
 		if(noun.toLowerCase().equals("room")) {
 			message = "\n"+rooms.get(currentRoomNum).getRoomDescription();
@@ -453,6 +467,7 @@ public class GameEngine
 		int outputEast = getMapOutput("East");
 		int outputSouth = getMapOutput("South");
 		int outputWest = getMapOutput("West");
+		int outputShuttle = getMapOutput("Shuttle");
 		
 		if (outputNorth == -1)
 		{
@@ -493,6 +508,16 @@ public class GameEngine
 			roomConnectionOutput += "West : " + getRoomName(sum) + "\n";
 		}
 		
+		if(outputShuttle == -1) 
+		{
+			roomConnectionOutput += "Shuttle : None\n";
+		}
+		else
+		{
+			int sum = outputShuttle;
+			roomConnectionOutput += "Shuttle : " +getRoomName(sum) + "\n";
+		}
+		
 		return roomConnectionOutput;
 		
 	}
@@ -527,13 +552,23 @@ public class GameEngine
 	}
 
 	
-	public String getHelp(String verb) 
+	public String getOnShuttle() {
+		String direction = "Shuttle";
+		String newMessage = updateCurrentRoom(direction);
+		
+		runningMessage += newMessage;
+		
+		return newMessage;
+	}
+	
+	public String getHelp() 
 	{
 		String message ="\ntake, get, grab, pickup are for picking up an item (ex. (get|grab|pickup) sword)\n";
 		message += "\ndrop is to drop an item (ex. drop dagger)\n";
 		message += "\nattack, swing, slash, hit, strike are for attacking an enemy (ex. (attack|swing|slash|hit|strike) moe with trident)\n";
 		message += "\ngo, move, walk are for moving in a direction (ex. (walk|move) north)\n";
-		message += "\nexamine, look are for looking at the description of an item (ex. (examine|look) dagger)";
+		message += "\nexamine and look are for looking at the description of an item (ex. (examine|look) dagger)\n";
+		message += "\nshuttle is the same as movement but for longer distances (ex. shuttle | drive) ";
 		return message;
 	}
 
@@ -580,6 +615,8 @@ public class GameEngine
 	            return "images/firstRoom.jpg";
 	        case "Third Room":
 	            return "images/firstRoom.jpg";
+	        case "Fourth Room":
+	        	return "images/firstRoom.jpg";
 	        default:
 	            return "images/default.jpg";
 	    }
