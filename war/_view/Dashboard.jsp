@@ -103,12 +103,17 @@
 		</div>
     </div>
 
-    <!-- JavaScript to scroll the container to the bottom on page load -->
+    <!-- JavaScript to scroll the container to the bottom on page load and focus the input -->
     <script type="text/javascript">
         window.onload = function() {
             var container = document.querySelector('.scrollable-container');
             if (container) {
                 container.scrollTop = container.scrollHeight;
+            }
+            // Set focus on the input field after the page loads
+            var inputField = document.querySelector('input[name="input"]');
+            if (inputField) {
+                inputField.focus();
             }
         };
     </script>
