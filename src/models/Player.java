@@ -2,9 +2,9 @@ package models;
 
 public class Player extends Character {
    private int skillPoints;
-   private int damageMulti;
+   private double damageMulti;
    // private Room location;
-   public Player(String name, int hp, int skillPoints, Inventory inventory, String longdescription, String shortdescription,int damageMulti) {
+   public Player(String name, int hp, int skillPoints, Inventory inventory, String longdescription, String shortdescription,double damageMulti) {
        super(name, hp, inventory, longdescription, shortdescription);
        this.skillPoints = skillPoints;
        this.damageMulti = damageMulti;
@@ -14,11 +14,11 @@ public class Player extends Character {
        // Implement movement logic based on Room class
    }
    
-   public int getdamageMulti() {
+   public double getdamageMulti() {
 		return damageMulti;
 	}
 	
-	public void setdamageMulti(int damageMulti) {
+	public void setdamageMulti(double damageMulti) {
 		this.damageMulti = damageMulti;
 	}
     

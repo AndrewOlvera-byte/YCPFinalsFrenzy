@@ -6,6 +6,7 @@ import java.util.Random;
 import java.util.HashMap;
 
 import models.Room;
+import models.Utility;
 import models.Player;
 import models.Character;
 import models.Connections;
@@ -61,6 +62,10 @@ public class GameEngine
         Weapon weapon1 = new Weapon(20, 30, "Sword", components, 80, "A rusty starter sword good for early combat", "A sword");
         ArrayList<Item> itemContainer1 = new ArrayList<>();
         itemContainer1.add(weapon1);
+        Utility potion1 = new Utility(10, 1, "Potion", null, "This Potion heals 40 Damage", "+40 Health",40,0);
+        itemContainer1.add(potion1);
+        Utility potion2 = new Utility(10, 1, "Damage Up", null, "This Potion Multiplies Damage By 1.2", "*1.2 Damage",0,1.2);
+        itemContainer1.add(potion2);
         Inventory inventory1 = new Inventory(itemContainer1, 300);
         Connections connections1 = new Connections();
         connections1.setConnection("North", 1);
@@ -221,10 +226,10 @@ public class GameEngine
 			return "\nAttack with what?";
 		}
 		Room currentRoom = rooms.get(currentRoomNum);
-		int damageMulti = player.getdamageMulti();
-		int attackDmg = player.getAttackDmg(itemNum)*damageMulti;//Needed
+		double damageMulti = player.getdamageMulti();
+		double attackDmg = player.getAttackDmg(itemNum)*damageMulti;//Needed
 		int charHealth = currentRoom.getCharacterHealth(characterNum);
-		int newHealth = charHealth - attackDmg;
+		double newHealth = charHealth - attackDmg;
 		
 		boolean aggressive = currentRoom.isCharAgressive(characterNum);
 		
@@ -552,7 +557,30 @@ public class GameEngine
 	    // Return only the new message (so you don't repeat the entire history).
 	    return newMessage;
 	}
-
+	public String usePotion(int itemNum) {
+		if (itemNum == -1) 
+		{
+			return "\nUse what?";
+		}
+		
+		if (itemNum < 0 || itemNum >= player.getInventorySize()) {
+	        return "\nInvalid item selection.";
+	    }
+		
+		Item InvenItem = player.getItem(itemNum);
+		
+		double Multi = ((Utility) InvenItem).getDamageMulti();
+		int Healing = ((Utility) InvenItem).getHealing();
+		int newHp = player.getHp() + Healing;
+		
+		player.setdamageMulti(Multi);
+		player.setHp(newHp);
+		player.removeItem(itemNum);
+		
+		return "\n" + InvenItem.getName() + " was used.";
+		
+	}
+		
 	
 	public String getOnShuttle() {
 		String newMessage = "";
