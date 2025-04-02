@@ -168,6 +168,10 @@ public class Room
         return this.requiredKey;
     }
     
+    public void setRequiredKey(String key) {
+    	this.requiredKey = key;
+    }
+    
     // NEW: Getter for a character's maximum health.
     // Assumes the Character class has a getMaxHp() method.
     public int getCharacterMaxHealth(int index) {
