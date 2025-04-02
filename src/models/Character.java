@@ -37,8 +37,8 @@ public class Character {
        return hp;
    }
    
-   public void setHp(int hp) {
-       this.hp = hp;
+   public void setHp(double newHealth) {
+       this.hp = (int) newHealth;
    }
    
    public int getMaxHp() {     // New getter for max health

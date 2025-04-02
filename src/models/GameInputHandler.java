@@ -10,7 +10,7 @@ public class GameInputHandler {
 
     private static final Set<String> VALID_VERBS = new HashSet<>(Arrays.asList(
         "pickup", "drop", "use", "get", "grab", "take", "examine", "go", "move", "walk", "talk", "attack", "swing", "slash", "strike", "hit", "look", "help"
-        , "shuttle", "drive", "respond"
+        , "shuttle", "drive", "respond","apply","drink"
     ));
 
     private static final Set<String> PREPOSITIONS = new HashSet<>(Arrays.asList(
@@ -72,6 +72,13 @@ public class GameInputHandler {
             case "drive":
             	gameEngine.getOnShuttle();
             	break;
+            case "apply":
+            case "drink":
+            	gameEngine.appendMessage(gameEngine.usePotion(gameEngine.CharItemNameToID(noun)));
+            	
+            	
+            	
+            break;
             case "talk":
             	this.conversationInitiated = true;
             	this.currentCharName = noun;
