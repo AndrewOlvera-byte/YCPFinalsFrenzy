@@ -5,23 +5,64 @@
 <head>
     <title>YCP Finals Frenzy</title>
     <style type="text/css">
-        td.label { text-align: right; }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #d0d0d0; /* Darker gray background */
+            font-family: Arial, sans-serif;
+        }
+        
+        .header-bar {
+            background-color: #2e8b57; /* Green header */
+            color: white;
+            height: 40px;            /* Fixed header height */
+            padding: 0 20px;         /* Only horizontal padding */
+            box-shadow: 0 0 20px rgba(46, 139, 87, 0.8); /* Lighting effect from header */
+            position: relative;      /* For absolute positioning of the logo */
+        }
+        
+        /* Style for the larger, centered logo */
+        .header-bar .logo {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            height: 90px; /* Adjust if needed */
+            width: auto;
+        }
+        
+        .content {
+            padding: 20px;
+        }
+        
+        td.label { 
+            text-align: right; 
+            font-size: 16px;
+        }
+        
         .error { color: red; }
         
+        /* Updated formatting for printed output */
         .formatted {
             white-space: pre-wrap;
+            font-size: 12px; /* Reduced font size */
+            text-align: left;
+            padding: 5px; /* Reduced padding */
+            margin-bottom: 5px; /* Reduced margin */
         }
         
         .scrollable-container {
-            width: 400px;
-            height: 300px;
+            width: 315px;
+            height: 150px;
             overflow: auto;
-            background-color: #f0f0f0;
-            border-radius: 8px;
-            padding: 10px;
+            background-color: #b0b0b0;
+            border-radius: 10px;
+            padding: 15px;
             white-space: pre-wrap;
-            border: 1px solid #ccc;
-            text-align: center;
+            border: 1px solid #999;
+            text-align: left;
+            font-size: 16px;
+            margin-bottom: 10px;
         }
         
         /* Flex container for side-by-side layout */
@@ -58,49 +99,91 @@
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
             z-index: 10;
         }
+        
+        /* Input container style */
+        .input-container {
+            width: 315px;
+            padding: 15px;
+            background-color: #b0b0b0; /* Darker gray for container */
+            border-radius: 10px;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        /* Style for the input field */
+        .input-field {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #999;
+            border-radius: 5px;
+            box-sizing: border-box;
+            margin-right: 10px;
+            transition: box-shadow 0.3s ease;
+        }
+        
+        /* Hover and focus effect for the input field */
+        .input-field:hover,
+        .input-field:focus {
+            box-shadow: 0 0 10px rgba(46, 139, 87, 0.8);
+            outline: none;
+        }
+        
+        /* Style for the submit button */
+        .submit-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #2e8b57;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .submit-button:hover {
+            background-color: #3c9d6a;
+        }
     </style>
 </head>
 <body>
-    <h1>YCP Finals Frenzy</h1>
+    <div class="header-bar">
+        <!-- Logo added with a class for styling -->
+        <img class="logo" src="${pageContext.request.contextPath}/images/Logo.png" alt="YCP Finals Frenzy Logo">
+    </div>
     
-    <!-- Flex container: Game info on the left, image with overlay on the right -->
-    <div class="dashboard-container">
-        <!-- Main content: Game state information on the left -->
-        <div class="main-content">
-            <div id="initialDisplay">
-                <div class="scrollable-container">
-                    ${response.message}
+    <div class="content">
+        <!-- Flex container: Game info on the left, image with overlay on the right -->
+        <div class="dashboard-container">
+            <!-- Main content: Game state information on the left -->
+            <div class="main-content">
+                <div id="initialDisplay">
+                    <div class="scrollable-container">
+                        ${response.message}
+                    </div>
+                    <div class="input-container">
+                        <form action="${pageContext.request.contextPath}/dashboard" method="post" style="display: flex; width: 100%;">
+                            <input type="text" id="input-field" name="input" class="input-field" placeholder="Input" />
+                            <input type="submit" value="Submit" class="submit-button" />
+                        </form>
+                    </div>
+                    <pre class="formatted">${response.roomInventory}</pre>
+                    <pre class="formatted">${response.playerInventory}</pre>
+                    <pre class="formatted">${response.charactersInRoom}</pre>
+                    <pre class="formatted">${response.playerInfo}</pre>
+                    <pre class="formatted">${response.roomConnections}</pre>
                 </div>
-                <pre class="formatted">Room Inventory: ${response.roomInventory}</pre>
-                <pre class="formatted">Player Inventory: ${response.playerInventory}</pre>
-                <pre class="formatted">Characters InRoom: ${response.charactersInRoom}</pre>
-                <pre class="formatted">Player Info: ${response.playerInfo}</pre>
-                <pre class="formatted">Room Connections: ${response.roomConnections}</pre>
             </div>
             
-            <form action="${pageContext.request.contextPath}/dashboard" method="post">
-                <table>
-                    <tr>
-                        <td class="label">Enter Input:</td>
-                        <td><input type="text" name="input" size="12" /></td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <input type="submit" value="Submit" />
-                        </td>
-                    </tr>
-                </table>
-            </form>
+            <!-- Sidebar: Room image with dynamic room number overlay -->
+            <div class="sidebar" style="position: relative;">
+                <img src="${response.roomImage}" alt="Current Room Image" style="width:100%; height:auto;"/>
+                <div class="number-label">${response.roomNumber}</div>
+                <!-- Directly output the overlay HTML for items and characters -->
+                ${response.roomItemsOverlay}
+                ${response.roomCharactersOverlay}
+            </div>
         </div>
-        
-        <!-- Sidebar: Room image with dynamic room number overlay -->
-		<div class="sidebar" style="position: relative;">
-		    <img src="${response.roomImage}" alt="Current Room Image" style="width:100%; height:auto;"/>
-		    <div class="number-label">${response.roomNumber}</div>
-		    <!-- Directly output the overlay HTML for items and characters -->
-		    ${response.roomItemsOverlay}
-		    ${response.roomCharactersOverlay}
-		</div>
     </div>
 
     <!-- JavaScript to scroll the container to the bottom on page load and focus the input -->

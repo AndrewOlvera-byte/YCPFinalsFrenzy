@@ -62,10 +62,10 @@ public class Room
     }
     
     // sets the health of the character (player attacks character)
-    public void setCharacterHealth(int characterNum, int health)
+    public void setCharacterHealth(int characterNum, double newHealth)
     {
         Character currentCharacter = characterContainer.get(characterNum);
-        currentCharacter.setHp(health);
+        currentCharacter.setHp(newHealth);
     }
     
     // returns the attack damage of a character using item itemNum in its inventory (character attacks player)
