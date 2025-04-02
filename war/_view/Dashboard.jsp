@@ -52,7 +52,7 @@
         }
         
         .scrollable-container {
-            width: 50%;
+            width: 315px;
             height: 300px;
             overflow: auto;
             background-color: #b0b0b0;
@@ -102,7 +102,7 @@
         
         /* Input container style */
         .input-container {
-            width: 50%;
+            width: 315px;
             padding: 15px;
             background-color: #b0b0b0; /* Darker gray for container */
             border-radius: 10px;
