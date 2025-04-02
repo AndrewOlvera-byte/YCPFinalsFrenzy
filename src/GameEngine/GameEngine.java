@@ -109,6 +109,8 @@ public class GameEngine
         
         ArrayList<Item> itemContainerFriend = new ArrayList<>();
         String[] componentsFriend = {};
+        Item shuttlePass = new Item(0,1, "Shuttle Pass", new String[] {}, "A pass to ride the shuttle", "A shuttle pass");
+        itemContainer3.add(shuttlePass);
         Weapon weaponFriend = new Weapon(20, 30, "Paint Brush", componentsFriend, 1, "Paint your Enemies??", "A Paint Brush");
         itemContainerFriend.add(weaponFriend);
         Inventory inventoryFriend = new Inventory(itemContainerFriend, 300);
@@ -174,6 +176,7 @@ public class GameEngine
             
             // Allow the room change.
             this.currentRoomNum = newRoomNum;
+            rooms.get(currentRoomNum).setRequiredKey(null);
             return "\nYou have entered " + destination.getRoomName() + "!";
         }
         return "\nThere is no room in this direction";
@@ -553,10 +556,18 @@ public class GameEngine
 
 	
 	public String getOnShuttle() {
-		String direction = "Shuttle";
-		String newMessage = updateCurrentRoom(direction);
+		String newMessage = "";
 		
-		runningMessage += newMessage;
+		if(player.hasKey("Shuttle Pass")) {
+			String direction = "Shuttle";
+			newMessage = updateCurrentRoom(direction);
+			runningMessage += newMessage;
+		}
+		
+		else {
+			newMessage = "\n you do not have the Shuttle Pass";
+			runningMessage += newMessage;
+		}
 		
 		return newMessage;
 	}
@@ -568,7 +579,8 @@ public class GameEngine
 		message += "\nattack, swing, slash, hit, strike are for attacking an enemy (ex. (attack|swing|slash|hit|strike) moe with trident)\n";
 		message += "\ngo, move, walk are for moving in a direction (ex. (walk|move) north)\n";
 		message += "\nexamine and look are for looking at the description of an item (ex. (examine|look) dagger)\n";
-		message += "\nshuttle is the same as movement but for longer distances (ex. shuttle | drive) ";
+		message += "\nshuttle is the same as movement but for longer distances (ex. shuttle | drive)\n";
+		message += "\ntalk is how to interact with valid NPCs. (ex. (talk) curly. Continue conversation with Respond #";
 		return message;
 	}
 
