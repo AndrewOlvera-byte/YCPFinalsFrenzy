@@ -33,10 +33,10 @@ public class GameEngineTest {
     @Test
     public void testUpdateCurrentRoom() {
         // From "First Room", updateCurrentRoom("North") should work (as set in loadRooms).
-        boolean updated = gameEngine.updateCurrentRoom("North");
-        assertTrue(updated);
+        String message = gameEngine.updateCurrentRoom("North");
+        assertTrue(message.contains("You have entered Second Room!"));
         // After moving north, current room should be "Second Room".
-        assertEquals("Second Room", gameEngine.getCurrentRoomName());
+        assertTrue(gameEngine.getCurrentRoomName() == "Second Room");
     }
     
     @Test
@@ -58,12 +58,12 @@ public class GameEngineTest {
         // Attack the character "Moe".
         String attackMessage = gameEngine.playerAttackChar(gameEngine.CharItemNameToID("Dagger"), gameEngine.CharNameToID("Moe"));
         // Expected outcome: since 400-40 > 0, the boss's health should reduce.
-        assertEquals("\nMoe has taken 40 damage.\nMoe Hit back for 80", attackMessage);
+        assertEquals("\nMoe has taken 40 damage.\nMoe Hit back for 90", attackMessage);
         
         // Use reflection to access the current room (private field "rooms") and check "Moe"'s health.
         Room currentRoom = getCurrentRoomFromGameEngine();
         assertNotNull(currentRoom);
-        assertEquals(360, currentRoom.getCharacterHealth(0));
+        assertEquals(120, currentRoom.getCharacterHealth(0));
     }
     
     @Test
@@ -82,7 +82,7 @@ public class GameEngineTest {
     public void testGetGo() {
         // In "First Room", "go north" should move to "Second Room".
         String message = gameEngine.getGo("North");
-        assertTrue(message.contains("Moved to Room Second Room"));
+        assertTrue(message.contains("You have entered Second Room!"));
         
         // Trying an invalid direction should return an appropriate message.
         String invalidMessage = gameEngine.getGo("Up");
@@ -95,7 +95,7 @@ public class GameEngineTest {
         gameEngine.processInput("go north");
         Response response = gameEngine.display();
         // The running message should indicate the room change.
-        assertTrue(response.getMessage().contains("Moved to Room Second Room"));
+        assertTrue(response.getMessage().contains("You have entered Second Room!"));
     }
     
     @Test

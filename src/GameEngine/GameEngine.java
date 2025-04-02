@@ -162,10 +162,6 @@ public class GameEngine
             Room destination = rooms.get(newRoomNum);
             String requiredKey = destination.getRequiredKey();
             
-            // Debug prints (optional)
-            System.out.println("Attempting to enter " + destination.getRoomName() +
-                               " which requires key: " + requiredKey);
-            System.out.println("Player has gold key? " + player.hasKey("gold key"));
             
             // If a key is required, check if the player has it.
             if (requiredKey != null && !requiredKey.isEmpty()) {
