@@ -23,14 +23,13 @@
         
         /* Style for the larger, centered logo */
         .header-bar .logo {
-    		position: absolute;
-    		left: 50%;
-    		top: 50%;
-    		transform: translate(-50%, -50%);
-    		height: 90px; /* Adjust if needed */
-    		width: auto;
-		}
-
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            height: 90px; /* Adjust if needed */
+            width: auto;
+        }
         
         .content {
             padding: 20px;
@@ -43,17 +42,18 @@
         
         .error { color: red; }
         
+        /* Updated formatting for printed output */
         .formatted {
             white-space: pre-wrap;
-            font-size: 16px;
+            font-size: 12px; /* Reduced font size */
             text-align: left;
-            padding: 15px;
-            margin-bottom: 10px;
+            padding: 5px; /* Reduced padding */
+            margin-bottom: 5px; /* Reduced margin */
         }
         
         .scrollable-container {
             width: 315px;
-            height: 300px;
+            height: 150px;
             overflow: auto;
             background-color: #b0b0b0;
             border-radius: 10px;
