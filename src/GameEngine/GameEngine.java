@@ -62,7 +62,7 @@ public class GameEngine
         Weapon weapon1 = new Weapon(20, 30, "Sword", components, 80, "A rusty starter sword good for early combat", "A sword");
         ArrayList<Item> itemContainer1 = new ArrayList<>();
         itemContainer1.add(weapon1);
-        Utility potion1 = new Utility(10, 1, "Potion", null, "This Potion heals 40 Damage", "+40 Health",40,0);
+        Utility potion1 = new Utility(10, 1, "Potion", null, "This Potion heals 40 Damage", "+40 Health",40,1);
         itemContainer1.add(potion1);
         Utility potion2 = new Utility(10, 1, "Damage Up", null, "This Potion Multiplies Damage By 1.2", "*1.2 Damage",0,1.2);
         itemContainer1.add(potion2);
