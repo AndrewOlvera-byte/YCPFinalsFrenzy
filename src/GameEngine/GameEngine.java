@@ -181,6 +181,7 @@ public class GameEngine
             
             // Allow the room change.
             this.currentRoomNum = newRoomNum;
+            rooms.get(currentRoomNum).setRequiredKey(null);
             return "\nYou have entered " + destination.getRoomName() + "!";
         }
         return "\nThere is no room in this direction";
