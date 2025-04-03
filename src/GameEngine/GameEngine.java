@@ -584,8 +584,16 @@ public class GameEngine
 		
 		Item InvenItem = player.getItem(itemNum);
 		
-		double Multi = ((Utility) InvenItem).getDamageMulti();
-		int Healing = ((Utility) InvenItem).getHealing();
+		
+		
+		if (!(InvenItem instanceof Utility)) {
+		    return "<b>\nYou can't drink or apply that!</b>";
+		}
+		
+		Utility potion = (Utility) InvenItem;
+		double Multi = potion.getDamageMulti();
+		int Healing = potion.getHealing();
+
 		int newHp = player.getHp() + Healing;
 		if (Multi != 0) {
 			player.setdamageMulti(Multi);
