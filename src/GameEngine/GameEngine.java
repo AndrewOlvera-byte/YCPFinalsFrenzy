@@ -591,7 +591,7 @@ public class GameEngine
 		player.setHp(newHp);
 		player.removeItem(itemNum);
 		
-		return "\n<b>" + InvenItem.getName() + " was used.</b>";
+		return "\n<b>" + InvenItem.getName() + " was applied.</b>";
 		
 	}
 		

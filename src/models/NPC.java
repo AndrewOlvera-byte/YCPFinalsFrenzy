@@ -40,16 +40,21 @@ public class NPC extends Character {
        return node.getMessage();
    }
    
-   public String getMessage()
-   {
-	   return this.conversationTree.getCurrentNodeMessage();
+   public String getMessage() {
+	    if (conversationTree == null || conversationTree.getCurrentNode() == null) {
+	        return "This character has nothing to say.";
+	    }
+	    return conversationTree.getCurrentNode().getMessage();
+	}
+
+   
+   public String[] getResponseOptions() {
+	    if (conversationTree == null || conversationTree.getCurrentNode() == null) {
+	        return null;
+	    }
+	    return conversationTree.getCurrentNodeResponseOptions();
    }
    
-   public String[] getResponseOptions()
-   {
-	   String[] responses = conversationTree.getCurrentNodeResponseOptions();
-	   return responses;
-   }
    public boolean isCurrentNodeToAggressive()
    {
 	   return this.conversationTree.isCurrentNodeToAggressive();
