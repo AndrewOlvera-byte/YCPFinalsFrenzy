@@ -62,7 +62,7 @@ public class GameEngine
         Weapon weapon1 = new Weapon(20, 30, "Sword", components, 80, "<b>A rusty sword. Doesn't really fit in your bag.</b>", "<b>A sword.</b>");
         ArrayList<Item> itemContainer1 = new ArrayList<>();
         itemContainer1.add(weapon1);
-        Utility potion1 = new Utility(10, 1, "Potion", null, "<b>A red potion that has \"POTION\" written across it. (+40 health)</b>", "<b>+40 Health potion.</b>",40,1);
+        Utility potion1 = new Utility(10, 1, "Potion", null, "<b>A red potion that has \"POTION\" written across it. (+40 health)</b>", "<b>+40 Health potion.</b>",40,0);
         itemContainer1.add(potion1);
         Utility potion2 = new Utility(10, 1, "Damage Up", null, "<b>An orange potion that has \"DAMAGE UP\" written across it. (x1.2 damage)</b>", "<b>x1.2 Damage potion.</b>",0,1.2);
         itemContainer1.add(potion2);
@@ -586,8 +586,9 @@ public class GameEngine
 		double Multi = ((Utility) InvenItem).getDamageMulti();
 		int Healing = ((Utility) InvenItem).getHealing();
 		int newHp = player.getHp() + Healing;
-		
-		player.setdamageMulti(Multi);
+		if (Multi != 0) {
+			player.setdamageMulti(Multi);
+		}
 		player.setHp(newHp);
 		player.removeItem(itemNum);
 		
