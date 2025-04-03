@@ -63,6 +63,7 @@
     		text-align: left;
     		font-size: 16px;
     		margin-bottom: 10px;
+    		line-height: 1.8; 
 		}
 		
         /* Input container style */
@@ -126,7 +127,7 @@
                     $("#playerInfoField").text(data.playerInfo);
                     $("#charactersInRoomField").text(data.charactersInRoom);
                     $("#roomConnectionsField").text(data.roomConnections);
-                    $("#messageField").text(data.message);
+                    $("#messageField").html(data.message);
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     $("#errorField").text("Error: " + textStatus + " - " + errorThrown);

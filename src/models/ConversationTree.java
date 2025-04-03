@@ -46,5 +46,10 @@ public class ConversationTree {
     {
     	return currentNode.getItemToDrop();
     }
+
+	public void selectResponse(String string) {
+		// TODO Auto-generated method stub
+		
+	}
     
 }

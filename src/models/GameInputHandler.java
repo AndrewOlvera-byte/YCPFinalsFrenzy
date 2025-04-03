@@ -33,7 +33,7 @@ public class GameInputHandler {
         String noun2 = parsedInput[3];
 
         if (verb == null || verb.isEmpty() || !VALID_VERBS.contains(verb)) {
-            gameEngine.appendMessage("\nInvalid command.");
+            gameEngine.appendMessage("\n<b>Invalid command.</b>");
             return false;
         }
         
@@ -44,7 +44,11 @@ public class GameInputHandler {
             case "get":
             case "grab":
             case "pickup":
-                gameEngine.appendMessage(gameEngine.pickupItem(gameEngine.RoomItemNameToID(noun)));
+            	if (noun == null || noun.trim().isEmpty()) {
+                    gameEngine.appendMessage("<b>\nYou must specify an item to grab. Try: grab [item name]</b>");
+                } else {
+                    gameEngine.appendMessage(gameEngine.pickupItem(gameEngine.RoomItemNameToID(noun)));
+                }
                 break;
             case "drop":
                 gameEngine.appendMessage(gameEngine.dropItem(gameEngine.CharItemNameToID(noun)));
@@ -54,16 +58,28 @@ public class GameInputHandler {
             case "slash":
             case "hit":
             case "strike":
-                gameEngine.appendMessage(gameEngine.playerAttackChar(gameEngine.CharItemNameToID(noun2), gameEngine.CharNameToID(noun)));
+            	if (noun2 == null || noun2.trim().isEmpty()) {
+                    gameEngine.appendMessage("\n<b>Invalid attack. You must specify a weapon. Try: hit [enemy] with [weapon]</b>");
+                } else {
+                    gameEngine.appendMessage(gameEngine.playerAttackChar(gameEngine.CharItemNameToID(noun2), gameEngine.CharNameToID(noun)));
+                }
                 break;
             case "go":
             case "move":
             case "walk":
+            	if (noun == null || noun.trim().isEmpty()) {
+            	    gameEngine.appendMessage("\n<b>Invalid movement. You must specify a direction. Try: go [north]</b>");
+            	} else {
             	gameEngine.getGo(noun);
+            	}
                 break;
             case "examine":
             case "look":
+            	if (noun == null || noun.trim().isEmpty()) {
+            	    gameEngine.appendMessage("\n<b>Invalid look. You must specify something to look at. Try: look [item] or [room] or [NPC]</b>");
+            	} else {
             	gameEngine.appendMessage(gameEngine.getExamine(noun));
+            	}
             	break;
             case "help":
             	gameEngine.appendMessage(gameEngine.getHelp());
@@ -74,53 +90,85 @@ public class GameInputHandler {
             	break;
             case "apply":
             case "drink":
+            	if (noun == null || noun.trim().isEmpty()) {
+            	    gameEngine.appendMessage("\n<b>Invalid apply. You must specify something apply or drink. Try: apply [potion]</b>");
+            	} else {
             	gameEngine.appendMessage(gameEngine.usePotion(gameEngine.CharItemNameToID(noun)));
-            	
-            	
-            	
+            	}
             break;
             case "talk":
             	this.conversationInitiated = true;
-            	this.currentCharName = noun;
-            	gameEngine.appendMessage("\n"+gameEngine.talkToNPC(gameEngine.CharNameToID(currentCharName)));
-            	String[] stringArr = gameEngine.getResponseOptions(gameEngine.CharNameToID(currentCharName));
-            	firstOption = stringArr[1];
-            	secondOption = stringArr[0];
-            	gameEngine.appendMessage("\nResponse Options:\n" + firstOption + "\n" + secondOption);
+                this.currentCharName = noun;
+
+                int charID = gameEngine.CharNameToID(currentCharName);
+                gameEngine.appendMessage("\n" + gameEngine.talkToNPC(charID));
+
+                String[] stringArr = gameEngine.getResponseOptions(charID);
+
+                if (stringArr == null || stringArr.length < 2) {
+                    firstOption = "";
+                    secondOption = "";
+                    conversationInitiated = false;
+                    gameEngine.appendMessage("\n<b>(No more responses available.)</b>");
+                } else {
+                    firstOption = stringArr[1];
+                    secondOption = stringArr[0];
+                    gameEngine.appendMessage("\n<b>Response Options:\n" + firstOption + "\n" + secondOption + "</b>");
+                }
             	break;
             case "respond":
             	if (conversationInitiated) {
-	            	if (noun.equals("1"))
-	            	{
-	            		gameEngine.appendMessage("\n" + gameEngine.interactWithNPC(firstOption, gameEngine.CharNameToID(currentCharName)));
-	            		
-	            		if (!gameEngine.reachedFinalNode()) 
-	            		{
-	            		String[] stringArrResp = gameEngine.getResponseOptions(gameEngine.CharNameToID(currentCharName));
-	                	firstOption = stringArrResp[1];
-	                	secondOption = stringArrResp[0];
-	                	gameEngine.appendMessage("\nResponse Options:\n" + firstOption + "\n" + secondOption);
-	            		}
-	            	}
-	            	if (noun.equals("2"))
-	            	{
-	            		gameEngine.appendMessage("\n" + gameEngine.interactWithNPC(secondOption, gameEngine.CharNameToID(currentCharName)));
-	            		
-	            		if (!gameEngine.reachedFinalNode()) 
-	            		{
-	            		String[] stringArrResp = gameEngine.getResponseOptions(gameEngine.CharNameToID(currentCharName));
-	                	firstOption = stringArrResp[1];
-	                	secondOption = stringArrResp[0];
-	                	gameEngine.appendMessage("\nResponse Options:\n" + firstOption + "\n" + secondOption);
-	            		}
-	            		else
-	            			conversationInitiated = false;
-	            			currentCharName = "";
-	            	}
-            	}
+                    int charID1 = gameEngine.CharNameToID(currentCharName);
+
+                    if (noun.equals("1") && firstOption != null && !firstOption.isEmpty()) {
+                        gameEngine.appendMessage("\n" + gameEngine.interactWithNPC(firstOption, charID1));
+
+                        if (!gameEngine.reachedFinalNode()) {
+                            String[] stringArrResp = gameEngine.getResponseOptions(charID1);
+                            if (stringArrResp == null || stringArrResp.length < 2) {
+                                conversationInitiated = false;
+                                currentCharName = "";
+                                gameEngine.appendMessage("\n<b>(No further responses. Conversation ended.)</b>");
+                            } else {
+                                firstOption = stringArrResp[1];
+                                secondOption = stringArrResp[0];
+                                gameEngine.appendMessage("<b>\nResponse Options:\n" + firstOption + "\n" + secondOption + "</b>");
+                            }
+                        } else {
+                            conversationInitiated = false;
+                            currentCharName = "";
+                            gameEngine.appendMessage("<b>\n(Conversation complete.)</b>");
+                        }
+
+                    } else if (noun.equals("2") && secondOption != null && !secondOption.isEmpty()) {
+                        gameEngine.appendMessage("\n" + gameEngine.interactWithNPC(secondOption, charID1));
+
+                        if (!gameEngine.reachedFinalNode()) {
+                            String[] stringArrResp = gameEngine.getResponseOptions(charID1);
+                            if (stringArrResp == null || stringArrResp.length < 2) {
+                                conversationInitiated = false;
+                                currentCharName = "";
+                                gameEngine.appendMessage("<b>\n(No further responses. Conversation ended.)</b>");
+                            } else {
+                                firstOption = stringArrResp[1];
+                                secondOption = stringArrResp[0];
+                                gameEngine.appendMessage("<b>\nResponse Options:\n" + firstOption + "\n" + secondOption + "</b>");
+                            }
+                        } else {
+                            conversationInitiated = false;
+                            currentCharName = "";
+                            gameEngine.appendMessage("<b>\n(Conversation complete.)</b>");
+                        }
+
+                    } else {
+                        gameEngine.appendMessage("<b>\nInvalid response option.</b>");
+                    }
+                } else {
+                    gameEngine.appendMessage("<b>\nNo active conversation.</b>");
+                }
             	break;
             default:
-                gameEngine.appendMessage("\nCommand not implemented.");
+                gameEngine.appendMessage("<b>\nCommand not implemented.</b>");
         }
         return true;
     }

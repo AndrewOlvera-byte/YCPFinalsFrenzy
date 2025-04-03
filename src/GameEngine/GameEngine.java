@@ -59,12 +59,12 @@ public class GameEngine
         // Room One: No key required
         String roomName1 = "First Room";
         String[] components = {};
-        Weapon weapon1 = new Weapon(20, 30, "Sword", components, 80, "A rusty starter sword good for early combat", "A sword");
+        Weapon weapon1 = new Weapon(20, 30, "Sword", components, 80, "<b>A rusty sword. Doesn't really fit in your bag.</b>", "<b>A sword.</b>");
         ArrayList<Item> itemContainer1 = new ArrayList<>();
         itemContainer1.add(weapon1);
-        Utility potion1 = new Utility(10, 1, "Potion", null, "This Potion heals 40 Damage", "+40 Health",40,1);
+        Utility potion1 = new Utility(10, 1, "Potion", null, "<b>A red potion that has \"POTION\" written across it. (+40 health)</b>", "<b>+40 Health potion.</b>",40,1);
         itemContainer1.add(potion1);
-        Utility potion2 = new Utility(10, 1, "Damage Up", null, "This Potion Multiplies Damage By 1.2", "*1.2 Damage",0,1.2);
+        Utility potion2 = new Utility(10, 1, "Damage Up", null, "<b>An orange potion that has \"DAMAGE UP\" written across it. (x1.2 damage)</b>", "<b>x1.2 Damage potion.</b>",0,1.2);
         itemContainer1.add(potion2);
         Inventory inventory1 = new Inventory(itemContainer1, 300);
         Connections connections1 = new Connections();
@@ -74,7 +74,7 @@ public class GameEngine
         connections1.setConnection("West", null);
         connections1.setConnection("Shuttle", 2);
         ArrayList<models.Character> characterContainer1 = new ArrayList<>();
-        Room newRoom1 = new Room(roomName1, inventory1, connections1, characterContainer1, "You glance around the lobby of the manor south floor", "you glance around room 1");
+        Room newRoom1 = new Room(roomName1, inventory1, connections1, characterContainer1, "<b>You are standing inside the lobby of Manor South. It smells bad in here.</b>", "<b>You glance around the Manor South Lobby.</b>");
         this.rooms.add(newRoom1);
         
         // Room Two: No key required
@@ -89,16 +89,16 @@ public class GameEngine
         
         ArrayList<Item> itemContainerBoss = new ArrayList<>();
         String[] componentsBoss = {};
-        Weapon weaponBoss = new Weapon(20, 30, "Trident", componentsBoss, 90, "A sharp three pronged weapon", "A Trident");
+        Weapon weaponBoss = new Weapon(20, 30, "Trident", componentsBoss, 90, "<b>A sharp three pronged weapon. You could make like, at least two roasted marshmallows.</b>", "<b>A trident.</b>");
         itemContainerBoss.add(weaponBoss);
-        Item goldKey = new Item(0, 1, "gold key", new String[]{}, "A super shinnnny key", "A key");
+        Item goldKey = new Item(0, 1, "gold key", new String[]{}, "<b>A super shiny key! Probably unlocks a door, but what do I know.</b>", "<b>A key!</b>");
         itemContainerBoss.add(goldKey);
         Inventory inventoryBoss = new Inventory(itemContainerBoss, 300);
         ArrayList<models.Character> characterContainer2 = new ArrayList<>();
         // Example NPC boss added to room two
-        models.NPC boss = new NPC("Moe", 160, true, null, 80, inventoryBoss, "Powerful man. Don't mess around", "Thats Moe!");
+        models.NPC boss = new NPC("Moe", 160, true, null, 80, inventoryBoss, "<b>Powerful man. Don't mess around!</b>", "<b>That's Moe!</b>");
         characterContainer2.add(boss);
-        Room newRoom2 = new Room(roomName2, inventory2, connections2, characterContainer2, "You glance out at the road out front of the Manors", "You glance around Room 2");
+        Room newRoom2 = new Room(roomName2, inventory2, connections2, characterContainer2, "<b>You are standing in front of the Slums- I mean Manors.</b>", "<b>You look out at the road out front of the Manors.</b>");
         this.rooms.add(newRoom2);
         
         // Room Three: Requires the "gold key" to enter
@@ -114,32 +114,32 @@ public class GameEngine
         
         ArrayList<Item> itemContainerFriend = new ArrayList<>();
         String[] componentsFriend = {};
-        Item shuttlePass = new Item(0,1, "Shuttle Pass", new String[] {}, "A pass to ride the shuttle", "A shuttle pass");
+        Item shuttlePass = new Item(0,1, "Shuttle Pass", new String[] {}, "</b>A blue pass to ride the shuttle. The road awaits!</b>", "<b>A shuttle pass.</b>");
         itemContainer3.add(shuttlePass);
-        Weapon weaponFriend = new Weapon(20, 30, "Paint Brush", componentsFriend, 1, "Paint your Enemies??", "A Paint Brush");
+        Weapon weaponFriend = new Weapon(20, 30, "Paint Brush", componentsFriend, 1, "<b>Paint your enemies??</b>", "<b>A paint brush.</b>");
         itemContainerFriend.add(weaponFriend);
         Inventory inventoryFriend = new Inventory(itemContainerFriend, 300);
         ArrayList<models.Character> characterContainer3 = new ArrayList<>();
-        NPC Friend = new NPC("Curly", 400, false, null, 5,inventoryFriend, "Heard he was named that because of his curly hair", "It's Curly!");
+        NPC Friend = new NPC("Curly", 400, false, null, 5,inventoryFriend, "<b>Curly stands in front of you. He looks content. Must be a Civil Engineer.</b>", "<b>It's Curly!</b>");
         
-        ConversationNode root = new ConversationNode("What's up!");
+        ConversationNode root = new ConversationNode("<b>What's up!</b>");
         
-        ConversationNode good = new ConversationNode("A paint brush check this out!");
+        ConversationNode good = new ConversationNode("<b>A paint brush, check this out!</b>");
         good.setDropItem(true);
         good.setItemToDrop(0);
         
-        ConversationNode bad = new ConversationNode("I thought we were friends!");
+        ConversationNode bad = new ConversationNode("<b>I thought we were friends!</b>");
         bad.setBecomeAggressive(true);
         
         ConversationTree conversationTree = new ConversationTree(root);
-        root.addResponse("1.Hey Curly, what's that you got?", good);
-        root.addResponse("2.AHHHH [Attack]", bad);
+        root.addResponse("<b>1. Hey Curly, what's that you got?</b>", good);
+        root.addResponse("<b>2. AHHHH [Attack]</b>", bad);
 
         
         Friend.addConversationTree(conversationTree);
 		characterContainer3.add(Friend);
         // Room three requires the "gold key"
-        Room newRoom3 = new Room(roomName3, inventory3, connections3, characterContainer3, "gold key", "You glance around the inside of the Student lobby", "You glance around room 3");
+        Room newRoom3 = new Room(roomName3, inventory3, connections3, characterContainer3, "Gold key", "<b>You stand inside the Student Union building, ahead of you is the Dining Hall.</b>", "<b>You glance around the lobby.</b>");
         this.rooms.add(newRoom3);
         
         //Room Four: To Show off Shuttle
@@ -154,7 +154,7 @@ public class GameEngine
         connection4.setConnection("Shuttle", 0);
         
         ArrayList<models.Character> characterContainer4 = new ArrayList<>();
-        Room newRoom4 = new Room(roomName4, inventory4, connection4, characterContainer4, "You glance around West Campus", "You glance around room 4");
+        Room newRoom4 = new Room(roomName4, inventory4, connection4, characterContainer4, "<b>Looking around West Campus, you see the Rutter's to the west and the road back to main on the east.</b>", "<b>You glance around West Campus.</b>");
         this.rooms.add(newRoom4);
     }
     
@@ -171,16 +171,16 @@ public class GameEngine
             // If a key is required, check if the player has it.
             if (requiredKey != null && !requiredKey.isEmpty()) {
                 if (!player.hasKey(requiredKey)) {
-                    return "\nYou do not have the required key (" + requiredKey + ") to enter " + destination.getRoomName() + ".";
+                    return "\n<b>You do not have the required key (" + requiredKey + ") to enter " + destination.getRoomName() + ".</b>";
                 }
             }
             
             // Allow the room change.
             this.currentRoomNum = newRoomNum;
             rooms.get(currentRoomNum).setRequiredKey(null);
-            return "\nYou have entered " + destination.getRoomName() + "!";
+            return "\n<b>You have entered " + destination.getRoomName() + "!</b>";
         }
-        return "\nThere is no room in this direction";
+        return "\n<b>There is no room in this direction.</b>";
     }
     
 
@@ -190,12 +190,12 @@ public class GameEngine
 	public void loadPlayer()
 	{
 		String[] components = {};
-		Weapon weaponPlayer = new Weapon(20, 30, "Dagger", components, 40, "Trusty dagger hidden in your back pocket", "A dagger");
+		Weapon weaponPlayer = new Weapon(20, 30, "Dagger", components, 40, "<b>A trusty dagger that fits in your back pocket.</b>", "<b>A dagger.</b>");
 		ArrayList<Item> itemContainer = new ArrayList<>();
 		itemContainer.add(weaponPlayer);
 		String playerName = "Cooper";
 		Inventory inventory = new Inventory(itemContainer, 30);
-		Player newPlayer = new Player(playerName, 200, 0, inventory, "This is You!", "You",1);
+		Player newPlayer = new Player(playerName, 200, 0, inventory, "<b>It's you! You know, you!</b>", "<b>You.</b>",1);
 		this.player = newPlayer;
 	}
 	
@@ -213,14 +213,14 @@ public class GameEngine
 	public String playerAttackChar(int itemNum, int characterNum)
 	{
 		if (characterNum == -1 && itemNum == -1) {
-			return "\nAttack who with what?";
+			return "\n<b>Attack who with what?</b>";
 		}
 		else if (characterNum == -1) 
 		{
-			return "\nAttack who?";
+			return "\n<b>Attack who?</b>";
 		}
 		else if (itemNum == -1) {
-			return "\nAttack with what?";
+			return "\n<b>Attack with what?</b>";
 		}
 		Room currentRoom = rooms.get(currentRoomNum);
 		double damageMulti = player.getdamageMulti();
@@ -237,23 +237,29 @@ public class GameEngine
 			
 			currentRoom.handleCharacterDeath(characterNum);
 			
-			return "\n" + temp + " has been slain and dropped its inventory!";
+			return "<b>" + currentRoom.getCharacterName(characterNum) + " has been slain and dropped its inventory!</b>";
+
 		}
 		else
 		{
 			currentRoom.setCharacterHealth(characterNum, newHealth);
 			charAttackPlayer(0, characterNum, aggressive);
-			if(player.getHp() <= 0)
+
+			// Format attack damage string
+			String dmgString = (attackDmg % 1 == 0) ? String.format("%.0f", attackDmg) : String.format("%.1f", attackDmg);
+
+			if (player.getHp() <= 0)
 			{
-				return "\nYou Died!";
+				return "\n<b>You Died!</b>";
 			}
-			else if (aggressive == true)
+			else if (aggressive)
 			{
-				return "\n" + currentRoom.getCharacterName(characterNum) + " has taken " + attackDmg + " damage." + "\n"+currentRoom.getCharacterName(characterNum)+" Hit back for "+ currentRoom.getCharacterAttackDmg(characterNum, 0);
-				
-		}
+				int counterDmg = currentRoom.getCharacterAttackDmg(characterNum, 0);
+				return "\n" + currentRoom.getCharacterName(characterNum) + " has taken " + dmgString + " damage." +
+				       "\n" + currentRoom.getCharacterName(characterNum) + " hit back for " + counterDmg + " damage.";
+			}
 			else {
-				return "\n" + currentRoom.getCharacterName(characterNum) + " has taken " + attackDmg + " damage.";
+				return "\n" + "<b>" + currentRoom.getCharacterName(characterNum) + " has taken " + dmgString + " damage.</b>";
 			}
 		}
 	}
@@ -261,14 +267,25 @@ public class GameEngine
 	// method for the character characterNum attacking the player with itemNum (can be 0 for now and only give enemies 1 weapon for MS1 demo)
 	public void charAttackPlayer(int itemNum, int characterNum, boolean aggressive)
 	{
-		Room currentRoom = rooms.get(currentRoomNum);
-		int attackDmg = currentRoom.getCharacterAttackDmg(characterNum, itemNum);
-		int playerHealth = player.getHp();
+	    Room currentRoom = rooms.get(currentRoomNum);
+	    Character character = currentRoom.getCharacter(characterNum);
 
-		if (aggressive == true) {
-			player.setHp(playerHealth - attackDmg);
-		}
+	    // Don't attack if not aggressive
+	    if (!aggressive) return;
+
+	    // If character has no item at index, skip attack
+	    if (character.getInventorySize() <= itemNum) {
+	        runningMessage += "\n" + character.getName() + " has no weapon to attack with.";
+	        return;
+	    }
+
+	    int attackDmg = currentRoom.getCharacterAttackDmg(characterNum, itemNum);
+	    int playerHealth = player.getHp();
+
+	    player.setHp(playerHealth - attackDmg);
 	}
+
+
 	
 	// method for player to pickup item itemNum from room inventory
 	public String pickupItem(int itemNum)
@@ -284,7 +301,7 @@ public class GameEngine
 		currentRoom.removeItem(itemNum);
 		this.player.addItem(item);
 		
-		return "\n" + itemName + " was picked up.";
+		return "<b>\n" + itemName + " was picked up.</b>";
 	}
 	
 	// helper method to convert from an items name to its ID
@@ -331,12 +348,12 @@ public class GameEngine
 	public String examineItemName(int itemNum) {
 		if(itemNum == -1) 
 		{
-			return "\nExamine what Item?";
+			return "\n<b>Examine what Item?</b>";
 		}
 		
 		if(itemNum < 0 || itemNum >= player.getInventorySize())
 		{
-			return "\nInvalid item selection.";
+			return "\n<b>Invalid item selection.</b>";
 		}
 		
 		Item InvenItem = player.getItem(itemNum);
@@ -345,15 +362,15 @@ public class GameEngine
 	
 	public String examineCharacter(int charNum) {
 		if(charNum == -1) {
-			return "\nExamine what Character?";
+			return "\n<b>Examine what Character?</b>";
 		}
 		
 		if(charNum < 0 || charNum >= rooms.get(currentRoomNum).getCharacterContainerSize()) {
-			return "\nInvalid Character selection.";
+			return "\n<b>Invalid Character selection.</b>";
 		}
 		
 		Character character = rooms.get(currentRoomNum).getCharacter(charNum);
-		return"\n" + character.getCharDescription();
+		return"\n<b>" + character.getCharDescription() + "</b>";
 	}
 	
 	//InputProcess Method that gets the description of an items
@@ -379,11 +396,11 @@ public class GameEngine
 	{
 		if (itemNum == -1) 
 		{
-			return "\nDrop what?";
+			return "\n<b>Drop what?</b>";
 		}
 		
 		if (itemNum < 0 || itemNum >= player.getInventorySize()) {
-	        return "\nInvalid item selection.";
+	        return "\n<b>Invalid item selection.</b>";
 	    }
 		
 		Room currentRoom = rooms.get(currentRoomNum);
@@ -391,7 +408,7 @@ public class GameEngine
 		player.removeItem(itemNum);
 	    currentRoom.addItem(InvenItem);
 		
-		return "\n" + InvenItem.getName() + " was dropped.";
+		return "\n<b>" + InvenItem.getName() + " was dropped.</b>";
 	}
 	
 	// method to get character name for display()
@@ -542,7 +559,7 @@ public class GameEngine
 	    } else if (WEST.contains(noun)) {
 	        direction = "West";
 	    } else {
-	        return "\nThis is not a valid direction";
+	        return "\n<b>This is not a valid direction</b>";
 	    }
 	    
 	    // Call updateCurrentRoom once and capture its returned message.
@@ -557,11 +574,11 @@ public class GameEngine
 	public String usePotion(int itemNum) {
 		if (itemNum == -1) 
 		{
-			return "\nUse what?";
+			return "\n<b>Use what?</b>";
 		}
 		
 		if (itemNum < 0 || itemNum >= player.getInventorySize()) {
-	        return "\nInvalid item selection.";
+	        return "\n<b>Invalid item selection.</b>";
 	    }
 		
 		Item InvenItem = player.getItem(itemNum);
@@ -574,7 +591,7 @@ public class GameEngine
 		player.setHp(newHp);
 		player.removeItem(itemNum);
 		
-		return "\n" + InvenItem.getName() + " was used.";
+		return "\n<b>" + InvenItem.getName() + " was used.</b>";
 		
 	}
 		
@@ -589,7 +606,7 @@ public class GameEngine
 		}
 		
 		else {
-			newMessage = "\n you do not have the Shuttle Pass";
+			newMessage = "<b>\nYou do not have the Shuttle Pass.</b>";
 			runningMessage += newMessage;
 		}
 		
@@ -598,13 +615,13 @@ public class GameEngine
 	
 	public String getHelp() 
 	{
-		String message ="\ntake, get, grab, pickup are for picking up an item (ex. (get|grab|pickup) sword)\n";
-		message += "\ndrop is to drop an item (ex. drop dagger)\n";
-		message += "\nattack, swing, slash, hit, strike are for attacking an enemy (ex. (attack|swing|slash|hit|strike) moe with trident)\n";
-		message += "\ngo, move, walk are for moving in a direction (ex. (walk|move) north)\n";
-		message += "\nexamine and look are for looking at the description of an item (ex. (examine|look) dagger)\n";
-		message += "\nshuttle is the same as movement but for longer distances (ex. shuttle | drive)\n";
-		message += "\ntalk is how to interact with valid NPCs. (ex. (talk) curly. Continue conversation with Respond #";
+		String message ="<b>\nTake, get, grab, pickup are for picking up an item. (ex. (get|grab|pickup) sword)\n";
+		message += "\nDrop is to drop an item (ex. drop dagger)\n";
+		message += "\nAttack, swing, slash, hit, strike are for attacking an enemy. (ex. (attack|swing|slash|hit|strike) moe with trident)\n";
+		message += "\nGo, move, walk are for moving in a direction. (ex. (walk|move) north)\n";
+		message += "\nExamine and look are for looking at the description of an item or room. (ex. (examine|look) dagger)\n";
+		message += "\nShuttle is the same as movement but for traveling via shuttle. (ex. shuttle | drive)\n";
+		message += "\nTalk is how to interact with valid NPCs. (ex. (talk) curly. Continue conversation with Respond #</b>";
 		return message;
 	}
 
@@ -634,8 +651,27 @@ public class GameEngine
     public String interactWithNPC(String choice, int characterNum)
     {
     	Room currentRoom = rooms.get(currentRoomNum);
-    	return currentRoom.interactWithNPC(choice, characterNum);
+    	NPC npc = (NPC) currentRoom.getCharacter(characterNum);
+    	String result = npc.interact(choice);
+
+    	// Handle aggression toggle
+    	if (npc.isCurrentNodeToAggressive()) {
+    		npc.setAgression(true);
+    		result += "<b>\n" + npc.getName() + " is now hostile!</b>";
+    	}
+
+    	// Handle item drop
+    	if (npc.isCurrentNodeDropItem()) {
+    		int dropItemIndex = npc.getItemToDrop();
+    		Item item = npc.getInventory().getItem(dropItemIndex);
+    		npc.getInventory().removeItem(dropItemIndex);
+    		currentRoom.addItem(item);
+    		result += "<b>\n" + npc.getName() + " dropped a " + item.getName() + "!</b>";
+    	}
+
+    	return result;
     }
+
     
     public boolean reachedFinalNode()
     {
