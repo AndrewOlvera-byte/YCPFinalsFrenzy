@@ -57,7 +57,7 @@ public class GameEngine
     public void loadRooms()
     {
         // Room One: No key required
-        String roomName1 = "First Room";
+        String roomName1 = "Manor South Lobby";
         String[] components = {};
         Weapon weapon1 = new Weapon(20, 30, "Sword", components, 80, "<b>A rusty sword. Doesn't really fit in your bag.</b>", "<b>A sword.</b>");
         ArrayList<Item> itemContainer1 = new ArrayList<>();
@@ -78,7 +78,7 @@ public class GameEngine
         this.rooms.add(newRoom1);
         
         // Room Two: No key required
-        String roomName2 = "Second Room";
+        String roomName2 = "Manors Road";
         ArrayList<Item> itemContainer2 = new ArrayList<>();
         Inventory inventory2 = new Inventory(itemContainer2, 300);
         Connections connections2 = new Connections();
@@ -98,11 +98,11 @@ public class GameEngine
         // Example NPC boss added to room two
         models.NPC boss = new NPC("Moe", 160, true, null, 80, inventoryBoss, "<b>Powerful man. Don't mess around!</b>", "<b>That's Moe!</b>");
         characterContainer2.add(boss);
-        Room newRoom2 = new Room(roomName2, inventory2, connections2, characterContainer2, "<b>You are standing in front of the Slums- I mean Manors.</b>", "<b>You look out at the road out front of the Manors.</b>");
+        Room newRoom2 = new Room(roomName2, inventory2, connections2, characterContainer2, "<b>You are standing in front of the Slums- I mean the Manors.</b>", "<b>You look out at the road out front of the Manors.</b>");
         this.rooms.add(newRoom2);
         
         // Room Three: Requires the "gold key" to enter
-        String roomName3 = "Third Room";
+        String roomName3 = "The Student Union";
         ArrayList<Item> itemContainer3 = new ArrayList<>();
         Inventory inventory3 = new Inventory(itemContainer3, 300);
         Connections connections3 = new Connections();
@@ -143,9 +143,10 @@ public class GameEngine
         this.rooms.add(newRoom3);
         
         //Room Four: To Show off Shuttle
-        String roomName4 = "Fourth Room";
+        String roomName4 = "The Shuttle Stop";
         ArrayList<Item> itemContainer4 = new ArrayList<>();
         Inventory inventory4 = new Inventory(itemContainer4, 300);
+        itemContainer4.add(potion1);
         Connections connection4 = new Connections();
         connection4.setConnection("North", null);
         connection4.setConnection("East", null);
