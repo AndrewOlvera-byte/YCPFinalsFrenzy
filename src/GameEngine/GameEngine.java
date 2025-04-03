@@ -91,7 +91,7 @@ public class GameEngine
         String[] componentsBoss = {};
         Weapon weaponBoss = new Weapon(20, 30, "Trident", componentsBoss, 90, "<b>A sharp three pronged weapon. You could make like, at least two roasted marshmallows.</b>", "<b>A trident.</b>");
         itemContainerBoss.add(weaponBoss);
-        Item goldKey = new Item(0, 1, "gold key", new String[]{}, "<b>A super shiny key! Probably unlocks a door, but what do I know.</b>", "<b>A key!</b>");
+        Item goldKey = new Item(0, 1, "Gold Key", new String[]{}, "<b>A super shiny key! Probably unlocks a door, but what do I know.</b>", "<b>A key!</b>");
         itemContainerBoss.add(goldKey);
         Inventory inventoryBoss = new Inventory(itemContainerBoss, 300);
         ArrayList<models.Character> characterContainer2 = new ArrayList<>();
