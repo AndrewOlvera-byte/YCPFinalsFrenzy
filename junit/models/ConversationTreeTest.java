@@ -14,7 +14,7 @@ public class ConversationTreeTest {
         ConversationTree tree = new ConversationTree(root);
         assertEquals("Hello!", tree.getCurrentNodeMessage());
 
-        tree.selectResponse("1.Hi");
+        tree.traverse("1.Hi");
         assertEquals("Hi there!", tree.getCurrentNodeMessage());
     }
 }

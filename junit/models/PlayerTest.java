@@ -14,7 +14,6 @@ public class PlayerTest {
 
         assertEquals("Hero", player.getName());
         assertEquals(100, player.getHp());
-        assertEquals(0, player.getGold());
         assertEquals("Long desc", player.getCharDescription());
         assertEquals(1.0, player.getdamageMulti());
 

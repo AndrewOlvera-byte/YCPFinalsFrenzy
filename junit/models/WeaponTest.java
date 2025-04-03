@@ -9,7 +9,7 @@ public class WeaponTest {
     public void testWeaponProperties() {
         Weapon weapon = new Weapon(25, 4, "Sword", null, 80, "Long sword", "Sword.");
 
-        assertEquals(80, weapon.getDamage());
+        assertEquals(80, weapon.getAttackDmg());
         assertEquals("Sword", weapon.getName());
         assertEquals(25, weapon.getValue());
     }
