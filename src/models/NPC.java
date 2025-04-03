@@ -42,7 +42,7 @@ public class NPC extends Character {
    
    public String getMessage() {
 	    if (conversationTree == null || conversationTree.getCurrentNode() == null) {
-	        return "This character has nothing to say.";
+	        return "<b>This character has nothing to say.</b>";
 	    }
 	    return conversationTree.getCurrentNode().getMessage();
 	}

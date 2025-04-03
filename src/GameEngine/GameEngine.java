@@ -237,7 +237,7 @@ public class GameEngine
 			
 			currentRoom.handleCharacterDeath(characterNum);
 			
-			return "<b>" + currentRoom.getCharacterName(characterNum) + " has been slain and dropped its inventory!</b>";
+			return "\n<b>" + temp + " has been slain and dropped its inventory!</b>";
 
 		}
 		else
@@ -255,8 +255,8 @@ public class GameEngine
 			else if (aggressive)
 			{
 				int counterDmg = currentRoom.getCharacterAttackDmg(characterNum, 0);
-				return "\n" + currentRoom.getCharacterName(characterNum) + " has taken " + dmgString + " damage." +
-				       "\n" + currentRoom.getCharacterName(characterNum) + " hit back for " + counterDmg + " damage.";
+				return "<b>\n" + currentRoom.getCharacterName(characterNum) + " has taken " + dmgString + " damage.</b>" +
+				       "<b>\n" + currentRoom.getCharacterName(characterNum) + " hit back for " + counterDmg + " damage.</b>";
 			}
 			else {
 				return "\n" + "<b>" + currentRoom.getCharacterName(characterNum) + " has taken " + dmgString + " damage.</b>";
