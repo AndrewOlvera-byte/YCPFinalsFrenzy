@@ -631,7 +631,8 @@ public class GameEngine
 		message += "\nGo, move, walk are for moving in a direction. (ex. (walk|move) north)\n";
 		message += "\nExamine and look are for looking at the description of an item or room. (ex. (examine|look) dagger)\n";
 		message += "\nShuttle is the same as movement but for traveling via shuttle. (ex. shuttle | drive)\n";
-		message += "\nTalk is how to interact with valid NPCs. (ex. (talk) curly. Continue conversation with Respond #</b>";
+		message += "\nTalk is how to interact with valid NPCs. (ex. (talk) curly. Continue conversation with Respond #\n";
+		message += "\n Drink is used to consume potions. (ex. (drink | apply) potion.</b>";
 		return message;
 	}
 
