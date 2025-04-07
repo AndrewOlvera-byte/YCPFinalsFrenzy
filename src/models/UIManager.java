@@ -244,4 +244,7 @@ public class UIManager {
         return response;
     }
 }
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes

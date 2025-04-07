@@ -1,9 +1,16 @@
 package models;
 
+<<<<<<< Updated upstream
 
 
 import GameEngine.GameEngine;
 
+=======
+import java.util.*;
+
+import GameEngine.GameEngine;
+import models.*;
+>>>>>>> Stashed changes
 
 public class CombatManager {
     private GameEngine engine;

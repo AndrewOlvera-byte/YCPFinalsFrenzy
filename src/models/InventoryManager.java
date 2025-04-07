@@ -1,8 +1,15 @@
 package models;
 
+<<<<<<< Updated upstream
 
 import GameEngine.GameEngine;
 
+=======
+import java.util.*;
+
+import GameEngine.GameEngine;
+import models.*;
+>>>>>>> Stashed changes
 
 public class InventoryManager {
     private GameEngine engine;
