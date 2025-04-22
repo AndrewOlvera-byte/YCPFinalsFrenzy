@@ -1,0 +1,13 @@
+----------------------------------------------------------------
+Tue Apr 22 13:15:30 EDT 2025:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.10.2.0 - (1582446): instance a816c00e-0196-5e7f-6a13-000000470ff0 
+on database directory C:\TeamProject\YCPFinalsFrenzy\gameDB with class loader sun.misc.Launcher$AppClassLoader@e2f2a 
+Loaded from file:/C:/cs320-spring2025/CS320_Derby/lib/derby.jar
+java.vendor=Temurin
+java.runtime.version=1.8.0_442-b06
+user.dir=C:\TeamProject\YCPFinalsFrenzy
+os.name=Windows 11
+os.arch=x86
+os.version=10.0
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''

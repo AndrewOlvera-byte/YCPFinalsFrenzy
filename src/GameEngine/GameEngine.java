@@ -2,6 +2,7 @@ package GameEngine;
 
 import java.util.*;
 import models.*;
+import database.*;
 
 public class GameEngine {
     private Player player;
@@ -35,12 +36,34 @@ public class GameEngine {
         this.isRunning = true;
     }
     
-    // "loads data" from .csv file in future but for now is where we create the instantiation of the game state for our demo
+    // "loads data" from the database
     public void loadData() {
-        roomManager.loadRooms();
-        playerManager.loadPlayer();
+        IDatabase db = DatabaseProvider.getInstance();
+        
+        // Load rooms from database
+        this.rooms = db.getAllRooms();
+        
+        // If no rooms were loaded from the database, use the RoomManager to load default rooms
+        if (this.rooms.isEmpty()) {
+            roomManager.loadRooms();
+        }
+        
+        // Load player from database
+        Player dbPlayer = db.getPlayer();
+        
+        // If no player was loaded from the database, create a default player
+        if (dbPlayer == null) {
+            playerManager.loadPlayer();
+        } else {
+            this.player = dbPlayer;
+        }
+        
         this.currentRoomNum = 0;
-        String roomName = getCurrentRoomName();
+        
+        // Only try to get room name if we have rooms
+        if (!this.rooms.isEmpty()) {
+            String roomName = getCurrentRoomName();
+        }
     }
     
     // Getters and setters for managers to access GameEngine state
@@ -83,7 +106,12 @@ public class GameEngine {
     }
     
     public String getCurrentRoomName() {
-        return roomManager.getCurrentRoomName();
+        try {
+            return roomManager.getCurrentRoomName();
+        } catch (Exception e) {
+            // Log error if needed
+            return "Unknown Room";
+        }
     }
     
     public String getRoomName(int roomNum) {
