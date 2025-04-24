@@ -10,6 +10,5 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/CS320_Jetty9"/>
-	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/CS320_Derby"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

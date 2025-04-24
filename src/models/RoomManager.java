@@ -14,16 +14,7 @@ public class RoomManager {
     
     // Gets the current room object
     public Room getCurrentRoom() {
-        ArrayList<Room> rooms = engine.getRooms();
-        if (rooms.isEmpty()) {
-            // If there are no rooms, load rooms manually
-            loadRooms();
-            // If still empty after loading, throw a clear error
-            if (rooms.isEmpty()) {
-                throw new IllegalStateException("Room list is empty. Unable to get current room.");
-            }
-        }
-        return rooms.get(engine.getCurrentRoomNum());
+        return engine.getRooms().get(engine.getCurrentRoomNum());
     }
     
     // Loading of rooms
@@ -161,13 +152,8 @@ public class RoomManager {
     }
     
     public String getCurrentRoomName() {
-        try {
-            Room currentRoom = getCurrentRoom();
-            return currentRoom.getRoomName();
-        } catch (Exception e) {
-            // If there's an error getting the current room, return a default name
-            return "Default Room";
-        }
+        Room currentRoom = getCurrentRoom();
+        return currentRoom.getRoomName();
     }
     
     public String getRoomName(int roomNum) {
