@@ -12,12 +12,13 @@ import GameEngine.GameEngine;
 import models.Response;
 
 public class dashboardServlet extends HttpServlet {
-	private static final long serialVersionUID = 1L;
-	@Override
+    private static final long serialVersionUID = 1L;
+
+    @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        
-		// Create or retrieve the session and GameEngine instance.
+
+        // Create or retrieve the session and GameEngine instance.
         HttpSession session = req.getSession(true);
         GameEngine gameEngine = (GameEngine) session.getAttribute("gameEngine");
         if (gameEngine == null) {
@@ -25,34 +26,44 @@ public class dashboardServlet extends HttpServlet {
             gameEngine.start();
             session.setAttribute("gameEngine", gameEngine);
         }
-        
-        // Get the initial game state.
+
+        // Get the current game state and forward to JSP.
         Response response = gameEngine.display();
-        
-        // Set the response as a request attribute for the JSP.
         req.setAttribute("response", response);
         req.getRequestDispatcher("/_view/Dashboard.jsp").forward(req, resp);
     }
-	
-	@Override
+
+    @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        
-		// Retrieve the GameEngine from session.
+
+        // 1) Retrieve existing session (do NOT create a new one)
         HttpSession session = req.getSession(false);
         if (session == null || session.getAttribute("gameEngine") == null) {
             resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Session expired or not found.");
             return;
         }
+
+        // 2) Handle the Restart button before any game-input processing
+        String restart = req.getParameter("restart");
+        if ("true".equals(restart)) {
+            // Remove the old engine and redirect back to GET /dashboard
+            session.removeAttribute("gameEngine");
+            resp.sendRedirect(req.getContextPath() + "/dashboard");
+            return;
+        }
+
+        // 3) Normal game-input flow
         GameEngine gameEngine = (GameEngine) session.getAttribute("gameEngine");
 
-        // Process the input from the request.
+        // Only process non-null, non-empty commands
         String input = req.getParameter("input");
-        boolean success = gameEngine.processInput(input);
+        if (input != null && !input.trim().isEmpty()) {
+            gameEngine.processInput(input);
+        }
 
-        // Get updated game state.
+        // 4) Render the updated game state
         Response updatedResponse = gameEngine.display();
-
         req.setAttribute("response", updatedResponse);
         req.getRequestDispatcher("/_view/Dashboard.jsp").forward(req, resp);
     }

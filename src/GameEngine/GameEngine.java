@@ -222,6 +222,15 @@ public class GameEngine {
     
     // Main display method for constructing Response
     public Response display() {
+        // if the player is dead, return a special “game over” response
+        if (player != null && player.getHp() <= 0) {
+            Response resp = new Response();
+            resp.setGameOver(true);
+            // relative to your webapp root—adjust if needed
+            resp.setGameOverImage("/images/GameOver.png");
+            return resp;
+        }
+        // otherwise, fall back to the normal UIManager flow
         return uiManager.display();
     }
 }
