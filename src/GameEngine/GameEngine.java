@@ -43,7 +43,7 @@ public class GameEngine {
         roomManager.loadRooms();
         playerManager.loadPlayer();
         GameStateManager.loadState(this);
-        this.currentRoomNum = 0;
+        this.currentRoomNum = getCurrentRoomNum();;
         String roomName = getCurrentRoomName();
     }
     
