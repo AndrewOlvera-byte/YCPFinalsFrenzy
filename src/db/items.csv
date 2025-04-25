@@ -1,7 +1,7 @@
 item_id,name,value,weight,long_description,short_description,type,healing,damage_multi,attack_damage
 1,Sword,20,30,"<b>A rusty sword. Doesn't really fit in your bag.</b>","<b>A sword.</b>",WEAPON,0,0,80
 2,Potion,10,1,"<b>A red potion that has ""POTION"" written across it. (+40 health)</b>","<b>+40 Health potion.</b>",UTILITY,40,0,0
-3,Damage Up,10,1,"<b>An orange potion that has ""DAMAGE UP"" written across it. (x1.2 damage)</b>","<b>x1.2 Damage potion.</b>",UTILITY,0,1.2,0
+3,Damage-Up,10,1,"<b>An orange potion that has ""DAMAGE UP"" written across it. (x1.2 damage)</b>","<b>x1.2 Damage potion.</b>",UTILITY,0,1.2,0
 4,Trident,20,30,"<b>A sharp three pronged weapon. You could make like, at least two roasted marshmallows.</b>","<b>A trident.</b>",WEAPON,0,0,90
 5,Gold Key,0,1,"<b>A super shiny key! Probably unlocks a door, but what do I know.</b>","<b>A key!</b>",ITEM,0,0,0
 6,Shuttle Pass,0,1,"<b>A blue pass to ride the shuttle. The road awaits!</b>","<b>A shuttle pass.</b>",ITEM,0,0,0

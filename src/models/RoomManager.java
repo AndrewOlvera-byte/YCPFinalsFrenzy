@@ -63,6 +63,46 @@ public class RoomManager {
                 engine.getRooms().get(roomIdx).addItem(it);
             }
 
+         // 4) Load NPCs into rooms
+         // Load NPCs into rooms using NPC_ROOM linking table
+         // Load NPCs with inventory items
+            PreparedStatement psNPC = conn.prepareStatement(
+                "SELECT n.npc_id, n.name, n.hp, n.aggression, n.damage, n.long_description, n.short_description, nr.room_id " +
+                "FROM NPC n JOIN NPC_ROOM nr ON n.npc_id = nr.npc_id"
+            );
+            ResultSet rsNPC = psNPC.executeQuery();
+
+            while (rsNPC.next()) {
+                int npcId = rsNPC.getInt("npc_id");
+                
+                // Load inventory for this NPC
+                Inventory npcInventory = new Inventory(new ArrayList<>(), 100);
+                PreparedStatement psInv = conn.prepareStatement("SELECT item_id FROM NPC_INVENTORY WHERE npc_id = ?");
+                psInv.setInt(1, npcId);
+                ResultSet rsInv = psInv.executeQuery();
+                while (rsInv.next()) {
+                    Item npcItem = loadItemById(conn, rsInv.getInt("item_id"));
+                    npcInventory.addItem(npcItem);
+                }
+
+                NPC npc = new NPC(
+                    rsNPC.getString("name"),
+                    rsNPC.getInt("hp"),
+                    rsNPC.getBoolean("aggression"),
+                    new String[]{}, // dialogue placeholder
+                    rsNPC.getInt("damage"),
+                    npcInventory, // Use populated inventory
+                    rsNPC.getString("long_description"),
+                    rsNPC.getString("short_description")
+                );
+
+                int roomIdx = rsNPC.getInt("room_id") - 1;
+                engine.getRooms().get(roomIdx).getCharacterContainer().add(npc);
+            }
+
+
+
+
             // 4) (optionally) load NPCs, NPC_INVENTORY, NPC_ROOM, etc.
         } catch (SQLException ex) {
             throw new RuntimeException("Failed to load rooms", ex);

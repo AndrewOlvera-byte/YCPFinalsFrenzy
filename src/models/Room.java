@@ -7,7 +7,7 @@ public class Room
     private String roomName = "";
     private Inventory inventory;
     private Connections connections;
-    private ArrayList<models.Character> characterContainer;
+    private ArrayList<Character> characterContainer;
     private String requiredKey;
 	private String longdescription;
 	private String shortdescription;

@@ -46,11 +46,26 @@ public class Character {
    }
    
    public int getAttackDmg(int itemNum) {
-       Item item = inventory.getItem(itemNum);
-       Weapon weapon = (Weapon) item;
-       return weapon.getAttackDmg();
-   }
-   
+	    if (inventory.getSize() == 0) {
+	        // Default attack damage if inventory is empty
+	        return 1; // Set your desired default damage
+	    }
+
+	    if (itemNum < 0 || itemNum >= inventory.getSize()) {
+	        // Item number is invalid, default attack damage
+	        return 1; // Again, choose an appropriate default
+	    }
+
+	    Item item = inventory.getItem(itemNum);
+	    if (item instanceof Weapon) {
+	        Weapon weapon = (Weapon) item;
+	        return weapon.getAttackDmg();
+	    } else {
+	        // If item isn't a Weapon, return default attack damage
+	        return 1;
+	    }
+	}
+
    public boolean isAgressive() {
        return false;
    }
