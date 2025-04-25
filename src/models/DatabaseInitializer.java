@@ -1,4 +1,3 @@
-
 package models;
 
 import java.io.BufferedReader;
@@ -9,8 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DatabaseInitializer {
-	
-	
+
     /** Run on GameEngine.start(): create tables and seed CSVs if needed */
     public static void initialize() {
         try (Connection conn = DerpyDatabase.getConnection()) {
@@ -57,80 +55,73 @@ public class DatabaseInitializer {
         }
     }
 
-    /** Execute each line in /db/schema.sql */
+    /** Execute all statements in /db/schema.sql, splitting on ‘;’ */
     private static void runDDL(Connection conn) throws Exception {
-        try (InputStream in = DatabaseInitializer.class
-                     .getResourceAsStream("/db/schema.sql");
-             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-             Statement stmt = conn.createStatement()) {
-
-            StringBuilder buf = new StringBuilder();
+        // Load entire file
+        InputStream in = DatabaseInitializer.class.getResourceAsStream("/db/schema.sql");
+        if (in == null) {
+            throw new RuntimeException("Could not find /db/schema.sql on classpath");
+        }
+        StringBuilder sb = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                line = line.trim();
-                if (line.isEmpty() || line.startsWith("--")) continue;
-                buf.append(line).append(" ");
-                if (line.endsWith(";")) {
-                    String sql = buf.toString();
-                    // strip trailing semicolon
-                    sql = sql.substring(0, sql.lastIndexOf(";")).trim();
-                    try {
-                        stmt.execute(sql);
-                    } catch (SQLException sqle) {
-                        String state = sqle.getSQLState();
-                        // X0Y32 = “table/view already exists”; 42Y55 = same in newer versions
-                        if ("X0Y32".equals(state) || "42Y55".equals(state)) {
-                            // ignore
-                        } else {
-                            throw sqle;
-                        }
+                String trimmed = line.trim();
+                if (trimmed.isEmpty() || trimmed.startsWith("--")) {
+                    continue;
+                }
+                sb.append(line).append("\n");
+            }
+        }
+
+        // Split and execute each statement
+        String[] statements = sb.toString().split(";");
+        try (Statement stmt = conn.createStatement()) {
+            for (String raw : statements) {
+                String sql = raw.trim();
+                if (sql.isEmpty()) {
+                    continue;
+                }
+                try {
+                    stmt.execute(sql);
+                } catch (SQLException sqle) {
+                    String state = sqle.getSQLState();
+                    // ignore “table/view already exists”
+                    if (!"X0Y32".equals(state) && !"42Y55".equals(state)) {
+                        throw sqle;
                     }
-                    buf.setLength(0);
                 }
             }
         }
     }
 
-
-    /** Load a CSV from /db/<csvFile> and run the given INSERT */
- // inside models/DatabaseInitializer.java
-
-    /** 
-     * Parse one CSV line into columns, handling quoted fields with commas.
-     */
     private static String[] parseCSVLine(String line) {
         List<String> fields = new ArrayList<>();
         StringBuilder sb = new StringBuilder();
         boolean inQuotes = false;
-        for (int i = 0; i < line.length(); i++) {
-            char c = line.charAt(i);
+        for (char c : line.toCharArray()) {
             if (c == '"') {
-                // flip in/out of quoted mode
                 inQuotes = !inQuotes;
             } else if (c == ',' && !inQuotes) {
-                // end of field
                 fields.add(sb.toString());
                 sb.setLength(0);
             } else {
                 sb.append(c);
             }
         }
-        // last field
         fields.add(sb.toString());
         return fields.toArray(new String[0]);
     }
 
     private static void seedTable(Connection conn, String csvFile, String insertSql) throws Exception {
-        try (InputStream in = DatabaseInitializer.class
-                     .getResourceAsStream("/db/" + csvFile);
+        try (InputStream in = DatabaseInitializer.class.getResourceAsStream("/db/" + csvFile);
              BufferedReader reader = new BufferedReader(new InputStreamReader(in));
              PreparedStatement ps = conn.prepareStatement(insertSql)) {
 
             String line = reader.readLine(); // skip header
             while ((line = reader.readLine()) != null) {
-                String[] cols = parseCSVLine(line);      // ← use our CSV parser
+                String[] cols = parseCSVLine(line);
                 for (int i = 0; i < cols.length; i++) {
-                    // Trim surrounding quotes, if any
                     String val = cols[i];
                     if (val.startsWith("\"") && val.endsWith("\"")) {
                         val = val.substring(1, val.length() - 1);
@@ -142,5 +133,4 @@ public class DatabaseInitializer {
             ps.executeBatch();
         }
     }
-
 }
