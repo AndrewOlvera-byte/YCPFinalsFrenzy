@@ -1,117 +1,166 @@
 package models;
 
-import java.util.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import GameEngine.GameEngine;
-import models.*;
+import models.DerpyDatabase;
 
 public class InventoryManager {
     private GameEngine engine;
-    
+
     public InventoryManager(GameEngine engine) {
         this.engine = engine;
     }
-    
-    // Method for player to pickup item itemNum from room inventory
+
+    /** Pick up an item from the current room into the player’s inventory */
     public String pickupItem(int itemNum) {
-        if (itemNum == -1) {
+        if (itemNum < 0) {
             return "\nPick up what?";
         }
-        
-        Room currentRoom = engine.getRooms().get(engine.getCurrentRoomNum());
-        String itemName = currentRoom.getItemName(itemNum); // temp name for the item name when we remove it
-        Item item = currentRoom.getItem(itemNum);
-        currentRoom.removeItem(itemNum);
+        // In-memory move
+        Room room = engine.getRooms().get(engine.getCurrentRoomNum());
+        Item item = room.getItem(itemNum);
+        String itemName = item.getName();
+        room.removeItem(itemNum);
         engine.getPlayer().addItem(item);
-        
+
+        // DB update: remove from ROOM_INVENTORY, add to PLAYER_INVENTORY
+        try (Connection conn = DerpyDatabase.getConnection()) {
+            // 1) DELETE from ROOM_INVENTORY
+            try (PreparedStatement del = conn.prepareStatement(
+                     "DELETE FROM ROOM_INVENTORY WHERE room_id = ? AND item_id = ?"
+                 )) {
+                del.setInt(1, engine.getCurrentRoomNum() + 1);
+                del.setInt(2, itemNum + 1);
+                del.executeUpdate();
+            }
+            // 2) INSERT into PLAYER_INVENTORY
+         // --- before the INSERT ---
+            try (PreparedStatement check = conn.prepareStatement(
+                     "SELECT 1 FROM PLAYER_INVENTORY WHERE player_id = ? AND item_id = ?")) {
+                check.setInt(1, 1);
+                check.setInt(2, itemNum + 1);
+                if (check.executeQuery().next()) {
+                    // Already in inventory, skip the INSERT
+                    return "<b>\nYou already have a " + itemName + ".</b>";
+                }
+            }
+
+            // Now do the INSERT safely:
+            try (PreparedStatement ins = conn.prepareStatement(
+                     "INSERT INTO PLAYER_INVENTORY(player_id, item_id) VALUES(1, ?)")) {
+                ins.setInt(1, itemNum + 1);
+                ins.executeUpdate();
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Inventory DB update failed", e);
+        }
+
         return "<b>\n" + itemName + " was picked up.</b>";
     }
-    
-    // Method to drop an item from player inventory into room inventory
+
+    /** Drop an item from the player into the current room */
     public String dropItem(int itemNum) {
-        if (itemNum == -1) {
-            return "\n<b>Drop what?</b>";
-        }
-        
         if (itemNum < 0 || itemNum >= engine.getPlayer().getInventorySize()) {
             return "\n<b>Invalid item selection.</b>";
         }
-        
-        Room currentRoom = engine.getRooms().get(engine.getCurrentRoomNum());
-        Item InvenItem = engine.getPlayer().getItem(itemNum);
+        // In-memory move
+        Item item = engine.getPlayer().getItem(itemNum);
+        String itemName = item.getName();
         engine.getPlayer().removeItem(itemNum);
-        currentRoom.addItem(InvenItem);
-        
-        return "\n<b>" + InvenItem.getName() + " was dropped.</b>";
+        Room room = engine.getRooms().get(engine.getCurrentRoomNum());
+        room.addItem(item);
+
+        // DB update: remove from PLAYER_INVENTORY, add to ROOM_INVENTORY
+        try (Connection conn = DerpyDatabase.getConnection()) {
+            // 1) DELETE from PLAYER_INVENTORY
+            try (PreparedStatement del = conn.prepareStatement(
+                     "DELETE FROM PLAYER_INVENTORY WHERE player_id = 1 AND item_id = ?"
+                 )) {
+                del.setInt(1, itemNum + 1);
+                del.executeUpdate();
+            }
+            // 2) INSERT into ROOM_INVENTORY
+            try (PreparedStatement ins = conn.prepareStatement(
+                     "INSERT INTO ROOM_INVENTORY(room_id, item_id) VALUES(?, ?)"
+                 )) {
+                ins.setInt(1, engine.getCurrentRoomNum() + 1);
+                ins.setInt(2, itemNum + 1);
+                ins.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Inventory DB update failed", e);
+        }
+
+        return "\n<b>" + itemName + " was dropped.</b>";
     }
-    
-    // Helper method to convert from an items name to its ID in room
+
+    /** Find the index of an item in the current room by name */
     public int RoomItemNameToID(String name) {
-        int itemNum = -1; // set to -1 so if there is no item found it will return -1
-        Room currentRoom = engine.getRooms().get(engine.getCurrentRoomNum());
-        for (int i = 0; i < currentRoom.getInventorySize(); i++) {
-            if (name.equalsIgnoreCase(currentRoom.getItemName(i))) {
-                itemNum = i;
-                break;
+        Room room = engine.getRooms().get(engine.getCurrentRoomNum());
+        for (int i = 0; i < room.getInventorySize(); i++) {
+            if (name.equalsIgnoreCase(room.getItemName(i))) {
+                return i;
             }
         }
-        return itemNum;
+        return -1;
     }
-    
-    // Helper method to convert from an items name to its ID in player inventory
+
+    /** Find the index of an item in the player’s inventory by name */
     public int CharItemNameToID(String name) {
-        int itemNum = -1; // set to -1 so if there is no item found it will return -1
-        
         for (int i = 0; i < engine.getPlayer().getInventorySize(); i++) {
             if (name.equalsIgnoreCase(engine.getPlayer().getItemName(i))) {
-                itemNum = i;
-                break;
+                return i;
             }
         }
-        return itemNum;
+        return -1;
     }
-    
-    // Method to examine an item
+
+    /** Examine the player’s item (long then short description) */
     public String examineItemName(int itemNum) {
-        if(itemNum == -1) {
-            return "\n<b>Examine what Item?</b>";
-        }
-        
-        if(itemNum < 0 || itemNum >= engine.getPlayer().getInventorySize()) {
-            return "\n<b>Invalid item selection.</b>";
-        }
-        
-        Item InvenItem = engine.getPlayer().getItem(itemNum);
-        return "\n" + InvenItem.getDescription();
-    }
-    
-    // Method to use potions and consumables
-    public String usePotion(int itemNum) {
-        if (itemNum == -1) {
-            return "\n<b>Use what?</b>";
-        }
-        
         if (itemNum < 0 || itemNum >= engine.getPlayer().getInventorySize()) {
             return "\n<b>Invalid item selection.</b>";
         }
-        
-        Item InvenItem = engine.getPlayer().getItem(itemNum);
-        
-        if (!(InvenItem instanceof Utility)) {
+        Item item = engine.getPlayer().getItem(itemNum);
+        return "\n" + item.getDescription();
+    }
+
+    /** Use a potion or utility item from the player’s inventory */
+    public String usePotion(int itemNum) {
+        if (itemNum < 0 || itemNum >= engine.getPlayer().getInventorySize()) {
+            return "\n<b>Invalid item selection.</b>";
+        }
+        Item raw = engine.getPlayer().getItem(itemNum);
+        if (!(raw instanceof Utility)) {
             return "<b>\nYou can't drink or apply that!</b>";
         }
-        
-        Utility potion = (Utility) InvenItem;
-        double Multi = potion.getDamageMulti();
-        int Healing = potion.getHealing();
+        Utility potion = (Utility) raw;
+        double multi = potion.getDamageMulti();
+        int heal    = potion.getHealing();
 
-        int newHp = engine.getPlayer().getHp() + Healing;
-        if (Multi != 0) {
-            engine.getPlayer().setdamageMulti(Multi);
+        // In-memory apply
+        engine.getPlayer().setHp(engine.getPlayer().getHp() + heal);
+        if (multi != 0) {
+            engine.getPlayer().setdamageMulti(multi);
         }
-        engine.getPlayer().setHp(newHp);
         engine.getPlayer().removeItem(itemNum);
-        
-        return "\n<b>" + InvenItem.getName() + " was applied.</b>";
+
+        // DB update: remove from PLAYER_INVENTORY
+        try (Connection conn = DerpyDatabase.getConnection();
+             PreparedStatement del = conn.prepareStatement(
+                 "DELETE FROM PLAYER_INVENTORY WHERE player_id = 1 AND item_id = ?"
+             )) {
+            del.setInt(1, itemNum + 1);
+            del.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to update DB after using potion", e);
+        }
+
+        return "\n<b>" + raw.getName() + " was applied.</b>";
     }
 }

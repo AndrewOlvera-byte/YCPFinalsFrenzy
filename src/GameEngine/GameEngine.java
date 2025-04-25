@@ -3,6 +3,7 @@ package GameEngine;
 import java.util.*;
 import models.*;
 
+
 public class GameEngine {
     private Player player;
     private boolean isRunning = false;
@@ -30,15 +31,18 @@ public class GameEngine {
     }
     
     // called after creating the GameEngine instantiation in the session to load the current data and set isRunning to true
+    
     public void start() {
+        DatabaseInitializer.initialize();
+        System.out.println("Seeding DB for the first time…");
         loadData();
         this.isRunning = true;
     }
-    
     // "loads data" from .csv file in future but for now is where we create the instantiation of the game state for our demo
     public void loadData() {
         roomManager.loadRooms();
         playerManager.loadPlayer();
+        GameStateManager.loadState(this);
         this.currentRoomNum = 0;
         String roomName = getCurrentRoomName();
     }

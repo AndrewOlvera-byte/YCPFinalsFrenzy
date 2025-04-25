@@ -1,0 +1,8 @@
+from_room_id,direction,to_room_id
+1,North,2
+1,Shuttle,3
+2,East,3
+2,South,1
+3,West,2
+3,Shuttle,4
+4,Shuttle,1

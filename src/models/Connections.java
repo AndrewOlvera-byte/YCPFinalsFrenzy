@@ -23,9 +23,11 @@ public class Connections {
     }
 
     public void connectRooms(int fromRoomId, int toRoomId, String direction) {
-        // Mapping the direction (north, south, east, west) to the destination room ID
-        roomConnections.get(fromRoomId).put(direction, toRoomId);
+        roomConnections
+            .computeIfAbsent(fromRoomId, k -> new HashMap<String,Integer>())
+            .put(direction, toRoomId);
     }
+
 
     /*public boolean canMove(int currentRoomId, String direction, String playerKey) {
         if (!roomConnections.get(currentRoomId).containsKey(direction)) {

@@ -1,0 +1,3 @@
+npc_id,name,hp,aggression,damage,long_description,short_description
+1,Moe,160,true,80,<b>Powerful man. Don't mess around!</b>,<b>That's Moe!</b>
+2,Curly,400,false,5,<b>Curly stands in front of you. He looks content. Must be a Civil Engineer.</b>,<b>It's Curly!</b>

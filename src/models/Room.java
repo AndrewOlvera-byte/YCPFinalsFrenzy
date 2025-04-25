@@ -1,5 +1,6 @@
 package models;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Room
 {
@@ -222,6 +223,21 @@ public class Room
 		}
 		return message;
 	}
+    /** Allow managers to fetch and mutate the room’s inventory */
+    public Inventory getInventory() {
+        return this.inventory;
+    }
+
+    /** Allow managers to wire up connections from ROOM_CONNECTIONS */
+    public Connections getConnections() {
+        return this.connections;
+    }
+
+    /** Allow managers to add NPCs into the room */
+    public List<Character> getCharacterContainer() {
+        return this.characterContainer;
+    }
+
 	
 	public void setDescription(String longdescription, String shortdescription) {
 		this.longdescription = longdescription;

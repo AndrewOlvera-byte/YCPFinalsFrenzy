@@ -1,0 +1,2 @@
+player_id,name,hp,skill_points,damage_multi,long_description,short_description
+1,Cooper,200,0,1.0,"<b>It's you! You know, you!</b>","<b>You.</b>"

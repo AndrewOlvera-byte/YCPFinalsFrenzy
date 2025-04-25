@@ -1,201 +1,273 @@
 package models;
 
+import java.sql.*;
 import java.util.*;
-
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import GameEngine.GameEngine;
-import models.*;
+import models.DerpyDatabase;
 
 public class RoomManager {
     private GameEngine engine;
-    
+
     public RoomManager(GameEngine engine) {
         this.engine = engine;
     }
-    
-    // Gets the current room object
-    public Room getCurrentRoom() {
-        return engine.getRooms().get(engine.getCurrentRoomNum());
-    }
-    
-    // Loading of rooms
-    public void loadRooms() {
-        // Room One: No key required
-        String roomName1 = "Manor South Lobby";
-        String[] components = {};
-        Weapon weapon1 = new Weapon(20, 30, "Sword", components, 80, "<b>A rusty sword. Doesn't really fit in your bag.</b>", "<b>A sword.</b>");
-        ArrayList<Item> itemContainer1 = new ArrayList<>();
-        itemContainer1.add(weapon1);
-        Utility potion1 = new Utility(10, 1, "Potion", null, "<b>A red potion that has \"POTION\" written across it. (+40 health)</b>", "<b>+40 Health potion.</b>",40,0);
-        itemContainer1.add(potion1);
-        Utility potion2 = new Utility(10, 1, "Damage Up", null, "<b>An orange potion that has \"DAMAGE UP\" written across it. (x1.2 damage)</b>", "<b>x1.2 Damage potion.</b>",0,1.2);
-        itemContainer1.add(potion2);
-        Inventory inventory1 = new Inventory(itemContainer1, 300);
-        Connections connections1 = new Connections();
-        connections1.setConnection("North", 1);
-        connections1.setConnection("East", null);
-        connections1.setConnection("South", null);
-        connections1.setConnection("West", null);
-        connections1.setConnection("Shuttle", 2);
-        ArrayList<models.Character> characterContainer1 = new ArrayList<>();
-        Room newRoom1 = new Room(roomName1, inventory1, connections1, characterContainer1, "<b>You are standing inside the lobby of Manor South. It smells bad in here.</b>", "<b>You glance around the Manor South Lobby.</b>");
-        engine.getRooms().add(newRoom1);
-        
-        // Room Two: No key required
-        String roomName2 = "Manors Road";
-        ArrayList<Item> itemContainer2 = new ArrayList<>();
-        Inventory inventory2 = new Inventory(itemContainer2, 300);
-        Connections connections2 = new Connections();
-        connections2.setConnection("North", null);
-        connections2.setConnection("East", 2);
-        connections2.setConnection("South", 0);
-        connections2.setConnection("West", null);
-        
-        ArrayList<Item> itemContainerBoss = new ArrayList<>();
-        String[] componentsBoss = {};
-        Weapon weaponBoss = new Weapon(20, 30, "Trident", componentsBoss, 90, "<b>A sharp three pronged weapon. You could make like, at least two roasted marshmallows.</b>", "<b>A trident.</b>");
-        itemContainerBoss.add(weaponBoss);
-        Item goldKey = new Item(0, 1, "Gold Key", new String[]{}, "<b>A super shiny key! Probably unlocks a door, but what do I know.</b>", "<b>A key!</b>");
-        itemContainerBoss.add(goldKey);
-        Inventory inventoryBoss = new Inventory(itemContainerBoss, 300);
-        ArrayList<models.Character> characterContainer2 = new ArrayList<>();
-        // Example NPC boss added to room two
-        models.NPC boss = new NPC("Moe", 160, true, null, 80, inventoryBoss, "<b>Powerful man. Don't mess around!</b>", "<b>That's Moe!</b>");
-        characterContainer2.add(boss);
-        Room newRoom2 = new Room(roomName2, inventory2, connections2, characterContainer2, "<b>You are standing in front of the Slums- I mean the Manors.</b>", "<b>You look out at the road out front of the Manors.</b>");
-        engine.getRooms().add(newRoom2);
-        
-        // Room Three: Requires the "gold key" to enter
-        String roomName3 = "The Student Union";
-        ArrayList<Item> itemContainer3 = new ArrayList<>();
-        Inventory inventory3 = new Inventory(itemContainer3, 300);
-        Connections connections3 = new Connections();
-        connections3.setConnection("North", null);
-        connections3.setConnection("East", null);
-        connections3.setConnection("South", null);
-        connections3.setConnection("West", 1);
-        connections3.setConnection("Shuttle", 3);
-        
-        ArrayList<Item> itemContainerFriend = new ArrayList<>();
-        String[] componentsFriend = {};
-        Item shuttlePass = new Item(0,1, "Shuttle Pass", new String[] {}, "</b>A blue pass to ride the shuttle. The road awaits!</b>", "<b>A shuttle pass.</b>");
-        itemContainer3.add(shuttlePass);
-        Weapon weaponFriend = new Weapon(20, 30, "Paint Brush", componentsFriend, 1, "<b>Paint your enemies??</b>", "<b>A paint brush.</b>");
-        itemContainerFriend.add(weaponFriend);
-        Inventory inventoryFriend = new Inventory(itemContainerFriend, 300);
-        ArrayList<models.Character> characterContainer3 = new ArrayList<>();
-        NPC Friend = new NPC("Curly", 400, false, null, 5,inventoryFriend, "<b>Curly stands in front of you. He looks content. Must be a Civil Engineer.</b>", "<b>It's Curly!</b>");
-        
-        ConversationNode root = new ConversationNode("<b>What's up!</b>");
-        
-        ConversationNode good = new ConversationNode("<b>A paint brush, check this out!</b>");
-        good.setDropItem(true);
-        good.setItemToDrop(0);
-        
-        ConversationNode bad = new ConversationNode("<b>I thought we were friends!</b>");
-        bad.setBecomeAggressive(true);
-        
-        ConversationTree conversationTree = new ConversationTree(root);
-        root.addResponse("<b>1. Hey Curly, what's that you got?</b>", good);
-        root.addResponse("<b>2. AHHHH [Attack]</b>", bad);
 
-        
-        Friend.addConversationTree(conversationTree);
-        characterContainer3.add(Friend);
-        // Room three requires the "gold key"
-        Room newRoom3 = new Room(roomName3, inventory3, connections3, characterContainer3, "Gold key", "<b>You stand inside the Student Union building, ahead of you is the Dining Hall.</b>", "<b>You glance around the lobby.</b>");
-        engine.getRooms().add(newRoom3);
-        
-        //Room Four: To Show off Shuttle
-        String roomName4 = "The Shuttle Stop";
-        ArrayList<Item> itemContainer4 = new ArrayList<>();
-        Inventory inventory4 = new Inventory(itemContainer4, 300);
-        itemContainer4.add(potion1);
-        Connections connection4 = new Connections();
-        connection4.setConnection("North", null);
-        connection4.setConnection("East", null);
-        connection4.setConnection("South", null);
-        connection4.setConnection("West", null);
-        connection4.setConnection("Shuttle", 0);
-        
-        ArrayList<models.Character> characterContainer4 = new ArrayList<>();
-        Room newRoom4 = new Room(roomName4, inventory4, connection4, characterContainer4, "<b>Looking around West Campus, you see the Rutter's to the west and the road back to main on the east.</b>", "<b>You glance around West Campus.</b>");
-        engine.getRooms().add(newRoom4);
+    // --- Loading from Derby ---
+
+    public void loadRooms() {
+        try (Connection conn = DerpyDatabase.getConnection()) {
+            // 1) Load ROOM base rows
+            PreparedStatement ps = conn.prepareStatement(
+              "SELECT room_id, room_name, required_key, long_description, short_description " +
+              "FROM ROOM ORDER BY room_id");
+            ResultSet rs = ps.executeQuery();
+            List<Room> roomList = new ArrayList<>();
+            while (rs.next()) {
+                roomList.add(new Room(
+                    rs.getString("room_name"),
+                    new Inventory(new ArrayList<>(), 300),
+                    new Connections(),
+                    new ArrayList<>(),
+                    rs.getString("required_key"),
+                    rs.getString("long_description"),
+                    rs.getString("short_description")
+                ));
+            }
+            engine.getRooms().clear();
+            engine.getRooms().addAll(roomList);
+
+            // 2) Load ROOM_CONNECTIONS
+            ps = conn.prepareStatement(
+              "SELECT from_room_id, direction, to_room_id FROM ROOM_CONNECTIONS");
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                int from = rs.getInt("from_room_id") - 1; // zero-based index
+                String dir = rs.getString("direction");
+                int to   = rs.getInt("to_room_id") - 1;
+                Connections con = engine.getRooms().get(from).getConnections();
+                con.setConnection(dir, to);
+            }
+
+            // 3) Load ROOM_INVENTORY
+            ps = conn.prepareStatement(
+              "SELECT room_id, item_id FROM ROOM_INVENTORY");
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                int roomIdx = rs.getInt("room_id") - 1;
+                int itemId  = rs.getInt("item_id");
+                // fetch the ITEM row by itemId, build an Item object (similar to loadPlayer)
+                Item it = loadItemById(conn, itemId);
+                engine.getRooms().get(roomIdx).addItem(it);
+            }
+
+            // 4) (optionally) load NPCs, NPC_INVENTORY, NPC_ROOM, etc.
+        } catch (SQLException ex) {
+            throw new RuntimeException("Failed to load rooms", ex);
+        }
     }
-    
-    // Updates currentRoom to returned int if room is available, and returns true if updated; false otherwise
-    public String updateCurrentRoom(String direction) {
-        Room currentRoom = getCurrentRoom();
-        int newRoomNum = currentRoom.getConnectedRoom(direction);
-        if (newRoomNum != -1) {
-            Room destination = engine.getRooms().get(newRoomNum);
-            String requiredKey = destination.getRequiredKey();
-            
-            // If a key is required, check if the player has it.
-            if (requiredKey != null && !requiredKey.isEmpty()) {
-                if (!engine.getPlayer().hasKey(requiredKey)) {
-                    return "\n<b>You do not have the required key (" + requiredKey + ") to enter " + destination.getRoomName() + ".</b>";
+
+    // helper to pull a single item from the ITEM table
+    /**  
+     * Simple helper: pull a single item (no components) from the ITEM table  
+     * and return the right subclass based on its `type`.  
+     */
+    private Item loadItemById(Connection conn, int id) throws SQLException {
+        String sql =
+            "SELECT value, weight, name, long_description, short_description, " +
+            "       type, healing, damage_multi, attack_damage " +
+            "  FROM ITEM " +
+            " WHERE item_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    throw new SQLException("ITEM " + id + " not found");
+                }
+                int    value       = rs.getInt("value");
+                int    weight      = rs.getInt("weight");
+                String name        = rs.getString("name");
+                String longDesc    = rs.getString("long_description");
+                String shortDesc   = rs.getString("short_description");
+                String type        = rs.getString("type");
+
+                switch (type.toUpperCase()) {
+                    case "UTILITY":
+                        int    healing   = rs.getInt("healing");
+                        double dmgMulti  = rs.getDouble("damage_multi");
+                        return new Utility(
+                            value, weight, name, /*components=*/null,
+                            longDesc, shortDesc,
+                            healing, dmgMulti
+                        );
+
+                    case "WEAPON":
+                        int attackDmg   = rs.getInt("attack_damage");
+                        return new Weapon(
+                            value, weight, name, /*components=*/null,
+                            attackDmg,
+                            longDesc, shortDesc
+                        );
+
+                    default:
+                        return new Item(
+                            value, weight, name, /*components=*/null,
+                            longDesc, shortDesc
+                        );
                 }
             }
-            
-            // Allow the room change.
-            engine.setCurrentRoomNum(newRoomNum);
-            engine.getRooms().get(engine.getCurrentRoomNum()).setRequiredKey(null);
-            return "\n<b>You have entered " + destination.getRoomName() + "!</b>";
         }
-        return "\n<b>There is no room in this direction.</b>";
     }
-    
+
+
+    /**  
+     * Full helper: pull an item plus its components,  
+     * then dispatch to the right subclass based on `type`.  
+     */
+    private Item loadItem(Connection conn, int itemId) throws SQLException {
+        String sql =
+            "SELECT name, value, weight, long_description, short_description, " +
+            "       type, healing, damage_multi, attack_damage " +
+            "  FROM ITEM " +
+            " WHERE item_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, itemId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    throw new SQLException("Item not found: " + itemId);
+                }
+
+                String name      = rs.getString("name");
+                int    value     = rs.getInt("value");
+                int    weight    = rs.getInt("weight");
+                String longDesc  = rs.getString("long_description");
+                String shortDesc = rs.getString("short_description");
+                String type      = rs.getString("type");
+
+                // load components
+                List<String> comps = new ArrayList<>();
+                String compSql = "SELECT component FROM ITEM_COMPONENT WHERE item_id = ?";
+                try (PreparedStatement cps = conn.prepareStatement(compSql)) {
+                    cps.setInt(1, itemId);
+                    try (ResultSet crs = cps.executeQuery()) {
+                        while (crs.next()) {
+                            comps.add(crs.getString("component"));
+                        }
+                    }
+                }
+                String[] components = comps.toArray(new String[0]);
+
+                switch (type.toUpperCase()) {
+                    case "UTILITY": {
+                        int    healing   = rs.getInt("healing");
+                        double dmgMulti  = rs.getDouble("damage_multi");
+                        return new Utility(
+                            value, weight, name, components,
+                            longDesc, shortDesc,
+                            healing, dmgMulti
+                        );
+                    }
+                    case "WEAPON": {
+                        int attackDmg   = rs.getInt("attack_damage");
+                        return new Weapon(
+                            value, weight, name, components,
+                            attackDmg,
+                            longDesc, shortDesc
+                        );
+                    }
+                    default:
+                        return new Item(
+                            value, weight, name, components,
+                            longDesc, shortDesc
+                        );
+                }
+            }
+        }
+    }
+
+
+    // --- Movement & Interaction API (restored) ---
+
+    /** Named by GameEngine.updateCurrentRoom(...) */
+    public String updateCurrentRoom(String direction) {
+        Room current = getCurrentRoom();
+        int destNum = current.getConnectedRoom(direction);
+        if (destNum == -1) {
+            return "\n<b>There is no room in this direction.</b>";
+        }
+        Room dest = engine.getRooms().get(destNum);
+        String req = dest.getRequiredKey();
+        if (req != null && !req.isEmpty()
+                && !engine.getPlayer().hasKey(req)) {
+            return "\n<b>You do not have the required key ("+req+") to enter "
+                   + dest.getRoomName()+".</b>";
+        }
+        engine.setCurrentRoomNum(destNum);
+        dest.setRequiredKey(null);
+        return "\n<b>You have entered "+dest.getRoomName()+"!</b>";
+    }
+
+    /** Used by UIManager & GameEngine for map display */
     public int getMapOutput(String direction) {
-        Room currentRoom = getCurrentRoom();
-        int output = currentRoom.getConnectedRoom(direction);
-        return output;
+        return getCurrentRoom().getConnectedRoom(direction);
     }
-    
+
     public String getCurrentRoomName() {
-        Room currentRoom = getCurrentRoom();
-        return currentRoom.getRoomName();
+        return getCurrentRoom().getRoomName();
     }
-    
+
     public String getRoomName(int roomNum) {
         if (roomNum < 0 || roomNum >= engine.getRooms().size()) {
             return "Unknown Room";
         }
-        Room currentRoom = engine.getRooms().get(roomNum);
-        return currentRoom.getRoomName();
+        return engine.getRooms().get(roomNum).getRoomName();
     }
-    
-    // Helper method to convert from a char name to its ID
+
+    /** Helper to get the actual Room object */
+    public Room getCurrentRoom() {
+        return engine.getRooms().get(engine.getCurrentRoomNum());
+    }
+
+    /** Character lookup by name */
     public int CharNameToID(String name) {
-        int charNum = -1; // set to -1 so if there is no char found it will return -1
-        Room currentRoom = getCurrentRoom();
-        for (int i = 0; i < currentRoom.getCharacterTotal(); i++) {
-            if (name.equalsIgnoreCase(currentRoom.getCharacterName(i))) {
-                charNum = i;
+        Room room = getCurrentRoom();
+        for (int i = 0; i < room.getCharacterContainer().size(); i++) {
+            if (room.getCharacterContainer().get(i)
+                    .getName().equalsIgnoreCase(name)) {
+                return i;
             }
         }
-        return charNum;
+        return -1;
     }
-    
-    public String examineCharacter(int charNum) {
-        if(charNum == -1) {
-            return "\n<b>Examine what Character?</b>";
-        }
-        
-        if(charNum < 0 || charNum >= getCurrentRoom().getCharacterContainerSize()) {
+
+    /** NPC interaction stubs */
+    public String talkToNPC(int idx) {
+        return getCurrentRoom().talkToNPC(idx);
+    }
+    public String[] getResponseOptions(int idx) {
+        return getCurrentRoom().getNPCResponseOptions(idx);
+    }
+    public String interactWithNPC(String choice, int idx) {
+        return getCurrentRoom().interactWithNPC(choice, idx);
+    }
+
+    /** Examine a character */
+    public String examineCharacter(int idx) {
+        if (idx < 0 || idx >= getCurrentRoom().getCharacterContainer().size()) {
             return "\n<b>Invalid Character selection.</b>";
         }
-        
-        Character character = getCurrentRoom().getCharacter(charNum);
-        return"\n<b>" + character.getCharDescription() + "</b>";
+        return "\n<b>"+ getCurrentRoom()
+               .getCharacter(idx).getCharDescription() +"</b>";
     }
-    
     public String getGo(String noun) {
-        String direction = "";
-        final Set<String> NORTH = new HashSet<>(Arrays.asList("North", "north", "N", "n"));
-        final Set<String> SOUTH = new HashSet<>(Arrays.asList("South", "south", "s", "S"));
-        final Set<String> EAST  = new HashSet<>(Arrays.asList("East", "east", "E", "e"));
-        final Set<String> WEST  = new HashSet<>(Arrays.asList("West", "west", "W", "w"));
-        
+        String direction;
+        final Set<String> NORTH = new HashSet<>(Arrays.asList("North","north","N","n"));
+        final Set<String> SOUTH = new HashSet<>(Arrays.asList("South","south","S","s"));
+        final Set<String> EAST  = new HashSet<>(Arrays.asList("East","east","E","e"));
+        final Set<String> WEST  = new HashSet<>(Arrays.asList("West","west","W","w"));
+
         if (NORTH.contains(noun)) {
             direction = "North";
         } else if (SOUTH.contains(noun)) {
@@ -205,66 +277,26 @@ public class RoomManager {
         } else if (WEST.contains(noun)) {
             direction = "West";
         } else {
-            return "\n<b>This is not a valid direction</b>";
+            return "\n<b>This is not a valid direction.</b>";
         }
-        
-        // Call updateCurrentRoom once and capture its returned message.
+
+        // Delegate to our existing updateCurrentRoom(...)
         String newMessage = updateCurrentRoom(direction);
-        
-        // Append the new message once to runningMessage.
         engine.appendMessage(newMessage);
-        
-        // Return only the new message
         return newMessage;
     }
-    
+
+    /**
+     * Handle the “shuttle” command (requires the shuttle pass).
+     */
     public String getOnShuttle() {
-        String newMessage = "";
-        
-        if(engine.getPlayer().hasKey("Shuttle Pass")) {
-            String direction = "Shuttle";
-            newMessage = updateCurrentRoom(direction);
-            engine.appendMessage(newMessage);
+        String newMessage;
+        if (engine.getPlayer().hasKey("Shuttle Pass")) {
+            newMessage = updateCurrentRoom("Shuttle");
+        } else {
+            newMessage = "\n<b>You do not have the Shuttle Pass.</b>";
         }
-        else {
-            newMessage = "<b>\nYou do not have the Shuttle Pass.</b>";
-            engine.appendMessage(newMessage);
-        }
-        
+        engine.appendMessage(newMessage);
         return newMessage;
-    }
-    
-    // NPC interaction methods
-    public String talkToNPC(int characterNum) {
-        Room currentRoom = getCurrentRoom();
-        return currentRoom.talkToNPC(characterNum);
-    }
-    
-    public String[] getResponseOptions(int characterNum) {
-        Room currentRoom = getCurrentRoom();
-        return currentRoom.getNPCResponseOptions(characterNum);
-    }
-    
-    public String interactWithNPC(String choice, int characterNum) {
-        Room currentRoom = getCurrentRoom();
-        NPC npc = (NPC) currentRoom.getCharacter(characterNum);
-        String result = npc.interact(choice);
-
-        // Handle aggression toggle
-        if (npc.isCurrentNodeToAggressive()) {
-            npc.setAgression(true);
-            result += "<b>\n" + npc.getName() + " is now hostile!</b>";
-        }
-
-        // Handle item drop
-        if (npc.isCurrentNodeDropItem()) {
-            int dropItemIndex = npc.getItemToDrop();
-            Item item = npc.getInventory().getItem(dropItemIndex);
-            npc.getInventory().removeItem(dropItemIndex);
-            currentRoom.addItem(item);
-            result += "<b>\n" + npc.getName() + " dropped a " + item.getName() + "!</b>";
-        }
-
-        return result;
     }
 }
