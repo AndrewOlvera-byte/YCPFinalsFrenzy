@@ -26,7 +26,11 @@ public class CombatManager {
         
         Room currentRoom = engine.getRooms().get(engine.getCurrentRoomNum());
         double damageMulti = engine.getPlayer().getdamageMulti();
-        double attackDmg = engine.getPlayer().getAttackDmg(itemNum) * damageMulti;
+        double boost = 0;
+        if (engine.getPlayer() instanceof AttackPlayer) {
+        	 boost = ((AttackPlayer)engine.getPlayer()).getAttackBoost();
+        }
+        double attackDmg = engine.getPlayer().getAttackDmg(itemNum) * damageMulti + boost;
         int charHealth = currentRoom.getCharacterHealth(characterNum);
         double newHealth = charHealth - attackDmg;
         
@@ -73,6 +77,12 @@ public class CombatManager {
         }
 
         int attackDmg = currentRoom.getCharacterAttackDmg(characterNum, itemNum);
+        if (engine.getPlayer() instanceof DefensePlayer) {
+        	 attackDmg -= ((DefensePlayer)engine.getPlayer()).getDefenseBoost();
+        	 if(attackDmg < 0) {
+        		 attackDmg = 0;
+        	 }
+        }
         int playerHealth = engine.getPlayer().getHp();
 
         engine.getPlayer().setHp(playerHealth - attackDmg);
