@@ -1,0 +1,4 @@
+conversation_id,node_id,is_root,message,becomeAggressive,dropItem,itemToDrop
+Curly,root,true,<b>What's up!</b>,false,false,0
+Curly,good,false,"<b>A paint brush, check this out!</b>",false,true,0
+Curly,bad,false,<b>I thought we were friends!</b>,true,false,0

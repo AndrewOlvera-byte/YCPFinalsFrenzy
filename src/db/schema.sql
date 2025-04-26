@@ -100,3 +100,29 @@ CREATE TABLE GAME_STATE (
   damage_multi  DOUBLE,
   last_saved    TIMESTAMP
 );
+
+-- 5) Conversation node then edges
+CREATE TABLE conversation_nodes (
+  conversation_id     VARCHAR(100)   NOT NULL,
+  node_id             VARCHAR(100)   NOT NULL,
+  is_root             BOOLEAN        DEFAULT FALSE,
+  message             VARCHAR(4000),
+  become_aggressive   BOOLEAN        DEFAULT FALSE,
+  drop_item           BOOLEAN        DEFAULT FALSE,
+  item_to_drop        INT            DEFAULT 0,
+  PRIMARY KEY (conversation_id, node_id)
+);
+
+CREATE TABLE conversation_edges (
+  conversation_id     VARCHAR(100)   NOT NULL,
+  parent_node_id      VARCHAR(100)   NOT NULL,
+  input_key           VARCHAR(4000)  NOT NULL,
+  child_node_id       VARCHAR(100)   NOT NULL,
+  FOREIGN KEY (conversation_id, parent_node_id)
+    REFERENCES conversation_nodes(conversation_id, node_id)
+    ON DELETE CASCADE,
+  FOREIGN KEY (conversation_id, child_node_id)
+    REFERENCES conversation_nodes(conversation_id, node_id)
+    ON DELETE CASCADE
+);
+

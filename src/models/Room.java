@@ -219,7 +219,7 @@ public class Room
 			Item item = npc.getItem(itemNum);
 			this.inventory.addItem(item);
 			npc.removeItem(itemNum);
-			message += "\n" + npc.getName() + " dropped" + item.getName();
+			message += "\n<b>" + npc.getName() + " dropped " + item.getName() + "</b>";
 		}
 		return message;
 	}

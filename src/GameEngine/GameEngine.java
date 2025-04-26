@@ -2,6 +2,7 @@ package GameEngine;
 
 import java.util.*;
 import models.*;
+import models.Character;
 
 
 public class GameEngine {
@@ -19,6 +20,7 @@ public class GameEngine {
     private CombatManager combatManager;
     private InventoryManager inventoryManager;
     private UIManager uiManager;
+    private ConversationManager conversationManager;
     
     // Empty instantiation so data can be loaded using loadData()
     public GameEngine() {
@@ -28,6 +30,7 @@ public class GameEngine {
         this.combatManager = new CombatManager(this);
         this.inventoryManager = new InventoryManager(this);
         this.uiManager = new UIManager(this);
+        this.conversationManager = new ConversationManager(this);
     }
     
     // called after creating the GameEngine instantiation in the session to load the current data and set isRunning to true
@@ -41,6 +44,19 @@ public class GameEngine {
     // "loads data" from .csv file in future but for now is where we create the instantiation of the game state for our demo
     public void loadData() {
         roomManager.loadRooms();
+        
+     // Read all nodes/edges into memory
+        conversationManager.loadConversations();
+        for (Room room : getRooms()) {
+            for (Character npc : room.getCharacterContainer()) {
+                ConversationTree tree = conversationManager.getConversation(npc.getName());
+                if (tree != null) {
+                    if (npc instanceof NPC) {
+                        ((NPC) npc).addConversationTree(tree);
+                    }
+                }
+            }
+        }
         playerManager.loadPlayer();
         GameStateManager.loadState(this);
         this.currentRoomNum = getCurrentRoomNum();;
@@ -222,6 +238,11 @@ public class GameEngine {
     
     public String getCurrentRoomNumber() {
         return String.valueOf(currentRoomNum + 1);
+    }
+    
+    // conversation manager if needed
+    public ConversationManager getConversationManager() {
+        return conversationManager;
     }
     
     // Main display method for constructing Response

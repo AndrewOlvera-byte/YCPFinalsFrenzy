@@ -40,6 +40,8 @@ public class DatabaseInitializer {
                 seedTable(conn, "player.csv",          "INSERT INTO PLAYER VALUES (?, ?, ?, ?, ?, ?, ?)");
                 seedTable(conn, "room_inventory.csv",  "INSERT INTO ROOM_INVENTORY VALUES (?, ?)");
                 seedTable(conn, "player_inventory.csv","INSERT INTO PLAYER_INVENTORY VALUES (?, ?)");
+                seedTable(conn, "conversation_nodes.csv","INSERT INTO CONVERSATION_NODES VALUES (?, ?, ?, ?, ?, ?, ?)");
+                seedTable(conn, "conversation_edges.csv","INSERT INTO CONVERSATION_EDGES VALUES (?, ?, ?, ?)");
             }
         } catch (Exception e) {
             throw new RuntimeException("DB initialization failed", e);
@@ -115,22 +117,54 @@ public class DatabaseInitializer {
 
     private static void seedTable(Connection conn, String csvFile, String insertSql) throws Exception {
         try (InputStream in = DatabaseInitializer.class.getResourceAsStream("/db/" + csvFile);
-             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-             PreparedStatement ps = conn.prepareStatement(insertSql)) {
+             BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
 
-            String line = reader.readLine(); // skip header
-            while ((line = reader.readLine()) != null) {
-                String[] cols = parseCSVLine(line);
-                for (int i = 0; i < cols.length; i++) {
-                    String val = cols[i];
-                    if (val.startsWith("\"") && val.endsWith("\"")) {
-                        val = val.substring(1, val.length() - 1);
-                    }
-                    ps.setString(i + 1, val.isEmpty() ? null : val);
-                }
-                ps.addBatch();
+            // Read and parse header line to get column names
+            String headerLine = reader.readLine();
+            if (headerLine == null) {
+                return; // no data
             }
-            ps.executeBatch();
+            String[] headers = parseCSVLine(headerLine);
+
+            // Prepare statement
+            try (PreparedStatement ps = conn.prepareStatement(insertSql)) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] cols = parseCSVLine(line);
+                    for (int i = 0; i < cols.length; i++) {
+                        String header = headers[i].trim();
+                        String val    = cols[i].trim();
+                        // Unwrap quoted values
+                        if (val.startsWith("\"") && val.endsWith("\"")) {
+                            val = val.substring(1, val.length() - 1);
+                        }
+                        if (val.isEmpty()) {
+                            ps.setNull(i + 1, Types.VARCHAR);
+                        }
+                        // Boolean fields (underscore or camelCase)
+                        else if (header.equalsIgnoreCase("is_root")) {
+                            ps.setBoolean(i + 1, Boolean.parseBoolean(val));
+                        } else if (header.equalsIgnoreCase("become_aggressive")
+                                || header.equalsIgnoreCase("becomeAggressive")) {
+                            ps.setBoolean(i + 1, Boolean.parseBoolean(val));
+                        } else if (header.equalsIgnoreCase("drop_item")
+                                || header.equalsIgnoreCase("dropItem")) {
+                            ps.setBoolean(i + 1, Boolean.parseBoolean(val));
+                        }
+                        // Integer field (underscore or camelCase)
+                        else if (header.equalsIgnoreCase("item_to_drop")
+                                || header.equalsIgnoreCase("itemToDrop")) {
+                            ps.setInt(i + 1, Integer.parseInt(val));
+                        }
+                        // Default string binding
+                        else {
+                            ps.setString(i + 1, val);
+                        }
+                    }
+                    ps.addBatch();
+                }
+                ps.executeBatch();
+            }
         }
     }
 }

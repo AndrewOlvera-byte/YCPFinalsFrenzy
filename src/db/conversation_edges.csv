@@ -1,0 +1,3 @@
+conversation_id,parent_node_id,input_key,child_node_id
+Curly,root,"<b>1. Hey Curly, what's that you got?</b>",good
+Curly,root,<b>2. AHHHH [Attack]</b>,bad

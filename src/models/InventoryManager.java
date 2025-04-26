@@ -19,7 +19,7 @@ public class InventoryManager {
     /** Pick up an item from the current room into the player’s inventory */
     public String pickupItem(int itemNum) {
         if (itemNum < 0) {
-            return "\nPick up what?";
+            return "\n<b>Pick up what?</b>";
         }
         // In-memory move
         Room room = engine.getRooms().get(engine.getCurrentRoomNum());
