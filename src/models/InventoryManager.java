@@ -146,7 +146,7 @@ public class InventoryManager {
         // In-memory apply
         engine.getPlayer().setHp(engine.getPlayer().getHp() + heal);
         if (multi != 0) {
-            engine.getPlayer().setdamageMulti(multi);
+            engine.getPlayer().setdamageMulti(multi + engine.getPlayer().getdamageMulti());
         }
         engine.getPlayer().removeItem(itemNum);
 
