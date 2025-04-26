@@ -322,7 +322,6 @@ public class RoomManager {
 
         // Delegate to our existing updateCurrentRoom(...)
         String newMessage = updateCurrentRoom(direction);
-        engine.appendMessage(newMessage);
         return newMessage;
     }
 
@@ -336,7 +335,6 @@ public class RoomManager {
         } else {
             newMessage = "\n<b>You do not have the Shuttle Pass.</b>";
         }
-        engine.appendMessage(newMessage);
         return newMessage;
     }
 }
