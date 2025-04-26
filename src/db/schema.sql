@@ -1,13 +1,18 @@
 -- 1) Core entity tables
+-- in schema.sql, either…
 CREATE TABLE PLAYER (
-  player_id      INT PRIMARY KEY,
-  name           VARCHAR(255),
-  hp             INT,
-  skill_points   INT,
-  damage_multi   DOUBLE,
-  long_description   VARCHAR(1024),
-  short_description  VARCHAR(255)
+  player_id INT PRIMARY KEY,
+  name VARCHAR(100),
+  hp INT,
+  skill_points INT,
+  damage_multi DOUBLE,
+  long_description VARCHAR(1000),
+  short_description VARCHAR(500),
+  player_type VARCHAR(20),
+  attack_boost INT,
+  defense_boost INT
 );
+
 
 
 CREATE TABLE ITEM (

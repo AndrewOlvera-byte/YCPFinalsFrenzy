@@ -20,7 +20,7 @@ public class PlayerManager {
             try (PreparedStatement ps = conn.prepareStatement(sql);
                  ResultSet rs = ps.executeQuery()) {
                 if (!rs.next()) {
-                    throw new SQLException("No PLAYER with ID=1");
+                    throw new SQLException("No PLAYER with ID=2");
                 }
                 String name  = rs.getString("name");
                 int    hp    = rs.getInt("hp");
