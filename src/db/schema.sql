@@ -103,6 +103,7 @@ CREATE TABLE GAME_STATE (
   current_room  INT,
   player_hp     INT,
   damage_multi  DOUBLE,
+  running_message CLOB,    -- Adding column for runningMessage persistence
   last_saved    TIMESTAMP
 );
 

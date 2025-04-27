@@ -105,6 +105,10 @@ public class GameEngine {
         return runningMessage;
     }
     
+    public void setRunningMessage(String message) {
+        this.runningMessage = message;
+    }
+    
     public void appendMessage(String message) { 
         this.runningMessage += message;
     }

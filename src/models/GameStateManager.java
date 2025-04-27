@@ -8,15 +8,20 @@ public class GameStateManager {
     public static void loadState(GameEngine engine) {
         try (Connection conn = DerbyDatabase.getConnection();
              PreparedStatement ps = conn.prepareStatement(
-               "SELECT current_room, player_hp, damage_multi "
+               "SELECT current_room, player_hp, damage_multi, running_message "
              + "FROM GAME_STATE WHERE state_id = 1");
              ResultSet rs = ps.executeQuery()) {
 
             if (rs.next()) {
                 engine.setCurrentRoomNum(rs.getInt("current_room") - 1);
                 engine.getPlayer().setHp(rs.getInt("player_hp"));
-             
                 engine.getPlayer().setdamageMulti(rs.getDouble("damage_multi"));
+                
+                // Load the running message
+                String runningMessage = rs.getString("running_message");
+                if (runningMessage != null) {
+                    engine.setRunningMessage(runningMessage);
+                }
             }
         } catch (SQLException e) {
             throw new RuntimeException("Failed to load game state", e);
@@ -43,26 +48,29 @@ public class GameStateManager {
                     "   SET current_room = ?, " +
                     "       player_hp    = ?, " +
                     "       damage_multi = ?, " +
+                    "       running_message = ?, " +
                     "       last_saved   = CURRENT_TIMESTAMP " +
                     " WHERE state_id     = 1";
                 try (PreparedStatement ps = conn.prepareStatement(updateSql)) {
                     ps.setInt   (1, engine.getCurrentRoomNum() + 1);
                     ps.setInt   (2, engine.getPlayer().getHp());
                     ps.setDouble(3, engine.getPlayer().getdamageMulti());
+                    ps.setString(4, engine.getRunningMessage());
                     ps.executeUpdate();
                 }
             } else {
                 // 2b) INSERT a brand-new row
                 String insertSql =
                     "INSERT INTO GAME_STATE(" +
-                    "    state_id, current_room, player_hp, damage_multi, last_saved" +
+                    "    state_id, current_room, player_hp, damage_multi, running_message, last_saved" +
                     ") VALUES (" +
-                    "    1, ?, ?, ?, CURRENT_TIMESTAMP" +
+                    "    1, ?, ?, ?, ?, CURRENT_TIMESTAMP" +
                     ")";
                 try (PreparedStatement ps = conn.prepareStatement(insertSql)) {
                     ps.setInt   (1, engine.getCurrentRoomNum() + 1);
                     ps.setInt   (2, engine.getPlayer().getHp());
                     ps.setDouble(3, engine.getPlayer().getdamageMulti());
+                    ps.setString(4, engine.getRunningMessage());
                     ps.executeUpdate();
                 }
             }
