@@ -1,6 +1,12 @@
 package models;
 import java.util.ArrayList;
 import java.util.List;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import models.DerbyDatabase;
 
 public class Room
 {
@@ -82,6 +88,104 @@ public class Room
         for (Item item : droppedItems) {
             this.addItem(item);
         }
+        
+        // Update the database to reflect items dropped from a character death
+        try (Connection conn = DerbyDatabase.getConnection()) {
+            // Find character ID (different approach for NPC vs player)
+            int characterId = -1;
+            String tableName = null;
+            String idColumnName = null;
+            
+            if (slainChar instanceof NPC) {
+                tableName = "NPC_INVENTORY";
+                idColumnName = "npc_id";
+                
+                // Get NPC ID
+                try (PreparedStatement psChar = conn.prepareStatement(
+                    "SELECT npc_id FROM NPC WHERE name = ?")) {
+                    psChar.setString(1, slainChar.getName());
+                    ResultSet rsChar = psChar.executeQuery();
+                    if (rsChar.next()) {
+                        characterId = rsChar.getInt("npc_id");
+                    }
+                }
+            } else {
+                // For other character types like Player
+                tableName = "PLAYER_INVENTORY";
+                idColumnName = "player_id";
+                characterId = 1; // Assuming player_id is always 1
+            }
+            
+            // Get this room's ID
+            int roomId = -1;
+            try (PreparedStatement psRoom = conn.prepareStatement(
+                "SELECT room_id FROM ROOM WHERE room_name = ?")) {
+                psRoom.setString(1, this.roomName);
+                ResultSet rsRoom = psRoom.executeQuery();
+                if (rsRoom.next()) {
+                    roomId = rsRoom.getInt("room_id");
+                }
+            }
+            
+            if (characterId != -1 && roomId != -1 && tableName != null) {
+                // For each dropped item
+                for (Item item : droppedItems) {
+                    int itemId = -1;
+                    
+                    // Get item ID
+                    try (PreparedStatement psItem = conn.prepareStatement(
+                        "SELECT item_id FROM ITEM WHERE name = ?")) {
+                        psItem.setString(1, item.getName());
+                        ResultSet rsItem = psItem.executeQuery();
+                        if (rsItem.next()) {
+                            itemId = rsItem.getInt("item_id");
+                        }
+                    }
+                    
+                    if (itemId != -1) {
+                        // 1. Delete from character's inventory
+                        try (PreparedStatement psDel = conn.prepareStatement(
+                            "DELETE FROM " + tableName + " WHERE " + idColumnName + " = ? AND item_id = ?")) {
+                            psDel.setInt(1, characterId);
+                            psDel.setInt(2, itemId);
+                            psDel.executeUpdate();
+                        }
+                        
+                        // 2. Check if item already exists in room inventory
+                        boolean itemInRoom = false;
+                        try (PreparedStatement psCheck = conn.prepareStatement(
+                            "SELECT 1 FROM ROOM_INVENTORY WHERE room_id = ? AND item_id = ?")) {
+                            psCheck.setInt(1, roomId);
+                            psCheck.setInt(2, itemId);
+                            itemInRoom = psCheck.executeQuery().next();
+                        }
+                        
+                        // 3. Insert into ROOM_INVENTORY if not already there
+                        if (!itemInRoom) {
+                            try (PreparedStatement psIns = conn.prepareStatement(
+                                "INSERT INTO ROOM_INVENTORY (room_id, item_id) VALUES (?, ?)")) {
+                                psIns.setInt(1, roomId);
+                                psIns.setInt(2, itemId);
+                                psIns.executeUpdate();
+                            }
+                        }
+                    }
+                }
+                
+                // If it's an NPC, also remove it from NPC_ROOM
+                if (slainChar instanceof NPC) {
+                    try (PreparedStatement psDelNpc = conn.prepareStatement(
+                        "DELETE FROM NPC_ROOM WHERE npc_id = ? AND room_id = ?")) {
+                        psDelNpc.setInt(1, characterId);
+                        psDelNpc.setInt(2, roomId);
+                        psDelNpc.executeUpdate();
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Failed to update database for character death: " + e.getMessage());
+        }
+        
         removeCharacter(characterNum);
     }
     
@@ -220,10 +324,80 @@ public class Room
 			this.inventory.addItem(item);
 			npc.removeItem(itemNum);
 			message += "\n<b>" + npc.getName() + " dropped " + item.getName() + "</b>";
+			
+			// Update the database to reflect the item moving from NPC to room
+			try (Connection conn = DerbyDatabase.getConnection()) {
+				// First, find the NPC's ID and the item's ID in the database
+				int npcId = -1;
+				int itemId = -1;
+				int roomId = -1;
+				
+				// Get NPC ID
+				try (PreparedStatement psNpc = conn.prepareStatement(
+					"SELECT npc_id FROM NPC WHERE name = ?")) {
+					psNpc.setString(1, npc.getName());
+					ResultSet rsNpc = psNpc.executeQuery();
+					if (rsNpc.next()) {
+						npcId = rsNpc.getInt("npc_id");
+					}
+				}
+				
+				// Get item ID
+				try (PreparedStatement psItem = conn.prepareStatement(
+					"SELECT item_id FROM ITEM WHERE name = ?")) {
+					psItem.setString(1, item.getName());
+					ResultSet rsItem = psItem.executeQuery();
+					if (rsItem.next()) {
+						itemId = rsItem.getInt("item_id");
+					}
+				}
+				
+				// Get this room's ID
+				try (PreparedStatement psRoom = conn.prepareStatement(
+					"SELECT room_id FROM ROOM WHERE room_name = ?")) {
+					psRoom.setString(1, this.roomName);
+					ResultSet rsRoom = psRoom.executeQuery();
+					if (rsRoom.next()) {
+						roomId = rsRoom.getInt("room_id");
+					}
+				}
+				
+				// If we found all IDs, update the database
+				if (npcId != -1 && itemId != -1 && roomId != -1) {
+					// 1. Delete from NPC_INVENTORY
+					try (PreparedStatement psDel = conn.prepareStatement(
+						"DELETE FROM NPC_INVENTORY WHERE npc_id = ? AND item_id = ?")) {
+						psDel.setInt(1, npcId);
+						psDel.setInt(2, itemId);
+						psDel.executeUpdate();
+					}
+					
+					// 2. Check if item already exists in room inventory
+					boolean itemInRoom = false;
+					try (PreparedStatement psCheck = conn.prepareStatement(
+						"SELECT 1 FROM ROOM_INVENTORY WHERE room_id = ? AND item_id = ?")) {
+						psCheck.setInt(1, roomId);
+						psCheck.setInt(2, itemId);
+						itemInRoom = psCheck.executeQuery().next();
+					}
+					
+					// 3. Insert into ROOM_INVENTORY if not already there
+					if (!itemInRoom) {
+						try (PreparedStatement psIns = conn.prepareStatement(
+							"INSERT INTO ROOM_INVENTORY (room_id, item_id) VALUES (?, ?)")) {
+							psIns.setInt(1, roomId);
+							psIns.setInt(2, itemId);
+							psIns.executeUpdate();
+						}
+					}
+				}
+			} catch (SQLException e) {
+				System.err.println("Failed to update database for NPC item drop: " + e.getMessage());
+			}
 		}
 		return message;
 	}
-    /** Allow managers to fetch and mutate the room’s inventory */
+    /** Allow managers to fetch and mutate the room's inventory */
     public Inventory getInventory() {
         return this.inventory;
     }

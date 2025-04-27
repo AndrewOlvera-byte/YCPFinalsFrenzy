@@ -2,6 +2,7 @@ package models;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,44 +17,73 @@ public class InventoryManager {
         this.engine = engine;
     }
 
-    /** Pick up an item from the current room into the player’s inventory */
+    /** Pick up an item from the current room into the player's inventory */
     public String pickupItem(int itemNum) {
         if (itemNum < 0) {
             return "\n<b>Pick up what?</b>";
         }
-        // In-memory move
+        
         Room room = engine.getRooms().get(engine.getCurrentRoomNum());
         Item item = room.getItem(itemNum);
         String itemName = item.getName();
-        room.removeItem(itemNum);
-        engine.getPlayer().addItem(item);
-
-        // DB update: remove from ROOM_INVENTORY, add to PLAYER_INVENTORY
+        
+        // Check database first to see if the player already has this item
         try (Connection conn = DerbyDatabase.getConnection()) {
-            // 1) DELETE from ROOM_INVENTORY
-            try (PreparedStatement del = conn.prepareStatement(
-                     "DELETE FROM ROOM_INVENTORY WHERE room_id = ? AND item_id = ?"
-                 )) {
-                del.setInt(1, engine.getCurrentRoomNum() + 1);
-                del.setInt(2, itemNum + 1);
-                del.executeUpdate();
+            // Get the actual item_id from the database
+            int databaseItemId = -1;
+            
+            try (PreparedStatement psGetItemId = conn.prepareStatement(
+                     "SELECT item_id FROM ITEM WHERE name = ?")) {
+                psGetItemId.setString(1, itemName);
+                ResultSet rsItemId = psGetItemId.executeQuery();
+                if (rsItemId.next()) {
+                    databaseItemId = rsItemId.getInt("item_id");
+                }
             }
-            // 2) INSERT into PLAYER_INVENTORY
-         // --- before the INSERT ---
+            
+            // If we couldn't find the item ID in the database, use the itemNum + 1 as fallback
+            if (databaseItemId == -1) {
+                databaseItemId = itemNum + 1;
+            }
+            
             try (PreparedStatement check = conn.prepareStatement(
                      "SELECT 1 FROM PLAYER_INVENTORY WHERE player_id = ? AND item_id = ?")) {
                 check.setInt(1, 1);
-                check.setInt(2, itemNum + 1);
+                check.setInt(2, databaseItemId);
                 if (check.executeQuery().next()) {
-                    // Already in inventory, skip the INSERT
+                    // Already in inventory, don't make any changes
                     return "<b>\nYou already have a " + itemName + ".</b>";
                 }
             }
+            
+            // Only proceed with changes if the item is not already in inventory
+            // In-memory move
+            room.removeItem(itemNum);
+            engine.getPlayer().addItem(item);
 
-            // Now do the INSERT safely:
+            // DB update: remove from ROOM_INVENTORY, add to PLAYER_INVENTORY
+            // 1) DELETE from ROOM_INVENTORY - check if it exists first
+            boolean itemExistsInRoom = false;
+            try (PreparedStatement checkRoom = conn.prepareStatement(
+                     "SELECT 1 FROM ROOM_INVENTORY WHERE room_id = ? AND item_id = ?")) {
+                checkRoom.setInt(1, engine.getCurrentRoomNum() + 1);
+                checkRoom.setInt(2, databaseItemId);
+                itemExistsInRoom = checkRoom.executeQuery().next();
+            }
+            
+            if (itemExistsInRoom) {
+                try (PreparedStatement del = conn.prepareStatement(
+                         "DELETE FROM ROOM_INVENTORY WHERE room_id = ? AND item_id = ?")) {
+                    del.setInt(1, engine.getCurrentRoomNum() + 1);
+                    del.setInt(2, databaseItemId);
+                    del.executeUpdate();
+                }
+            }
+            
+            // 2) INSERT into PLAYER_INVENTORY
             try (PreparedStatement ins = conn.prepareStatement(
                      "INSERT INTO PLAYER_INVENTORY(player_id, item_id) VALUES(1, ?)")) {
-                ins.setInt(1, itemNum + 1);
+                ins.setInt(1, databaseItemId);
                 ins.executeUpdate();
             }
 
@@ -78,20 +108,49 @@ public class InventoryManager {
 
         // DB update: remove from PLAYER_INVENTORY, add to ROOM_INVENTORY
         try (Connection conn = DerbyDatabase.getConnection()) {
+            // Get the actual item_id from the database
+            int databaseItemId = -1;
+            
+            try (PreparedStatement psGetItemId = conn.prepareStatement(
+                     "SELECT item_id FROM ITEM WHERE name = ?")) {
+                psGetItemId.setString(1, itemName);
+                ResultSet rsItemId = psGetItemId.executeQuery();
+                if (rsItemId.next()) {
+                    databaseItemId = rsItemId.getInt("item_id");
+                }
+            }
+            
+            // If we couldn't find the item ID in the database, use the itemNum + 1 as fallback
+            if (databaseItemId == -1) {
+                databaseItemId = itemNum + 1;
+            }
+            
             // 1) DELETE from PLAYER_INVENTORY
             try (PreparedStatement del = conn.prepareStatement(
                      "DELETE FROM PLAYER_INVENTORY WHERE player_id = 1 AND item_id = ?"
                  )) {
-                del.setInt(1, itemNum + 1);
+                del.setInt(1, databaseItemId);
                 del.executeUpdate();
             }
-            // 2) INSERT into ROOM_INVENTORY
-            try (PreparedStatement ins = conn.prepareStatement(
-                     "INSERT INTO ROOM_INVENTORY(room_id, item_id) VALUES(?, ?)"
-                 )) {
-                ins.setInt(1, engine.getCurrentRoomNum() + 1);
-                ins.setInt(2, itemNum + 1);
-                ins.executeUpdate();
+            
+            // 2) Check if the item already exists in the room's inventory
+            boolean itemExistsInRoom = false;
+            try (PreparedStatement checkRoom = conn.prepareStatement(
+                     "SELECT 1 FROM ROOM_INVENTORY WHERE room_id = ? AND item_id = ?")) {
+                checkRoom.setInt(1, engine.getCurrentRoomNum() + 1);
+                checkRoom.setInt(2, databaseItemId);
+                itemExistsInRoom = checkRoom.executeQuery().next();
+            }
+            
+            // Only insert if it doesn't already exist
+            if (!itemExistsInRoom) {
+                try (PreparedStatement ins = conn.prepareStatement(
+                         "INSERT INTO ROOM_INVENTORY(room_id, item_id) VALUES(?, ?)"
+                     )) {
+                    ins.setInt(1, engine.getCurrentRoomNum() + 1);
+                    ins.setInt(2, databaseItemId);
+                    ins.executeUpdate();
+                }
             }
         } catch (SQLException e) {
             throw new RuntimeException("Inventory DB update failed", e);
@@ -111,7 +170,7 @@ public class InventoryManager {
         return -1;
     }
 
-    /** Find the index of an item in the player’s inventory by name */
+    /** Find the index of an item in the player's inventory by name */
     public int CharItemNameToID(String name) {
         for (int i = 0; i < engine.getPlayer().getInventorySize(); i++) {
             if (name.equalsIgnoreCase(engine.getPlayer().getItemName(i))) {
@@ -121,7 +180,7 @@ public class InventoryManager {
         return -1;
     }
 
-    /** Examine the player’s item (long then short description) */
+    /** Examine the player's item (long then short description) */
     public String examineItemName(int itemNum) {
         if (itemNum < 0 || itemNum >= engine.getPlayer().getInventorySize()) {
             return "\n<b>Invalid item selection.</b>";
@@ -130,7 +189,7 @@ public class InventoryManager {
         return "\n" + item.getDescription();
     }
 
-    /** Use a potion or utility item from the player’s inventory */
+    /** Use a potion or utility item from the player's inventory */
     public String usePotion(int itemNum) {
         if (itemNum < 0 || itemNum >= engine.getPlayer().getInventorySize()) {
             return "\n<b>Invalid item selection.</b>";

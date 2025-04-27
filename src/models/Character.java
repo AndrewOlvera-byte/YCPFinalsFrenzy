@@ -1,6 +1,10 @@
 package models;
 import java.util.ArrayList;
 import java.util.List;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class Character {
    protected String name;
@@ -80,6 +84,9 @@ public class Character {
    }
    
    public void removeItem(int itemNum) {
+       if (itemNum < 0 || itemNum >= inventory.getSize()) {
+           return;
+       }
        this.inventory.removeItem(itemNum);
    }
    

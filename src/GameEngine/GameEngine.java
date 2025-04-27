@@ -5,7 +5,7 @@ import models.*;
 import models.Character;  // your NPC base
 
 public class GameEngine {
-    private static final boolean USE_FAKE_DB = true;
+    private static final boolean USE_FAKE_DB = false;
 
     private Player player;
     private boolean isRunning = false;
