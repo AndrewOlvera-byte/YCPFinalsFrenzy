@@ -37,7 +37,7 @@ public class DatabaseInitializer {
                 seedTable(conn, "npcs.csv",            "INSERT INTO NPC VALUES (?, ?, ?, ?, ?, ?, ?)");
                 seedTable(conn, "npc_room.csv",        "INSERT INTO NPC_ROOM VALUES (?, ?)");
                 seedTable(conn, "npc_inventory.csv",   "INSERT INTO NPC_INVENTORY VALUES (?, ?)");
-                seedTable(conn, "player.csv",          "INSERT INTO PLAYER VALUES (?, ?, ?, ?, ?, ?, ?)");
+                seedTable(conn, "player.csv",          "INSERT INTO PLAYER VALUES (?, ?, ?, ?, ?, ?, ?,?,?,?)");
                 seedTable(conn, "room_inventory.csv",  "INSERT INTO ROOM_INVENTORY VALUES (?, ?)");
                 seedTable(conn, "player_inventory.csv","INSERT INTO PLAYER_INVENTORY VALUES (?, ?)");
                 seedTable(conn, "conversation_nodes.csv","INSERT INTO CONVERSATION_NODES VALUES (?, ?, ?, ?, ?, ?, ?)");
