@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import GameEngine.GameEngine;
-import models.DerpyDatabase;
+import models.DerbyDatabase;
 
 public class InventoryManager {
     private GameEngine engine;
@@ -29,7 +29,7 @@ public class InventoryManager {
         engine.getPlayer().addItem(item);
 
         // DB update: remove from ROOM_INVENTORY, add to PLAYER_INVENTORY
-        try (Connection conn = DerpyDatabase.getConnection()) {
+        try (Connection conn = DerbyDatabase.getConnection()) {
             // 1) DELETE from ROOM_INVENTORY
             try (PreparedStatement del = conn.prepareStatement(
                      "DELETE FROM ROOM_INVENTORY WHERE room_id = ? AND item_id = ?"
@@ -77,7 +77,7 @@ public class InventoryManager {
         room.addItem(item);
 
         // DB update: remove from PLAYER_INVENTORY, add to ROOM_INVENTORY
-        try (Connection conn = DerpyDatabase.getConnection()) {
+        try (Connection conn = DerbyDatabase.getConnection()) {
             // 1) DELETE from PLAYER_INVENTORY
             try (PreparedStatement del = conn.prepareStatement(
                      "DELETE FROM PLAYER_INVENTORY WHERE player_id = 1 AND item_id = ?"
@@ -151,7 +151,7 @@ public class InventoryManager {
         engine.getPlayer().removeItem(itemNum);
 
         // DB update: remove from PLAYER_INVENTORY
-        try (Connection conn = DerpyDatabase.getConnection();
+        try (Connection conn = DerbyDatabase.getConnection();
              PreparedStatement del = conn.prepareStatement(
                  "DELETE FROM PLAYER_INVENTORY WHERE player_id = 1 AND item_id = ?"
              )) {

@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import GameEngine.GameEngine;
-import models.DerpyDatabase;
+import models.DerbyDatabase;
 
 public class RoomManager {
     private GameEngine engine;
@@ -18,7 +18,7 @@ public class RoomManager {
     // --- Loading from Derby ---
 
     public void loadRooms() {
-        try (Connection conn = DerpyDatabase.getConnection()) {
+        try (Connection conn = DerbyDatabase.getConnection()) {
             // 1) Load ROOM base rows
             PreparedStatement ps = conn.prepareStatement(
               "SELECT room_id, room_name, required_key, long_description, short_description " +

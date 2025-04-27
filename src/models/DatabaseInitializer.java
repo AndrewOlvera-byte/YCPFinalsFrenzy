@@ -11,7 +11,7 @@ public class DatabaseInitializer {
 
     /** Run on GameEngine.start(): create tables and seed CSVs if needed */
     public static void initialize() {
-        try (Connection conn = DerpyDatabase.getConnection()) {
+        try (Connection conn = DerbyDatabase.getConnection()) {
             boolean alreadySeeded = false;
 
             // 1) Check if ROOM exists and has rows

@@ -6,7 +6,7 @@ import GameEngine.GameEngine;
 public class GameStateManager {
     /** Call this at GameEngine.start() before loadData() */
     public static void loadState(GameEngine engine) {
-        try (Connection conn = DerpyDatabase.getConnection();
+        try (Connection conn = DerbyDatabase.getConnection();
              PreparedStatement ps = conn.prepareStatement(
                "SELECT current_room, player_hp, damage_multi "
              + "FROM GAME_STATE WHERE state_id = 1");
@@ -25,7 +25,7 @@ public class GameStateManager {
 
     /** Call this after every turn or action that changes state */
     public static void saveState(GameEngine engine) {
-        try (Connection conn = DerpyDatabase.getConnection()) {
+        try (Connection conn = DerbyDatabase.getConnection()) {
             // 1) Check if state row already exists
             boolean exists;
             try (PreparedStatement check = conn.prepareStatement(

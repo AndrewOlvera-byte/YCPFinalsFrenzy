@@ -3,7 +3,7 @@ package models;
 import java.sql.*;
 import java.util.*;
 import GameEngine.GameEngine;
-import models.DerpyDatabase;
+import models.DerbyDatabase;
 
 public class PlayerManager {
     private GameEngine engine;
@@ -13,7 +13,7 @@ public class PlayerManager {
     }
 
     public void loadPlayer() {
-        try (Connection conn = DerpyDatabase.getConnection()) {
+        try (Connection conn = DerbyDatabase.getConnection()) {
             // 1) load main record (we assume ID=1)
             String sql = "SELECT name, hp, skill_points, damage_multi, long_description, short_description "
                        + "FROM PLAYER WHERE player_id = 1";

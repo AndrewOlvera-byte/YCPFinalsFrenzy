@@ -4,7 +4,7 @@ import java.sql.*;
 import java.util.*;
 
 import GameEngine.GameEngine;
-import models.DerpyDatabase;
+import models.DerbyDatabase;
 
 public class ConversationManager {
     private GameEngine engine;
@@ -40,7 +40,7 @@ public class ConversationManager {
         // track root nodes per conversation
         Map<String, List<ConversationNode>> roots = new HashMap<>();
 
-        try (Connection conn = DerpyDatabase.getConnection()) {
+        try (Connection conn = DerbyDatabase.getConnection()) {
             // 1) Load all nodes
             String nodeSql =
                 "SELECT conversation_id, node_id, message, " +
