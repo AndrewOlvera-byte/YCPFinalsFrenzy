@@ -1,4 +1,4 @@
 player_id,name,hp,skill_points,damage_multi,long_description,short_description,player_type,attack_boost,defense_boost
-1,Cooper,200,0,1.0,"<b>It's you! You know, you!</b>","<b>You.</b>",NORMAL,0,0
-2,Chuck,150,0,1.0,"<b>It's you! You know, you!</b>","<b>You.</b>",ATTACK,20,0
-3,Tank,250,0,0.8,"<b>It's you! You know, you!</b>","<b>You.</b>",DEFENSE,0,20
+1,Cooper,200,0,1.0,"<b>It's you! You know, you!</b>","<b>You.</b>","<b>NORMAL</b>",0,0
+2,Chuck,150,0,1.0,"<b>It's you! You know, you!</b>","<b>You.</b>","<b>ATTACK</b>",20,0
+3,Tank,250,0,0.8,"<b>It's you! You know, you!</b>","<b>You.</b>","<b>DEFENSE</b>",0,20
