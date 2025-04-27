@@ -45,14 +45,14 @@ public class PlayerManager {
                 case "ATTACK":
                     double attackBoost = rs.getDouble("attack_boost");
                     engine.setPlayer(
-                      new AttackPlayer(name, hp, sp, inv, ldesc, sdesc, attackBoost, 0)
+                      new AttackPlayer(name, hp, sp, inv, ldesc, sdesc, 1, attackBoost)
                     );
                     break;
 
                 case "DEFENSE":  // <— correct spelling
                     double defenseBoost = rs.getDouble("defense_boost");
                     engine.setPlayer(
-                      new DefensePlayer(name, hp, sp, inv, ldesc, sdesc, 0, defenseBoost)
+                      new DefensePlayer(name, hp, sp, inv, ldesc, sdesc, 1, defenseBoost)
                     );
                     break;
 

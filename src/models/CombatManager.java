@@ -24,19 +24,29 @@ public class CombatManager {
             return "\n<b>Attack with what?</b>";
         }
         
-        Room currentRoom = engine.getRooms().get(engine.getCurrentRoomNum());
+        Room currentRoom   = engine.getRooms().get(engine.getCurrentRoomNum());
         double damageMulti = engine.getPlayer().getdamageMulti();
-        double boost = 0;
+        double boost       = 0;
         if (engine.getPlayer() instanceof AttackPlayer) {
-        	 boost = ((AttackPlayer)engine.getPlayer()).getAttackBoost();
+            boost = ((AttackPlayer)engine.getPlayer()).getAttackBoost();
         }
-        double attackDmg = engine.getPlayer().getAttackDmg(itemNum) * damageMulti + boost;
-        int charHealth = currentRoom.getCharacterHealth(characterNum);
-        double newHealth = charHealth - attackDmg;
+        
+        // calculate raw and total damage
+        int    rawDmg    = engine.getPlayer().getAttackDmg(itemNum);
+        double attackDmg = rawDmg * damageMulti + boost;
+        
+        // DEBUG: show how damage was computed
+        engine.appendMessage(String.format(
+            "\n[DEBUG] raw=%d × mult=%.2f + boost=%.2f → total=%.2f",
+            rawDmg, damageMulti, boost, attackDmg
+        ));
+        
+        int    charHealth = currentRoom.getCharacterHealth(characterNum);
+        double newHealth  = charHealth - attackDmg;
         
         boolean aggressive = currentRoom.isCharAgressive(characterNum);
         
-        if(newHealth <= 0) {
+        if (newHealth <= 0) {
             String temp = currentRoom.getCharacterName(characterNum);
             currentRoom.handleCharacterDeath(characterNum);
             return "\n<b>" + temp + " has been slain and dropped its inventory!</b>";
@@ -46,7 +56,9 @@ public class CombatManager {
             charAttackPlayer(0, characterNum, aggressive);
 
             // Format attack damage string
-            String dmgString = (attackDmg % 1 == 0) ? String.format("%.0f", attackDmg) : String.format("%.1f", attackDmg);
+            String dmgString = (attackDmg % 1 == 0)
+                ? String.format("%.0f", attackDmg)
+                : String.format("%.1f", attackDmg);
 
             if (engine.getPlayer().getHp() <= 0) {
                 return "\n<b>You Died!</b>";
@@ -67,24 +79,43 @@ public class CombatManager {
         Room currentRoom = engine.getRooms().get(engine.getCurrentRoomNum());
         Character character = currentRoom.getCharacter(characterNum);
 
-        // Don't attack if not aggressive
+        // 1) Only attack if the character is aggressive
         if (!aggressive) return;
 
-        // If character has no item at index, skip attack
+        // 2) Ensure they have a weapon to hit you with
         if (character.getInventorySize() <= itemNum) {
             engine.appendMessage("\n" + character.getName() + " has no weapon to attack with.");
             return;
         }
 
-        int attackDmg = currentRoom.getCharacterAttackDmg(characterNum, itemNum);
-        if (engine.getPlayer() instanceof DefensePlayer) {
-        	 attackDmg -= ((DefensePlayer)engine.getPlayer()).getDefenseBoost();
-        	 if(attackDmg < 0) {
-        		 attackDmg = 0;
-        	 }
-        }
-        int playerHealth = engine.getPlayer().getHp();
+        // 3) Base (raw) damage from the NPC
+        int rawDmg = currentRoom.getCharacterAttackDmg(characterNum, itemNum);
 
-        engine.getPlayer().setHp(playerHealth - attackDmg);
+        // 4) Any DefensePlayer reduction
+        double defense = 0;
+        if (engine.getPlayer() instanceof DefensePlayer) {
+            defense = ((DefensePlayer) engine.getPlayer()).getDefenseBoost();
+        }
+
+        // 5) Your AttackPlayer “boost” (yes, we’re applying it on incoming hits)
+        double atkBoost = 0;
+        if (engine.getPlayer() instanceof AttackPlayer) {
+            atkBoost = ((AttackPlayer) engine.getPlayer()).getAttackBoost();
+        }
+
+        // 6) Compute final damage (raw – defense + boost)
+        double totalDmg = rawDmg - defense + atkBoost;
+        if (totalDmg < 0) totalDmg = 0;
+
+        // 7) DEBUG: spit out all the numbers so you can confirm it’s working
+        engine.appendMessage(String.format(
+            "\n[DEBUG-INCOMING] raw=%d – def=%.2f + boost=%.2f → total=%.2f",
+            rawDmg, defense, atkBoost, totalDmg
+        ));
+
+        // 8) Finally, subtract from the player’s HP
+        int playerHp = engine.getPlayer().getHp();
+        engine.getPlayer().setHp(playerHp - (int)Math.round(totalDmg));
     }
+
 }
