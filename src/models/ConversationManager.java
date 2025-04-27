@@ -94,6 +94,11 @@ public class ConversationManager {
         }
     }
 
+    /** Allow GameEngine.loadData() to inject a fake map. */
+    public void setConversations(Map<String,ConversationTree> data) {
+        this.conversations = data;
+    }
+
     /**
      * Retrieve the ConversationTree for a given ID (e.g. "curly").
      * @return the tree, or null if no such conversation was loaded.

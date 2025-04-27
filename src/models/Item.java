@@ -1,4 +1,6 @@
 package models;
+import java.util.List;
+import java.util.ArrayList;
 public class Item {
 	private int value, weight;
 	private String name;
@@ -56,8 +58,14 @@ public class Item {
 		this.name = name;
 	}
 	
-	public String[] getComponents() {
-        return components.clone();
+	public List<String> getComponents() {
+		int length = components.length;
+		List<String> comps = new ArrayList<String>();
+		for (int i = 0; i < length; i++)
+		{
+			comps.add(components[i]);
+		}
+        return comps;
     }
 	
 	public void setComponents(String[] components) {

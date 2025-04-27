@@ -2,10 +2,11 @@ package GameEngine;
 
 import java.util.*;
 import models.*;
-import models.Character;
-
+import models.Character;  // your NPC base
 
 public class GameEngine {
+    private static final boolean USE_FAKE_DB = true;
+
     private Player player;
     private boolean isRunning = false;
     private int currentRoomNum;
@@ -14,7 +15,7 @@ public class GameEngine {
     private String error = "";
     private GameInputHandler inputHandler;
     
-    // Managers for different components
+    // Managers
     private RoomManager roomManager;
     private PlayerManager playerManager;
     private CombatManager combatManager;
@@ -22,7 +23,9 @@ public class GameEngine {
     private UIManager uiManager;
     private ConversationManager conversationManager;
     
-    // Empty instantiation so data can be loaded using loadData()
+    // CSV-fake loader
+    private FakeGameDatabase fakeDb = new FakeGameDatabase();
+
     public GameEngine() {
         this.inputHandler = new GameInputHandler(this);
         this.roomManager = new RoomManager(this);
@@ -32,35 +35,49 @@ public class GameEngine {
         this.uiManager = new UIManager(this);
         this.conversationManager = new ConversationManager(this);
     }
-    
-    // called after creating the GameEngine instantiation in the session to load the current data and set isRunning to true
-    
+
+    /** Called once to seed/initialize, then loadData. */
     public void start() {
-        DatabaseInitializer.initialize();
-        System.out.println("Seeding DB for the first time…");
+        if (!USE_FAKE_DB) {
+            DatabaseInitializer.initialize();
+            System.out.println("Seeding DB for the first time…");
+        }
         loadData();
         this.isRunning = true;
     }
-    // "loads data" from .csv file in future but for now is where we create the instantiation of the game state for our demo
+
+    /** Load rooms + player either from Derby or from CSV (FakeGameDatabase). */
     public void loadData() {
-        roomManager.loadRooms();
-        
-     // Read all nodes/edges into memory
-        conversationManager.loadConversations();
-        for (Room room : getRooms()) {
-            for (Character npc : room.getCharacterContainer()) {
-                ConversationTree tree = conversationManager.getConversation(npc.getName());
-                if (tree != null) {
-                    if (npc instanceof NPC) {
-                        ((NPC) npc).addConversationTree(tree);
+        if (USE_FAKE_DB) {
+            // 1) Rooms + NPCs
+            this.rooms.clear();
+            this.rooms.addAll(fakeDb.loadAllRooms());
+
+            // 2) Player + inventory
+            this.player = fakeDb.loadPlayer();
+            this.currentRoomNum = 0;  // start in room #1
+
+            // 3) Conversations can remain empty or implement a fake loader later
+            this.conversationManager.setConversations(new HashMap<>());
+        }
+        else {
+            // real Derby path
+            roomManager.loadRooms();                      // from DerbyDatabase
+            conversationManager.loadConversations();      // fills NPC conversation trees
+            for (Room room : getRooms()) {
+                for (Character npc : room.getCharacterContainer()) {
+                    ConversationTree tree = conversationManager.getConversation(npc.getName());
+                    if (tree != null) {
+                        if (npc instanceof NPC) {
+                            ((NPC) npc).addConversationTree(tree);
+                        }
                     }
                 }
             }
+            playerManager.loadPlayer();                   // from PLAYER & PLAYER_INVENTORY tables
+            GameStateManager.loadState(this);             // from GAME_STATE
+            this.currentRoomNum = getCurrentRoomNum();
         }
-        playerManager.loadPlayer();
-        GameStateManager.loadState(this);
-        this.currentRoomNum = getCurrentRoomNum();;
-        String roomName = getCurrentRoomName();
     }
     
     // Getters and setters for managers to access GameEngine state
@@ -247,7 +264,7 @@ public class GameEngine {
     
     // Main display method for constructing Response
     public Response display() {
-        // if the player is dead, return a special “game over” response
+        // if the player is dead, return a special "game over" response
         if (player != null && player.getHp() <= 0) {
             Response resp = new Response();
             resp.setGameOver(true);
