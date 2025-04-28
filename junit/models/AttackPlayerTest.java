@@ -1,14 +1,29 @@
-// File: junit/models/AttackPlayerTest.java
 package models;
-
+import models.AttackPlayer;
+import models.Inventory;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
 
-public class AttackPlayerTest {
+import java.util.ArrayList;
+
+class AttackPlayerTest {
+    private AttackPlayer attackPlayer;
+
+    @BeforeEach
+    void setUp() {
+        attackPlayer = new AttackPlayer("Attacker", 100, 5, new Inventory(new ArrayList<>(), 100), "Long desc", "Short desc", 2.0, 1.5);
+    }
+
     @Test
-    public void testDamageMultiplier() {
-        AttackPlayer ap = new AttackPlayer(null, 0, 0, null, null, null, 20, 20);
-        assertTrue(ap.getAttackBoost() > 0);
+    void testAttackPlayerInitialization() {
+        assertEquals(1.5, attackPlayer.getAttackBoost());
+        assertEquals(2.0, attackPlayer.getdamageMulti());
+    }
+
+    @Test
+    void testSetAttackBoost() {
+        attackPlayer.setAttackBoost(2.0);
+        assertEquals(2.0, attackPlayer.getAttackBoost());
     }
 }

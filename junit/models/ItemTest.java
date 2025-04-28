@@ -1,16 +1,33 @@
-// File: junit/models/ItemTest.java
 package models;
-
+import models.Item;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ItemTest {
+class ItemTest {
+    private Item item;
+
+    @BeforeEach
+    void setUp() {
+        item = new Item(50, 10, "Magic Sword", new String[]{"Blade", "Gem"}, "A powerful sword", "Sword");
+    }
+
     @Test
-    public void testAttributes() {
-        Item it = new Item(5, 2, "Foo", null, "Long", "Short");
-        assertEquals("Foo", it.getName());
-        assertEquals(5, it.getValue());
-        assertEquals("Long", it.getDescription());
+    void testItemInitialization() {
+        assertEquals("Magic Sword", item.getName());
+        assertEquals(50, item.getValue());
+        assertEquals(10, item.getWeight());
+    }
+
+    @Test
+    void testDescriptionSwitch() {
+        assertEquals("A powerful sword", item.getDescription());
+        assertEquals("Sword", item.getDescription()); // Second call switches to short description
+    }
+
+    @Test
+    void testComponentsList() {
+        assertEquals(2, item.getComponents().size());
+        assertTrue(item.getComponents().contains("Blade"));
     }
 }

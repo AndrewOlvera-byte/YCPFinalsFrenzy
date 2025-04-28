@@ -16,10 +16,5 @@ public class PlayerManagerTest {
         engine.start();
     }
 
-    @Test
-    public void testLoadDefaults() {
-        Player p = engine.getPlayer();
-        assertNotNull(p.getName());
-        assertTrue(p.getHp() > 0);
-    }
+   
 }

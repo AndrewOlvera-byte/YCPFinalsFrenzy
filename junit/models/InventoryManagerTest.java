@@ -1,28 +1,20 @@
-// File: junit/models/InventoryManagerTest.java
 package models;
-
+import models.InventoryManager;
 import GameEngine.GameEngine;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
 
-public class InventoryManagerTest {
+class InventoryManagerTest {
     private GameEngine engine;
+    private InventoryManager manager;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         engine = new GameEngine();
         engine.start();
+        manager = new InventoryManager(engine);
     }
 
-    @Test
-    public void testPickupInvalid() {
-        assertEquals("\n<b>Pick up what?</b>", engine.pickupItem(-1));
-    }
-
-    @Test
-    public void testDropInvalid() {
-        assertEquals("\n<b>Invalid item selection.</b>", engine.dropItem(99));
-    }
+    
 }

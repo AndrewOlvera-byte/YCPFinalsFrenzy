@@ -1,20 +1,43 @@
-// File: junit/models/RoomTest.java
 package models;
-
+import models.Inventory;
+import models.Item;
+import models.Room;
+import models.Connections;
+import models.Character;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 
-public class RoomTest {
+class RoomTest {
+    private Room room;
+
+    @BeforeEach
+    void setUp() {
+        room = new Room("Test Room", new Inventory(new ArrayList<>(), 100), new Connections(), new ArrayList<>(), "MasterKey", "A vast room", "A room");
+    }
+
     @Test
-    public void testRoomBasics() {
-        Room r = new Room("Hall", new Inventory(null,0), new Connections(), new ArrayList<>(), null, "L", "S");
-        assertEquals("Hall", r.getRoomName());
-        r.addItem(new Item(1,1,"X",null,"L","S"));
-        assertEquals(1, r.getInventorySize());
-        r.removeItem(0);
-        assertEquals(0, r.getInventorySize());
+    void testRoomName() {
+        assertEquals("Test Room", room.getRoomName());
+    }
+
+    @Test
+    void testAddItem() {
+        Item item = new Item(5, 1, "Torch", null, "Lights up", "Torch");
+        room.addItem(item);
+        assertEquals(1, room.getInventorySize());
+    }
+
+    @Test
+    void testGetRequiredKey() {
+        assertEquals("MasterKey", room.getRequiredKey());
+    }
+
+    @Test
+    void testRoomDescriptionSwitch() {
+        assertEquals("A vast room", room.getRoomDescription());
+        assertEquals("A room", room.getRoomDescription()); // After examining
     }
 }

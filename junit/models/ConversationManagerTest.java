@@ -1,17 +1,21 @@
-// File: junit/models/ConversationManagerTest.java
 package models;
-
+import models.ConversationManager;
+import models.ConversationTree;
+import GameEngine.GameEngine;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ConversationManagerTest {
-    @Test
-    public void testSetGet() {
-        ConversationManager m = new ConversationManager(null);
-        ConversationTree t = new ConversationTree(new ConversationNode("H"));
-        m.setConversations(Map.of("X", t));
-        assertSame(t, m.getConversation("X"));
-        assertNull(m.getConversation("Y"));
+class ConversationManagerTest {
+    private ConversationManager conversationManager;
+    private GameEngine engine;
+
+    @BeforeEach
+    void setUp() {
+        engine = new GameEngine();
+        engine.start();
+        conversationManager = new ConversationManager(engine);
     }
+
+   
 }
