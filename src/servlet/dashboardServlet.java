@@ -48,7 +48,11 @@ public class dashboardServlet extends HttpServlet {
         String restart = req.getParameter("restart");
         if ("true".equals(restart)) {
             // Remove the old engine and redirect back to GET /dashboard
-            session.removeAttribute("gameEngine");
+        	GameEngine gameEngine = (GameEngine) session.getAttribute("gameEngine");
+        	if(gameEngine != null) {
+        		gameEngine.reset();
+        	}
+        	
             resp.sendRedirect(req.getContextPath() + "/dashboard");
             return;
         }
