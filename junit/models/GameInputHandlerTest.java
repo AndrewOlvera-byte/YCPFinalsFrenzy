@@ -1,9 +1,9 @@
-
+// File: junit/models/GameInputHandlerTest.java
 package models;
 
+import GameEngine.GameEngine;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import GameEngine.GameEngine;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,13 +19,11 @@ public class GameInputHandlerTest {
 
     @Test
     public void testInvalidCommand() {
-        boolean result = handler.processInput("flibber flabber");
-        assertFalse(result); // Should be invalid
+        assertFalse(handler.processInput("foobar"));
     }
 
     @Test
     public void testHelpCommand() {
-        boolean result = handler.processInput("help");
-        assertTrue(result); // Should be valid
+        assertTrue(handler.processInput("help"));
     }
 }

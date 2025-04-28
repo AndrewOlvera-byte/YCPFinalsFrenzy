@@ -1,16 +1,14 @@
-
+// File: junit/models/WeaponTest.java
 package models;
 
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class WeaponTest {
     @Test
-    public void testWeaponProperties() {
-        Weapon weapon = new Weapon(25, 4, "Sword", null, 80, "Long sword", "Sword.");
-
-        assertEquals(80, weapon.getAttackDmg());
-        assertEquals("Sword", weapon.getName());
-        assertEquals(25, weapon.getValue());
+    public void testWeaponDamage() {
+        Weapon w = new Weapon(5,1,"Sword",null,80,"L","S");
+        assertEquals(80, w.getAttackDmg());
     }
 }

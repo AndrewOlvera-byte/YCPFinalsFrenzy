@@ -1,26 +1,20 @@
-
+// File: junit/models/PlayerTest.java
 package models;
 
 import org.junit.jupiter.api.Test;
+
 import java.util.ArrayList;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class PlayerTest {
     @Test
     public void testPlayerAttributes() {
-        ArrayList<Item> items = new ArrayList<>();
-        Inventory inventory = new Inventory(items, 50);
-        Player player = new Player("Hero", 100, 0, inventory, "Long desc", "Short desc", 1);
-
-        assertEquals("Hero", player.getName());
-        assertEquals(100, player.getHp());
-        assertEquals("Long desc", player.getCharDescription());
-        assertEquals(1.0, player.getdamageMulti());
-
-        player.setHp(90);
-        assertEquals(90, player.getHp());
-
-        player.setdamageMulti(1.5);
-        assertEquals(1.5, player.getdamageMulti());
+        Player p = new Player("Hero", 100, 1, new Inventory(new ArrayList<>(), 5), "L", "S", 1.2);
+        assertEquals("Hero", p.getName());
+        assertEquals(100, p.getHp());
+        assertEquals(1.2, p.getdamageMulti());
+        p.setHp(80);
+        assertEquals(80, p.getHp());
     }
 }

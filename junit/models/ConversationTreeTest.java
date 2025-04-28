@@ -1,20 +1,19 @@
-
+// File: junit/models/ConversationTreeTest.java
 package models;
 
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ConversationTreeTest {
     @Test
-    public void testConversationNavigation() {
-        ConversationNode root = new ConversationNode("Hello!");
-        ConversationNode node1 = new ConversationNode("Hi there!");
-        root.addResponse("1.Hi", node1);
-
-        ConversationTree tree = new ConversationTree(root);
-        assertEquals("Hello!", tree.getCurrentNodeMessage());
-
-        tree.traverse("1.Hi");
-        assertEquals("Hi there!", tree.getCurrentNodeMessage());
+    public void testNavigation() {
+        ConversationNode root = new ConversationNode("Hi");
+        ConversationNode n1 = new ConversationNode("Bye");
+        root.addResponse("1", n1);
+        ConversationTree t = new ConversationTree(root);
+        assertEquals("Hi", t.getCurrentNodeMessage());
+        t.traverse("1");
+        assertEquals("Bye", t.getCurrentNodeMessage());
     }
 }

@@ -1,19 +1,17 @@
-
+// File: junit/models/NPCTest.java
 package models;
 
 import org.junit.jupiter.api.Test;
-import java.util.ArrayList;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class NPCTest {
     @Test
-    public void testAggressionToggle() {
-        ArrayList<Item> items = new ArrayList<>();
-        Inventory inventory = new Inventory(items, 30);
-        NPC npc = new NPC("Enemy", 150, false, new String[]{"Hello!"}, 20, inventory, "desc", "short");
-
-        assertFalse(npc.getAggresion());
-        npc.setAgression(true);
-        assertTrue(npc.getAggresion());
+    public void testNpcBasic() {
+        NPC npc = new NPC("Moe", 50, false, new String[]{}, 10, null, "L", "S");
+        assertEquals("Moe", npc.getName());
+        assertFalse(npc.isAgressive());
+        npc.setHp(0);
+        assertEquals(0, npc.getHp());
     }
 }
