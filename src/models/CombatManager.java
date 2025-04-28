@@ -35,12 +35,6 @@ public class CombatManager {
         int    rawDmg    = engine.getPlayer().getAttackDmg(itemNum);
         double attackDmg = rawDmg * damageMulti + boost;
         
-        // DEBUG: show how damage was computed
-        engine.appendMessage(String.format(
-            "\n[DEBUG] raw=%d × mult=%.2f + boost=%.2f → total=%.2f",
-            rawDmg, damageMulti, boost, attackDmg
-        ));
-        
         int    charHealth = currentRoom.getCharacterHealth(characterNum);
         double newHealth  = charHealth - attackDmg;
         
@@ -108,10 +102,7 @@ public class CombatManager {
         if (totalDmg < 0) totalDmg = 0;
 
         // 7) DEBUG: spit out all the numbers so you can confirm it’s working
-        engine.appendMessage(String.format(
-            "\n[DEBUG-INCOMING] raw=%d – def=%.2f + boost=%.2f → total=%.2f",
-            rawDmg, defense, atkBoost, totalDmg
-        ));
+
 
         // 8) Finally, subtract from the player’s HP
         int playerHp = engine.getPlayer().getHp();
