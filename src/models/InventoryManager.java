@@ -222,4 +222,22 @@ public class InventoryManager {
 
         return "\n<b>" + raw.getName() + " was applied.</b>";
     }
+    
+    public String select() {
+        StringBuilder sb = new StringBuilder();
+        try (Connection conn = DerbyDatabase.getConnection()) {
+            // Retrieve the database name from the connection URL
+            String dbURL = conn.getMetaData().getURL(); // Get the connection URL
+            sb.append("Database URL: ").append(dbURL).append("\n");
+            // Optionally, extract the database name from the URL if it follows the format jdbc:derby:/path/to/database/dbname
+            int dbNameStartIndex = dbURL.lastIndexOf("/") + 1;
+            String dbName = dbURL.substring(dbNameStartIndex);
+            sb.append("Database Name: ").append(dbName).append("\n");
+        } catch (SQLException e) {
+            throw new RuntimeException("Error retrieving database name", e);
+        }
+        return sb.toString();
+    }
+
+
 }

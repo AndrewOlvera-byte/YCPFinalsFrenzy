@@ -5,7 +5,11 @@ import models.*;
 import models.Character;  // your NPC base
 
 public class GameEngine {
+	
     private static final boolean USE_FAKE_DB = false;
+    
+    private String[] tables = {"conversation_edges", "conversation_nodes", "GAME_STATE", "PLAYER_INVENTORY", "NPC_INVENTORY",
+    		"ROOM_INVENTORY", "NPC_ROOM", "ROOM_CONNECTIONS", "ITEM_COMPONENT", "NPC", "ROOM", "ITEM", "PLAYER"};
 
     private Player player;
     private boolean isRunning = false;
@@ -279,4 +283,16 @@ public class GameEngine {
         // otherwise, fall back to the normal UIManager flow
         return uiManager.display();
     }
+    public String reset() {
+    		DerbyDatabase.reset(tables);
+       		DatabaseInitializer.initialize();
+       		loadData();
+       		this.currentRoomNum = 0;
+       		return "\n<b>Game was restarted to original state </b>";
+    }
+       public void initialize() {
+    	   DatabaseInitializer.initialize();
+    	   loadData();
+    }
+
 }

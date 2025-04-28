@@ -15,7 +15,7 @@ public class GameInputHandler {
         "examine", "go", "move", "walk",
         "talk", "attack", "swing", "slash", "strike", "hit",
         "look", "help", "shuttle", "drive", "respond",
-        "apply", "drink"
+        "apply", "drink", "reset", "initialize"
     ));
 
     private static final Set<String> PREPOSITIONS = new HashSet<>(Arrays.asList(
@@ -160,6 +160,14 @@ public class GameInputHandler {
                     gameEngine.appendMessage("<b>\nNo active conversation.</b>");
                 }
                 break;
+                
+            case "reset":
+               		gameEngine.appendMessage(gameEngine.reset());
+               	break;
+               case "initialize":
+               	gameEngine.initialize();
+               	break;
+
 
             default:
                 gameEngine.appendMessage("<b>\nCommand not implemented.</b>");
