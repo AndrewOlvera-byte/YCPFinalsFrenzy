@@ -4,7 +4,7 @@ import java.sql.*;
 import java.util.*;
 
 import GameEngine.GameEngine;
-import models.DerbyDatabase;
+
 
 public class ConversationManager {
     private GameEngine engine;

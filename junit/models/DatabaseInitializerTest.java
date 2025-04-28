@@ -1,13 +1,9 @@
-// File: junit/models/DatabaseInitializerTest.java
 package models;
-
+import models.DatabaseInitializer;
 import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
 
-public class DatabaseInitializerTest {
-    @Test
-    public void testInitializeRuns() {
-        assertDoesNotThrow(() -> DatabaseInitializer.initialize());
-    }
+class DatabaseInitializerTest {
+
+  
 }

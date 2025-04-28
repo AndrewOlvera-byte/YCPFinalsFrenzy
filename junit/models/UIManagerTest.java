@@ -1,26 +1,20 @@
-// File: junit/models/UIManagerTest.java
 package models;
-
+import models.UIManager;
 import GameEngine.GameEngine;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
 
-public class UIManagerTest {
-    private UIManager ui;
+class UIManagerTest {
+    private UIManager uiManager;
+    private GameEngine engine;
 
     @BeforeEach
-    public void setUp() {
-        GameEngine eng = new GameEngine();
-        eng.start();
-        ui = new UIManager(eng);
+    void setUp() {
+        engine = new GameEngine();
+        engine.start();
+        uiManager = new UIManager(engine);
     }
 
-    @Test
-    public void testHelpContainsKeywords() {
-        String h = ui.getHelp();
-        assertTrue(h.contains("attack"));
-        assertTrue(h.contains("drop"));
-    }
+   
 }

@@ -1,14 +1,27 @@
-// File: junit/models/UtilityTest.java
 package models;
-
+import models.Utility;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
 
-public class UtilityTest {
+class UtilityTest {
+    private Utility utility;
+
+    @BeforeEach
+    void setUp() {
+        utility = new Utility(20, 5, "Healing Potion", null, "Heals you", "Potion", 30, 0.0);
+    }
+
     @Test
-    public void testHealingUtility() {
-        Utility u = new Utility(10,1,"Pot",null,"L","S",40,0.0);
-        assertEquals(40, u.getHealing());
+    void testUtilityInitialization() {
+        assertEquals(20, utility.getValue());
+        assertEquals(30, utility.getHealing());
+        assertEquals(0.0, utility.getDamageMulti());
+    }
+
+    @Test
+    void testAddComponent() {
+        utility.addComponent("Magic Herb");
+        assertTrue(utility.getComponents().contains("Magic Herb"));
     }
 }

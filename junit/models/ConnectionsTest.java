@@ -1,16 +1,25 @@
-// File: junit/models/ConnectionsTest.java
 package models;
-
+import models.Connections;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ConnectionsTest {
+class ConnectionsTest {
+    private Connections connections;
+
+    @BeforeEach
+    void setUp() {
+        connections = new Connections();
+    }
+
     @Test
-    public void testSetAndGet() {
-        Connections con = new Connections();
-        con.setConnection("North", 2);
-        assertEquals(2, con.get("North"));
-        assertEquals(-1, con.get("Invalid"));
+    void testSetAndGetConnection() {
+        connections.setConnection("North", 1);
+        assertEquals(1, connections.getConnection("North"));
+    }
+
+    @Test
+    void testMissingConnection() {
+        assertNull(connections.getConnection("South"));
     }
 }

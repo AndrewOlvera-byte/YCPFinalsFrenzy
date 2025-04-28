@@ -1,19 +1,28 @@
-// File: junit/models/ConversationTreeTest.java
 package models;
-
+import models.ConversationTree;
+import models.ConversationNode;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ConversationTreeTest {
+class ConversationTreeTest {
+    private ConversationTree tree;
+    private ConversationNode root;
+
+    @BeforeEach
+    void setUp() {
+        root = new ConversationNode("Root Node");
+        tree = new ConversationTree(root);
+    }
+
     @Test
-    public void testNavigation() {
-        ConversationNode root = new ConversationNode("Hi");
-        ConversationNode n1 = new ConversationNode("Bye");
-        root.addResponse("1", n1);
-        ConversationTree t = new ConversationTree(root);
-        assertEquals("Hi", t.getCurrentNodeMessage());
-        t.traverse("1");
-        assertEquals("Bye", t.getCurrentNodeMessage());
+    void testTreeInitialization() {
+        assertEquals("Root Node", tree.getCurrentNode().getMessage());
+    }
+
+    @Test
+    void testTraverseNullInput() {
+        tree.traverse(null); // Should safely do nothing
+        assertEquals("Root Node", tree.getCurrentNode().getMessage());
     }
 }

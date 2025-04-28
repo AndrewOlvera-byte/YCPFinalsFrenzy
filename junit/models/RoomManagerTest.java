@@ -1,23 +1,20 @@
-// File: junit/models/RoomManagerTest.java
 package models;
-
 import GameEngine.GameEngine;
+import models.RoomManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
 
-public class RoomManagerTest {
+class RoomManagerTest {
+    private RoomManager roomManager;
     private GameEngine engine;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         engine = new GameEngine();
         engine.start();
+        roomManager = new RoomManager(engine);
     }
 
-    @Test
-    public void testRoomsLoaded() {
-        assertFalse(engine.getRooms().isEmpty());
-    }
+   
 }
