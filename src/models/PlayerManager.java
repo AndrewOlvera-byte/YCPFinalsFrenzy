@@ -15,8 +15,8 @@ public class PlayerManager {
     public void loadPlayer() {
         try (Connection conn = DerbyDatabase.getConnection()) {
             // 1) load main record (we assume ID=1)
-            String sql = "SELECT name, hp, skill_points, damage_multi, long_description, short_description "
-                       + "FROM PLAYER WHERE player_id = 1";
+            String sql = "SELECT name, hp, skill_points, damage_multi, long_description, short_description,player_type,attack_boost,defense_boost "
+                       + "FROM PLAYER WHERE player_id = 3";
             try (PreparedStatement ps = conn.prepareStatement(sql);
                  ResultSet rs = ps.executeQuery()) {
                 if (!rs.next()) {
@@ -28,26 +28,49 @@ public class PlayerManager {
                 double dm    = rs.getDouble("damage_multi");
                 String ldesc = rs.getString("long_description");
                 String sdesc = rs.getString("short_description");
-
+                String Class = rs.getString("player_type");
+                
+                
                 // 2) load inventory
                 Inventory inv = new Inventory(new ArrayList<>(), 30);
                 try (PreparedStatement ips = conn.prepareStatement(
-                         "SELECT item_id FROM PLAYER_INVENTORY WHERE player_id = 1"
+                         "SELECT item_id FROM PLAYER_INVENTORY WHERE player_id = 3"
                      );
                      ResultSet irs = ips.executeQuery()) {
                     while (irs.next()) {
                         inv.addItem(loadItem(conn, irs.getInt("item_id")));
                     }
                 }
+                switch (Class) {
+                case "ATTACK":
+                    double attackBoost = rs.getDouble("attack_boost");
+                    engine.setPlayer(
+                      new AttackPlayer(name, hp, sp, inv, ldesc, sdesc, 1, attackBoost)
+                    );
+                    break;
 
-                Player p = new Player(name, hp, sp, inv, ldesc, sdesc, dm);
-                engine.setPlayer(p);
+                case "DEFENSE":  // <— correct spelling
+                    double defenseBoost = rs.getDouble("defense_boost");
+                    engine.setPlayer(
+                      new DefensePlayer(name, hp, sp, inv, ldesc, sdesc, 1, defenseBoost)
+                    );
+                    break;
+
+                case "NORMAL":
+                default:
+                    engine.setPlayer(
+                      new Player(name, hp, sp, inv, ldesc, sdesc, dm)
+                    );
+                    break;
+              }
+                
+                
             }
+                
         } catch (SQLException ex) {
             throw new RuntimeException("Failed to load player", ex);
         }
     }
-
     /** Duplicate the same helper from RoomManager */
     private Item loadItem(Connection conn, int itemId) throws SQLException {
         String sql =

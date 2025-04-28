@@ -45,23 +45,43 @@ public class UIManager {
     // Returns formatted string of player's inventory
     public String getPlayerInventoryString() {
         StringBuilder inventoryString = new StringBuilder("Player Inventory:\n");
-        int size = engine.getPlayer().getInventorySize();
-        
-        for (int i = 0; i < size; i++) {
-            inventoryString.append(i + 1).append("\t").append(engine.getPlayer().getItemName(i)).append("\n");
+        Player p = engine.getPlayer();
+        // ← these two lines are the “easiest fix”
+        if (p == null || p.getInventory() == null || p.getInventorySize() == 0) {
+            inventoryString.append("(no items)\n");
+            return inventoryString.toString();
         }
-        
+
+        int size = p.getInventorySize();
+        for (int i = 0; i < size; i++) {
+            inventoryString
+              .append(i + 1)
+              .append("\t")
+              .append(p.getItemName(i))
+              .append("\n");
+        }
         return inventoryString.toString();
     }
+
     
     // Returns formatted string of player stats
     public String getPlayerInfo() {
         StringBuilder info = new StringBuilder("Player Info:\n");
         Player player = engine.getPlayer();
-        info.append("Name: ").append(player.getName()).append("\nHealth: ").append(player.getHp()).append("\n");
-        
+        if (player == null) {
+            info.append("(no player loaded)\n");
+            return info.toString();
+        }
+
+        info.append("Name: ")
+            .append(player.getName() != null ? player.getName() : "(unknown)")
+            .append("\nHealth: ")
+            .append(player.getHp())
+            .append("\n");
+
         return info.toString();
     }
+
     
     // Returns formatted string of characters in the current room
     public String getRoomCharactersInfo() {
