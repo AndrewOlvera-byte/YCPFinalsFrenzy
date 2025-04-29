@@ -194,7 +194,7 @@ public class FakeGameDatabase {
                 String longDesc  = row.get(5);
                 String shortDesc = row.get(6);
                 Inventory inv    = new Inventory(new ArrayList<>(), 30);
-                p = new Player(name, hp, sp, inv, longDesc, shortDesc, dm);
+                p = new Player(name, hp, sp, inv, longDesc, shortDesc, dm, sp, sp);
                 break;
             }
         } catch (IOException e) {

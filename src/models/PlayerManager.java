@@ -16,7 +16,7 @@ public class PlayerManager {
         try (Connection conn = DerbyDatabase.getConnection()) {
             // 1) load main record (we assume ID=1)
             String sql = "SELECT name, hp, skill_points, damage_multi, long_description, short_description,player_type,attack_boost,defense_boost "
-                       + "FROM PLAYER WHERE player_id = 3";
+                       + "FROM PLAYER WHERE player_id = 2";
             try (PreparedStatement ps = conn.prepareStatement(sql);
                  ResultSet rs = ps.executeQuery()) {
                 if (!rs.next()) {
@@ -34,7 +34,7 @@ public class PlayerManager {
                 // 2) load inventory
                 Inventory inv = new Inventory(new ArrayList<>(), 30);
                 try (PreparedStatement ips = conn.prepareStatement(
-                         "SELECT item_id FROM PLAYER_INVENTORY WHERE player_id = 3"
+                         "SELECT item_id FROM PLAYER_INVENTORY WHERE player_id = 2"
                      );
                      ResultSet irs = ips.executeQuery()) {
                     while (irs.next()) {
@@ -43,23 +43,21 @@ public class PlayerManager {
                 }
                 switch (Class) {
                 case "ATTACK":
-                    double attackBoost = rs.getDouble("attack_boost");
                     engine.setPlayer(
-                      new AttackPlayer(name, hp, sp, inv, ldesc, sdesc, 1, attackBoost)
+                      new Player(name, hp, sp, inv, ldesc, sdesc, dm, 20,0)
                     );
                     break;
 
                 case "DEFENSE":  // <— correct spelling
-                    double defenseBoost = rs.getDouble("defense_boost");
                     engine.setPlayer(
-                      new DefensePlayer(name, hp, sp, inv, ldesc, sdesc, 1, defenseBoost)
+                      new Player(name, hp, sp, inv, ldesc, sdesc, dm, 0,20)
                     );
                     break;
 
                 case "NORMAL":
                 default:
                     engine.setPlayer(
-                      new Player(name, hp, sp, inv, ldesc, sdesc, dm)
+                      new Player(name, hp, sp, inv, ldesc, sdesc, dm,0,0)
                     );
                     break;
               }
@@ -111,6 +109,11 @@ public class PlayerManager {
                             attackDmg,
                             longDesc, shortDesc
                         );
+                    case "ARMOR":
+                        double attackBoost      = rs.getDouble("attack_boost");
+                        int defenseBoost      = rs.getInt("defense_boost");
+                        int  healing1     = rs.getInt("healing");
+                        return new Armor(value, weight,name, null,  longDesc,  shortDesc,  healing1, attackBoost, defenseBoost);
 
                     default:
                         // fallback to plain Item

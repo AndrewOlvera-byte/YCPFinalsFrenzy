@@ -3,11 +3,15 @@ package models;
 public class Player extends Character {
    private int skillPoints;
    private double damageMulti;
+   private int attackBoost;
+   private int defenseBoost;
    // private Room location;
-   public Player(String name, int hp, int skillPoints, Inventory inventory, String longdescription, String shortdescription,double damageMulti) {
+   public Player(String name, int hp, int skillPoints, Inventory inventory, String longdescription, String shortdescription,double damageMulti,int attackBoost,int defenseBoost) {
        super(name, hp, inventory, longdescription, shortdescription);
        this.skillPoints = skillPoints;
        this.damageMulti = damageMulti;
+       this.attackBoost = attackBoost;
+       this.defenseBoost = defenseBoost;
    }
    public void move(String direction) {
        System.out.println(name + " moves " + direction + " to a new location.");
@@ -31,5 +35,19 @@ public class Player extends Character {
             }
         }
         return false;
+    }
+    public int getAttackBoost() {
+        return attackBoost;
+    }
+
+    public void setAttackBoost(int attackBoost) {
+        this.attackBoost = attackBoost;
+    }
+    public int getdefenseBoost() {
+        return defenseBoost;
+    }
+
+    public void setdefenseBoost(int defenseBoost) {
+        this.defenseBoost = defenseBoost;
     }
 }

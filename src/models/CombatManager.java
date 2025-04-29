@@ -27,9 +27,7 @@ public class CombatManager {
         Room currentRoom   = engine.getRooms().get(engine.getCurrentRoomNum());
         double damageMulti = engine.getPlayer().getdamageMulti();
         double boost       = 0;
-        if (engine.getPlayer() instanceof AttackPlayer) {
-            boost = ((AttackPlayer)engine.getPlayer()).getAttackBoost();
-        }
+        boost = engine.getPlayer().getAttackBoost();
         
         // calculate raw and total damage
         int    rawDmg    = engine.getPlayer().getAttackDmg(itemNum);
@@ -85,20 +83,9 @@ public class CombatManager {
         // 3) Base (raw) damage from the NPC
         int rawDmg = currentRoom.getCharacterAttackDmg(characterNum, itemNum);
 
-        // 4) Any DefensePlayer reduction
-        double defense = 0;
-        if (engine.getPlayer() instanceof DefensePlayer) {
-            defense = ((DefensePlayer) engine.getPlayer()).getDefenseBoost();
-        }
+        int defense = engine.getPlayer().getdefenseBoost();
 
-        // 5) Your AttackPlayer “boost” (yes, we’re applying it on incoming hits)
-        double atkBoost = 0;
-        if (engine.getPlayer() instanceof AttackPlayer) {
-            atkBoost = ((AttackPlayer) engine.getPlayer()).getAttackBoost();
-        }
-
-        // 6) Compute final damage (raw – defense + boost)
-        double totalDmg = rawDmg - defense + atkBoost;
+        double totalDmg = rawDmg - defense;
         if (totalDmg < 0) totalDmg = 0;
 
         // 7) DEBUG: spit out all the numbers so you can confirm it’s working

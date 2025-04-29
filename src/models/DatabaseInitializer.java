@@ -32,12 +32,12 @@ public class DatabaseInitializer {
                 runDDL(conn);
                 seedTable(conn, "rooms.csv",           "INSERT INTO ROOM VALUES (?, ?, ?, ?, ?)");
                 seedTable(conn, "connections.csv",     "INSERT INTO ROOM_CONNECTIONS VALUES (?, ?, ?)");
-                seedTable(conn, "items.csv",           "INSERT INTO ITEM VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                seedTable(conn, "items.csv",           "INSERT INTO ITEM VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 seedTable(conn, "item_components.csv", "INSERT INTO ITEM_COMPONENT VALUES (?, ?)");
                 seedTable(conn, "npcs.csv",            "INSERT INTO NPC VALUES (?, ?, ?, ?, ?, ?, ?)");
                 seedTable(conn, "npc_room.csv",        "INSERT INTO NPC_ROOM VALUES (?, ?)");
                 seedTable(conn, "npc_inventory.csv",   "INSERT INTO NPC_INVENTORY VALUES (?, ?)");
-                seedTable(conn, "player.csv",          "INSERT INTO PLAYER VALUES (?, ?, ?, ?, ?, ?, ?,?,?,?)");
+                seedTable(conn, "player.csv",          "INSERT INTO PLAYER VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 seedTable(conn, "room_inventory.csv",  "INSERT INTO ROOM_INVENTORY VALUES (?, ?)");
                 seedTable(conn, "player_inventory.csv","INSERT INTO PLAYER_INVENTORY VALUES (?, ?)");
                 seedTable(conn, "conversation_nodes.csv","INSERT INTO CONVERSATION_NODES VALUES (?, ?, ?, ?, ?, ?, ?)");
@@ -88,7 +88,7 @@ public class DatabaseInitializer {
                     stmt.execute(sql);
                 } catch (SQLException sqle) {
                     String state = sqle.getSQLState();
-                    // ignore “table/view already exists”
+                    // ignore "table/view already exists"
                     if (!"X0Y32".equals(state) && !"42Y55".equals(state)) {
                         throw sqle;
                     }
@@ -126,14 +126,33 @@ public class DatabaseInitializer {
             }
             String[] headers = parseCSVLine(headerLine);
 
+            // Count the number of parameters in the SQL statement
+            int paramCount = 0;
+            for (int i = 0; i < insertSql.length(); i++) {
+                if (insertSql.charAt(i) == '?') {
+                    paramCount++;
+                }
+            }
+
+            // Validate that the number of columns matches the number of parameters
+            if (headers.length != paramCount) {
+                throw new SQLException("Number of columns in CSV (" + headers.length + 
+                    ") does not match number of parameters in SQL (" + paramCount + ") for " + csvFile);
+            }
+
             // Prepare statement
             try (PreparedStatement ps = conn.prepareStatement(insertSql)) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     String[] cols = parseCSVLine(line);
+                    if (cols.length != headers.length) {
+                        throw new SQLException("Row has " + cols.length + " columns, expected " + 
+                            headers.length + " in " + csvFile);
+                    }
+                    
                     for (int i = 0; i < cols.length; i++) {
                         String header = headers[i].trim();
-                        String val    = cols[i].trim();
+                        String val = cols[i].trim();
                         // Unwrap quoted values
                         if (val.startsWith("\"") && val.endsWith("\"")) {
                             val = val.substring(1, val.length() - 1);

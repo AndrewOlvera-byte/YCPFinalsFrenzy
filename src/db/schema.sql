@@ -25,7 +25,9 @@ CREATE TABLE ITEM (
   type              VARCHAR(50),   -- e.g. "weapon" or "potion"
   healing           INT,           -- how much HP it restores
   damage_multi      DOUBLE,        -- multiplier for player damage
-  attack_damage     INT            -- for weapons: base attack
+  attack_damage     INT,           -- for weapons: base attack
+  attack_boost      INT,           -- bonus to attack stat
+  defense_boost     INT            -- bonus to defense stat
 );
 
 

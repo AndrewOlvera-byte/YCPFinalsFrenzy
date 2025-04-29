@@ -1,11 +1,11 @@
-item_id,name,value,weight,long_description,short_description,type,healing,damage_multi,attack_damage
-1,Sword,20,30,"<b>A rusty sword. Doesn't really fit in your bag.</b>","<b>A sword.</b>",WEAPON,0,0,80
-2,Potion,10,1,"<b>A red potion that has ""POTION"" written across it. (+40 health)</b>","<b>+40 Health potion.</b>",UTILITY,40,0,0
-3,Damage-Up,10,1,"<b>An orange potion that has ""DAMAGE UP"" written across it. (x1.2 damage)</b>","<b>x1.2 Damage potion.</b>",UTILITY,0,0.2,0
-4,Trident,20,30,"<b>A sharp three pronged weapon. You could make like, at least two roasted marshmallows.</b>","<b>A trident.</b>",WEAPON,0,0,90
-5,Gold Key,0,1,"<b>A super shiny key! Probably unlocks a door, but what do I know.</b>","<b>A key!</b>",ITEM,0,0,0
-6,Shuttle Pass,0,1,"<b>A blue pass to ride the shuttle. The road awaits!</b>","<b>A shuttle pass.</b>",ITEM,0,0,0
-7,Paint Brush,20,30,"<b>Paint your enemies??</b>","<b>A paint brush.</b>",WEAPON,0,0,1
-8,Dagger,20,30,"<b>A trusty dagger that fits in your back pocket.</b>","<b>A dagger.</b>",WEAPON,0,0,40
-9,Gauntlets,30,5,"<b>Reliable Gauntlets will help you attack harder.</b>","<b>Gauntlets.</b>",UTILITY,0,0.5,0
-10,Armor,30,5,"<b>Weak armor will increase your health.</b>","<b>armor.</b>",UTILITY,80,0,0
+item_id,name,value,weight,long_description,short_description,type,healing,damage_multi,attack_damage,attack_boost,defense_boost
+1,Sword,20,30,"<b>A rusty sword. Doesn't really fit in your bag.</b>","<b>A sword.</b>",WEAPON,0,0,80,0,0
+2,Potion,10,1,"<b>A red potion that has ""POTION"" written across it. (+40 health)</b>","<b>+40 Health potion.</b>",UTILITY,40,0,0,0,0
+3,Damage-Up,10,1,"<b>An orange potion that has ""DAMAGE UP"" written across it. (x1.2 damage)</b>","<b>x1.2 Damage potion.</b>",UTILITY,0,0.2,0,0,0
+4,Trident,20,30,"<b>A sharp three pronged weapon. You could make like, at least two roasted marshmallows.</b>","<b>A trident.</b>",WEAPON,0,0,90,0,0
+5,Gold Key,0,1,"<b>A super shiny key! Probably unlocks a door, but what do I know.</b>","<b>A key!</b>",ITEM,0,0,0,0,0
+6,Shuttle Pass,0,1,"<b>A blue pass to ride the shuttle. The road awaits!</b>","<b>A shuttle pass.</b>",ITEM,0,0,0,0,0
+7,Paint Brush,20,30,"<b>Paint your enemies??</b>","<b>A paint brush.</b>",WEAPON,0,0,1,0,0
+8,Dagger,20,30,"<b>A trusty dagger that fits in your back pocket.</b>","<b>A dagger.</b>",WEAPON,0,0,40,0,0
+9,Gauntlets,30,5,"<b>Reliable Gauntlets will help you attack harder.</b>","<b>Gauntlets.</b>",ARMOR,0,0,0,20,0
+10,Armor,30,5,"<b>Weak armor will increase your health.</b>","<b>armor.</b>",ARMOR,80,0,0,0,20
