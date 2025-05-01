@@ -15,7 +15,9 @@ public class GameInputHandler {
         "examine", "go", "move", "walk",
         "talk", "attack", "swing", "slash", "strike", "hit",
         "look", "help", "shuttle", "drive", "respond",
-        "apply", "drink", "reset", "initialize"
+        "apply", "drink", "reset", "initialize", "forward", "backward", "left", "right",
+        "North", "N", "north", "n", "South", "south", "S", "s", "East", "east", "E", "e",
+        "West", "west", "w", "W"
     ));
 
     private static final Set<String> PREPOSITIONS = new HashSet<>(Arrays.asList(
@@ -98,6 +100,49 @@ public class GameInputHandler {
                     gameEngine.appendMessage(gameEngine.getGo(noun));
                 }
                 break;
+            case "North":
+            case "north":
+            case "N":
+            case "n":
+            	gameEngine.appendMessage(gameEngine.getGo("North"));
+            	break;
+            	
+            case "South":
+            case "south":
+            case "S":
+            case "s":
+            	gameEngine.appendMessage(gameEngine.getGo("South"));
+            	break;
+            	
+            case "East":
+            case "east":
+            case "E":
+            case "e":
+            	gameEngine.appendMessage(gameEngine.getGo("East"));
+            	break;
+            	
+            case "West":
+            case "west":
+            case "W":
+            case "w":
+            	gameEngine.appendMessage(gameEngine.getGo("West"));
+            	break;
+             
+            case "forward":
+                    gameEngine.appendMessage(gameEngine.getGo("North"));
+                break;
+                
+            case "backward":
+                    gameEngine.appendMessage(gameEngine.getGo("South"));
+                break;
+                
+            case "left":
+                    gameEngine.appendMessage(gameEngine.getGo("West"));
+                break;
+                
+            case "right":
+                    gameEngine.appendMessage(gameEngine.getGo("East"));
+                break;
 
             case "examine":
             case "look":
@@ -164,7 +209,7 @@ public class GameInputHandler {
             case "reset":
                		gameEngine.appendMessage(gameEngine.reset());
                	break;
-               case "initialize":
+            case "initialize":
                	gameEngine.initialize();
                	break;
 
