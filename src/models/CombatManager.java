@@ -31,7 +31,10 @@ public class CombatManager {
         
         // calculate raw and total damage
         int    rawDmg    = engine.getPlayer().getAttackDmg(itemNum);
-        double attackDmg = rawDmg * damageMulti + boost;
+        
+        double attack = engine.getPlayer().getArmorAttackTotal();
+        
+        double attackDmg = rawDmg * damageMulti + boost + attack;
         
         int    charHealth = currentRoom.getCharacterHealth(characterNum);
         double newHealth  = charHealth - attackDmg;
@@ -84,8 +87,10 @@ public class CombatManager {
         int rawDmg = currentRoom.getCharacterAttackDmg(characterNum, itemNum);
 
         int defense = engine.getPlayer().getdefenseBoost();
+        
+        int armor = engine.getPlayer().getArmorDefenseTotal();
 
-        double totalDmg = rawDmg - defense;
+        double totalDmg = rawDmg - defense - armor;
         if (totalDmg < 0) totalDmg = 0;
 
         // 7) DEBUG: spit out all the numbers so you can confirm it’s working

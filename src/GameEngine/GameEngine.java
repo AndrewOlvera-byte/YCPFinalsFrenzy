@@ -161,7 +161,9 @@ public class GameEngine {
     public String usePotion(int itemNum) {
         return inventoryManager.usePotion(itemNum);
     }
-    
+    public String equipArmor(int itemNum) {
+        return inventoryManager.equipArmor(itemNum);
+    }
     public String examineItemName(int itemNum) {
         return inventoryManager.examineItemName(itemNum);
     }

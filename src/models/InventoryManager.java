@@ -2,13 +2,17 @@ package models;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 import GameEngine.GameEngine;
 import models.DerbyDatabase;
+import models.Armor;
+import models.ArmorSlot;
+import models.Item;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class InventoryManager {
     private GameEngine engine;
@@ -238,6 +242,70 @@ public class InventoryManager {
         }
         return sb.toString();
     }
+    public String equipArmor(int itemNum) {
+        // 1) bounds check
+        if (itemNum < 0 || itemNum >= engine.getPlayer().getInventorySize()) {
+            return "\n<b>Invalid item selection.</b>";
+        }
+        // 2) type check
+        Item raw = engine.getPlayer().getItem(itemNum);
+        if (!(raw instanceof Armor)) {
+            return "\n<b>You can't equip that!</b>";
+        }
+        Armor armor = (Armor) raw;
+
+        // 3) decide slot (assumes your Armor class has a getArmorSlot())
+        ArmorSlot slot = armor.slot();
+
+        // 4) in-memory: equip (you could also check return boolean if you use the guarded version)
+        engine.getPlayer().equip(slot, armor);
+
+        // 5) DB: remove any existing for that slot, then insert the new one
+        try (Connection conn = DerbyDatabase.getConnection();
+             // delete old slot
+             PreparedStatement del = conn.prepareStatement(
+               "DELETE FROM PLAYER_EQUIPMENT WHERE player_id = 1 AND slot = ?"
+             );
+             // insert new armor
+             PreparedStatement ins = conn.prepareStatement(
+               "INSERT INTO PLAYER_EQUIPMENT(player_id, slot, item_id) VALUES(?,?,?)"
+             )
+        ) {
+            conn.setAutoCommit(false);
+
+            // Get the actual item_id from the database
+            int databaseItemId = -1;
+            try (PreparedStatement psGetItemId = conn.prepareStatement(
+                     "SELECT item_id FROM ITEM WHERE name = ?")) {
+                psGetItemId.setString(1, armor.getName());
+                try (ResultSet rsItemId = psGetItemId.executeQuery()) {
+                    if (rsItemId.next()) {
+                        databaseItemId = rsItemId.getInt("item_id");
+                    }
+                }
+            }
+            // If we couldn't find the item ID in the database, use the itemNum + 1 as fallback
+            if (databaseItemId == -1) {
+                databaseItemId = itemNum + 1;
+            }
+
+            del.setString(1, slot.name());
+            del.executeUpdate();
+
+            ins.setInt   (1, 1);              // your hard-coded player_id for now
+            ins.setString(2, slot.name());
+            ins.setInt   (3, databaseItemId);
+            ins.executeUpdate();
+
+            conn.commit();
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to update DB after equipping armor", e);
+        }
+
+        return "\n<b>" + armor.getName() + " equipped to " 
+             + slot.name().toLowerCase() + " slot.</b>";
+    }
+
 
 
 }

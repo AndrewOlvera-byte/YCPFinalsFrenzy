@@ -16,11 +16,11 @@ public class PlayerManager {
         try (Connection conn = DerbyDatabase.getConnection()) {
             // 1) load main record (we assume ID=1)
             String sql = "SELECT name, hp, skill_points, damage_multi, long_description, short_description,player_type,attack_boost,defense_boost "
-                       + "FROM PLAYER WHERE player_id = 2";
+                       + "FROM PLAYER WHERE player_id = 1";
             try (PreparedStatement ps = conn.prepareStatement(sql);
                  ResultSet rs = ps.executeQuery()) {
                 if (!rs.next()) {
-                    throw new SQLException("No PLAYER with ID=2");
+                    throw new SQLException("No PLAYER with ID=1");
                 }
                 String name  = rs.getString("name");
                 int    hp    = rs.getInt("hp");
@@ -34,7 +34,7 @@ public class PlayerManager {
                 // 2) load inventory
                 Inventory inv = new Inventory(new ArrayList<>(), 30);
                 try (PreparedStatement ips = conn.prepareStatement(
-                         "SELECT item_id FROM PLAYER_INVENTORY WHERE player_id = 2"
+                         "SELECT item_id FROM PLAYER_INVENTORY WHERE player_id = 1"
                      );
                      ResultSet irs = ips.executeQuery()) {
                     while (irs.next()) {
@@ -113,7 +113,9 @@ public class PlayerManager {
                         double attackBoost      = rs.getDouble("attack_boost");
                         int defenseBoost      = rs.getInt("defense_boost");
                         int  healing1     = rs.getInt("healing");
-                        return new Armor(value, weight,name, null,  longDesc,  shortDesc,  healing1, attackBoost, defenseBoost);
+                        String slotName = rs.getString("slot");              // e.g. "HEAD"
+                        ArmorSlot slot  = ArmorSlot.valueOf(slotName);      // enum lookup
+                        return new Armor(value, weight,name, null,  longDesc,  shortDesc,  healing1, attackBoost, defenseBoost,slot);
 
                     default:
                         // fallback to plain Item
