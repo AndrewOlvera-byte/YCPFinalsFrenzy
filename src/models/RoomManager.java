@@ -115,11 +115,13 @@ public class RoomManager {
      * and return the right subclass based on its `type`.  
      */
     private Item loadItemById(Connection conn, int id) throws SQLException {
-        String sql =
-            "SELECT value, weight, name, long_description, short_description, " +
-            "       type, healing, damage_multi, attack_damage " +
-            "  FROM ITEM " +
-            " WHERE item_id = ?";
+    	String sql =
+                "SELECT name, value, weight,\n" +
+                "       long_description, short_description,\n" +
+                "       type, healing, damage_multi, attack_damage,\n" +
+                "       attack_boost, defense_boost, slot\n" +
+                "  FROM ITEM\n" +
+                " WHERE item_id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
@@ -149,6 +151,20 @@ public class RoomManager {
                             value, weight, name, /*components=*/null,
                             attackDmg,
                             longDesc, shortDesc
+                        );
+                    case "ARMOR":
+                        // Now these columns actually exist in your ResultSet:
+                        int   healAmt     = rs.getInt("healing");
+                        double atkBoost  = rs.getDouble("attack_boost");
+                        int   defBoost   = rs.getInt("defense_boost");
+                        ArmorSlot slot    = ArmorSlot.valueOf(rs.getString("slot"));
+                        return new Armor(
+                            value, weight, name, null,
+                            longDesc, shortDesc,
+                            healAmt,
+                            atkBoost,
+                            defBoost,
+                            slot
                         );
 
                     default:

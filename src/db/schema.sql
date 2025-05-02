@@ -134,4 +134,12 @@ CREATE TABLE conversation_edges (
     REFERENCES conversation_nodes(conversation_id, node_id)
     ON DELETE CASCADE
 );
+CREATE TABLE PLAYER_EQUIPMENT (
+  player_id   INT         NOT NULL,
+  slot        VARCHAR(16) NOT NULL,   -- e.g. 'HEAD','TORSO','LEGS','ACCESSORY'
+  armor_id    INT         NOT NULL,
+  PRIMARY KEY (player_id, slot),
+  FOREIGN KEY (player_id) REFERENCES PLAYER(player_id),
+  FOREIGN KEY (armor_id)  REFERENCES ITEM(item_id)
+);
 

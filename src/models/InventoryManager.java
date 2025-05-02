@@ -267,9 +267,11 @@ public class InventoryManager {
                "DELETE FROM PLAYER_EQUIPMENT WHERE player_id = 1 AND slot = ?"
              );
              // insert new armor
-             PreparedStatement ins = conn.prepareStatement(
-               "INSERT INTO PLAYER_EQUIPMENT(player_id, slot, item_id) VALUES(?,?,?)"
-             )
+        		// RIGHT: use armor_id per your DDL
+        	PreparedStatement ins = conn.prepareStatement(
+        		"INSERT INTO PLAYER_EQUIPMENT (player_id, slot, armor_id) VALUES (?,?,?)"
+        		);
+
         ) {
             conn.setAutoCommit(false);
 
