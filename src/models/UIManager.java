@@ -3,6 +3,7 @@ package models;
 import java.util.*;
 
 import GameEngine.GameEngine;
+import models.Player;
 
 public class UIManager {
     private GameEngine engine;
@@ -145,19 +146,14 @@ public class UIManager {
     // Get current room image for display
     public String getCurrentRoomImage() {
         String roomName = engine.getCurrentRoomName();
-        switch (roomName) {
-            case "Manor South Lobby":
-                return "images/default.jpg";
-            case "Manors Road":
-                return "images/default.jpg";
-            case "The Student Union":
-                return "images/default.jpg";
-            case "The Shuttle Stop":
-                return "images/default.jpg";
-            default:
-                return "images/default.jpg";
+        if (roomName == null) {
+            return "images/default.jpg";
         }
+        String fileName = roomName.replaceAll("\\s+", "") + ".png";
+        return "images/" + fileName;
     }
+
+    
     
     // Generate overlay of items in room with persistent positions.
     public String getRoomItemsOverlay() {
@@ -176,7 +172,7 @@ public class UIManager {
                 topPercent = pos[1];
             } else {
                 // Generate new random positions within the desired ranges.
-                leftPercent = 40 + rand.nextDouble() * 40;  // anywhere from 40% to 80%
+                leftPercent = 30 + rand.nextDouble() * 30;  // anywhere from 30% to 60%
                 topPercent = 65 + rand.nextDouble() * 15;     // between 65% and 80%
                 // Store the generated position for this item.
                 itemPositions.put(itemName, new double[]{leftPercent, topPercent});
@@ -190,7 +186,7 @@ public class UIManager {
               .append(leftPercent)
               .append("%; top:")
               .append(topPercent)
-              .append("%; width:1in; height:auto; background-color: transparent;'/>");
+              .append("%; width:1in; height:auto; background-color: transparent;'/>\n");
         }
         
         return sb.toString();
@@ -201,49 +197,73 @@ public class UIManager {
         Room currentRoom = engine.getRooms().get(engine.getCurrentRoomNum());
         StringBuilder sb = new StringBuilder();
         
-        // Arrange characters side by side
+        // 1. Render all NPCs first
         for (int i = 0; i < currentRoom.getCharacterContainerSize(); i++) {
             String charName = currentRoom.getCharacterName(i);
             int charHealth = currentRoom.getCharacterHealth(i);
-            
-            // Calculate number of full hearts and check for a half heart
+
             int fullHearts = charHealth / 50;
             boolean showHalfHeart = (charHealth % 50) > 0;
-            
-            double leftOffsetInches = i * 2;   // horizontal offset for each character
-            
-            // Container div for hearts and character image
+
+            double leftOffsetInches = i * 2;
+
             sb.append("<div style='position:absolute; left:")
               .append(leftOffsetInches)
-              .append("in; top:40%; width:2.5in; text-align:center;'>");
-            
-            // Row of hearts above the character image
-            sb.append("<div style='height:0.5in;'>");
-            
-            // Append full hearts
+              .append("in; top:40%; width:2.5in; text-align:center;'>\n");
+
+            sb.append("<div style='height:0.5in;'>\n");
             for (int h = 0; h < fullHearts; h++) {
-                sb.append("<img src='images/heart.png' alt='heart' style='width:0.25in; height:auto; display:inline-block;'/>");
+                sb.append("<img src='images/heart.png' alt='heart' style='width:0.25in; height:auto; display:inline-block;'/>\n");
             }
-            
-            // Append a half heart if needed
             if (showHalfHeart) {
-                sb.append("<img src='images/halfheart.png' alt='half heart' style='width:0.25in; height:auto; display:inline-block;'/>");
+                sb.append("<img src='images/halfheart.png' alt='half heart' style='width:0.25in; height:auto; display:inline-block;'/>\n");
             }
-            
-            sb.append("</div>");
-            
-            // Character image
+            sb.append("</div>\n");
+
             sb.append("<img src='images/")
               .append(charName)
               .append(".png' alt='")
               .append(charName)
-              .append("' style='width:2.5in; height:auto; background-color: transparent;'/>");
-            
-            sb.append("</div>");
+              .append("' style='width:2.5in; height:auto; background-color: transparent;'/>\n");
+
+            sb.append("</div>\n");
         }
-        
+
+        // 2. Render the Player separately on the far right
+        Player player = engine.getPlayer();
+        if (player != null) {
+            int playerHealth = player.getHp();
+            int fullHearts = playerHealth / 50;
+            boolean showHalfHeart = (playerHealth % 50) > 0;
+            
+            // Position player on far right (e.g., 8 inches)
+            double leftOffsetInches = 8;
+
+            sb.append("<div style='position:absolute; left:")
+              .append(leftOffsetInches)
+              .append("in; top:40%; width:2.5in; text-align:center;'>\n");
+
+            sb.append("<div style='height:0.5in;'>\n");
+            for (int h = 0; h < fullHearts; h++) {
+                sb.append("<img src='images/heart.png' alt='heart' style='width:0.25in; height:auto; display:inline-block;'/>\n");
+            }
+            if (showHalfHeart) {
+                sb.append("<img src='images/halfheart.png' alt='half heart' style='width:0.25in; height:auto; display:inline-block;'/>\n");
+            }
+            sb.append("</div>\n");
+
+            sb.append("<img src='images/")
+              .append(player.getName())
+              .append(".png' alt='")
+              .append(player.getName())
+              .append("' style='width:2.5in; height:auto; background-color: transparent;'/>\n");
+
+            sb.append("</div>\n");
+        }
+
         return sb.toString();
     }
+
     
     // Main display method to construct Response object
     public Response display() {

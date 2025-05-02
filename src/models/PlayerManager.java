@@ -16,11 +16,11 @@ public class PlayerManager {
         try (Connection conn = DerbyDatabase.getConnection()) {
             // 1) load main record (we assume ID=1)
             String sql = "SELECT name, hp, skill_points, damage_multi, long_description, short_description,player_type,attack_boost,defense_boost "
-                       + "FROM PLAYER WHERE player_id = 2";
+                       + "FROM PLAYER WHERE player_id = 1";
             try (PreparedStatement ps = conn.prepareStatement(sql);
                  ResultSet rs = ps.executeQuery()) {
                 if (!rs.next()) {
-                    throw new SQLException("No PLAYER with ID=2");
+                    throw new SQLException("No PLAYER with ID=1");
                 }
                 String name  = rs.getString("name");
                 int    hp    = rs.getInt("hp");
@@ -34,7 +34,7 @@ public class PlayerManager {
                 // 2) load inventory
                 Inventory inv = new Inventory(new ArrayList<>(), 30);
                 try (PreparedStatement ips = conn.prepareStatement(
-                         "SELECT item_id FROM PLAYER_INVENTORY WHERE player_id = 2"
+                         "SELECT item_id FROM PLAYER_INVENTORY WHERE player_id = 1"
                      );
                      ResultSet irs = ips.executeQuery()) {
                     while (irs.next()) {

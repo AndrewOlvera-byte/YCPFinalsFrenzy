@@ -210,7 +210,7 @@
                 <div class="sidebar">
                     <img src="${response.roomImage}"
                          alt="Current Room Image" />
-                    <div class="number-label">${response.roomNumber}</div>
+                   
                     ${response.roomItemsOverlay}
                     ${response.roomCharactersOverlay}
                 </div>
