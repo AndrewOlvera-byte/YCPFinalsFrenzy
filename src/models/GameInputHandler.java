@@ -15,7 +15,7 @@ public class GameInputHandler {
         "examine", "go", "move", "walk",
         "talk", "attack", "swing", "slash", "strike", "hit",
         "look", "help", "shuttle", "drive", "respond",
-        "apply", "drink", "reset", "initialize","equip"
+        "apply", "drink", "reset", "initialize","equip","unequip"
     ));
 
     private static final Set<String> PREPOSITIONS = new HashSet<>(Arrays.asList(
@@ -176,6 +176,18 @@ public class GameInputHandler {
                 } else {
                     gameEngine.appendMessage(
                         gameEngine.equipArmor(gameEngine.CharItemNameToID(noun))
+                    );
+                }
+                break;
+            case "unequip":
+            	if (noun == null || noun.trim().isEmpty()) {
+                    gameEngine.appendMessage(
+                        "\n<b>Invalid equip. You must specify something to remove. "
+                      + "Try: apply [armor]</b>"
+                    );
+                } else {
+                    gameEngine.appendMessage(
+                        gameEngine.unequipArmor(noun)
                     );
                 }
                 break;

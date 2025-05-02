@@ -164,6 +164,9 @@ public class GameEngine {
     public String equipArmor(int itemNum) {
         return inventoryManager.equipArmor(itemNum);
     }
+    public String unequipArmor(String name) {
+        return inventoryManager.unequipArmor(name);
+    }
     public String examineItemName(int itemNum) {
         return inventoryManager.examineItemName(itemNum);
     }

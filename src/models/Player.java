@@ -79,6 +79,13 @@ public class Player extends Character {
         }
         equippedArmor.put(slot, armor);
     }
+    /**
+     * Returns the Armor currently equipped in the given slot,
+     * or null if nothing is equipped there.
+     */
+    public Armor getEquippedArmor(ArmorSlot slot) {
+        return equippedArmor.get(slot);
+    }
 
 
     /** Unequip whatever is in that slot */
