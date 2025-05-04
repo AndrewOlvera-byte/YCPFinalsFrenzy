@@ -79,6 +79,15 @@ public class UIManager {
             .append("\nHealth: ")
             .append(player.getHp())
             .append("\n");
+        
+        info.append("Equipped Armor:\n");
+            for (ArmorSlot slot : ArmorSlot.values()) {
+                Armor a = player.getEquippedArmor(slot);
+                info.append(slot.name())
+                    .append(": ")
+                    .append(a != null ? a.getName() : "none")
+                    .append("\n");
+            }
 
         return info.toString();
     }
