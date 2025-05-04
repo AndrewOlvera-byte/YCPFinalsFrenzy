@@ -28,6 +28,10 @@ public class Item {
 			return shortdescription;
 		}
 	}
+	public String getShortDescription() {
+		
+		return shortdescription.toUpperCase();
+	}
 	
 	public void setDescription(String longdescription, String shortdescription) {
 		this.longdescription = longdescription;

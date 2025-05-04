@@ -20,7 +20,14 @@ public class dashboardServlet extends HttpServlet {
 
         // Create or retrieve the session and GameEngine instance.
         HttpSession session = req.getSession(true);
-        GameEngine gameEngine = (GameEngine) session.getAttribute("gameEngine");
+        
+        if (session.getAttribute("selectedClass") == null) { // if no class is chosen then go to class page
+            req.getRequestDispatcher("/_view/ClassSelect.jsp")
+               .forward(req, resp);
+            return;
+        }
+        
+        GameEngine gameEngine = (GameEngine) session.getAttribute("gameEngine"); // otherwise go to game
         if (gameEngine == null) {
             gameEngine = new GameEngine();
             gameEngine.start();
@@ -36,6 +43,22 @@ public class dashboardServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+    	String cls = req.getParameter("selectedClass");
+    	if (cls != null) {
+    	    // Save chosen class and re-init the engine
+    	    HttpSession session = req.getSession(true);
+    	    session.setAttribute("selectedClass", cls);
+
+    	    GameEngine engine = new GameEngine();
+    	    engine.startWithoutPlayer();
+    	    engine.loadPlayerOfClass(cls);
+    	    session.setAttribute("gameEngine", engine);
+
+    	    resp.sendRedirect(req.getContextPath() + "/dashboard");
+    	    return;
+    	}
+
+    	
 
         // 1) Retrieve existing session (do NOT create a new one)
         HttpSession session = req.getSession(false);
@@ -72,3 +95,5 @@ public class dashboardServlet extends HttpServlet {
         req.getRequestDispatcher("/_view/Dashboard.jsp").forward(req, resp);
     }
 }
+
+

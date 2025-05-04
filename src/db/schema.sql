@@ -12,23 +12,24 @@ CREATE TABLE PLAYER (
   attack_boost INT,
   defense_boost INT
 );
-
-
-
+-- 6) Equipment linkage
 CREATE TABLE ITEM (
-  item_id           INT PRIMARY KEY,
+  item_id           INT          PRIMARY KEY,
   name              VARCHAR(255),
   value             INT,
   weight            INT,
   long_description  VARCHAR(1024),
   short_description VARCHAR(255),
-  type              VARCHAR(50),   -- e.g. "weapon" or "potion"
+  type              VARCHAR(50),   -- 'WEAPON','UTILITY','ARMOR'
   healing           INT,           -- how much HP it restores
-  damage_multi      DOUBLE,        -- multiplier for player damage
-  attack_damage     INT,           -- for weapons: base attack
-  attack_boost      INT,           -- bonus to attack stat
-  defense_boost     INT            -- bonus to defense stat
+  damage_multi      DOUBLE,        -- multiplier for utilities
+  attack_damage     INT,           -- for weapons
+  attack_boost      INT,           -- bonus to attack for armor
+  defense_boost     INT,           -- bonus to defense for armor
+  slot              VARCHAR(16)    -- HEAD, TORSO, LEGS or ACCESSORY
 );
+
+
 
 
 CREATE TABLE ROOM (
@@ -132,5 +133,13 @@ CREATE TABLE conversation_edges (
   FOREIGN KEY (conversation_id, child_node_id)
     REFERENCES conversation_nodes(conversation_id, node_id)
     ON DELETE CASCADE
+);
+CREATE TABLE PLAYER_EQUIPMENT (
+  player_id   INT         NOT NULL,
+  slot        VARCHAR(16) NOT NULL,   -- e.g. 'HEAD','TORSO','LEGS','ACCESSORY'
+  armor_id    INT         NOT NULL,
+  PRIMARY KEY (player_id, slot),
+  FOREIGN KEY (player_id) REFERENCES PLAYER(player_id),
+  FOREIGN KEY (armor_id)  REFERENCES ITEM(item_id)
 );
 

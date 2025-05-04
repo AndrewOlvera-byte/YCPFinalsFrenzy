@@ -72,9 +72,11 @@ public class PlayerManager {
     /** Duplicate the same helper from RoomManager */
     private Item loadItem(Connection conn, int itemId) throws SQLException {
         String sql =
-            "SELECT name, value, weight, long_description, short_description, " +
-            "       type, healing, damage_multi, attack_damage " +
-            "  FROM ITEM " +
+            "SELECT name, value, weight,\n" +
+            "       long_description, short_description,\n" +
+            "       type, healing, damage_multi, attack_damage,\n" +
+            "       attack_boost, defense_boost, slot\n" +
+            "  FROM ITEM\n" +
             " WHERE item_id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, itemId);
@@ -83,49 +85,90 @@ public class PlayerManager {
                     throw new SQLException("ITEM not found: " + itemId);
                 }
 
-                String name        = rs.getString("name");
-                int    value       = rs.getInt("value");
-                int    weight      = rs.getInt("weight");
-                String longDesc    = rs.getString("long_description");
-                String shortDesc   = rs.getString("short_description");
-                String type        = rs.getString("type");
+                String name      = rs.getString("name");
+                int    value     = rs.getInt("value");
+                int    weight    = rs.getInt("weight");
+                String longDesc  = rs.getString("long_description");
+                String shortDesc = rs.getString("short_description");
+                String type      = rs.getString("type");
 
                 switch (type.toUpperCase()) {
                     case "UTILITY":
-                        int    healing     = rs.getInt("healing");
-                        double dmgMulti    = rs.getDouble("damage_multi");
+                        int    healing  = rs.getInt("healing");
+                        double dmgMulti= rs.getDouble("damage_multi");
                         return new Utility(
-                            value, weight, name,
-                            /*components=*/null,
+                            value, weight, name, null,
                             longDesc, shortDesc,
                             healing, dmgMulti
                         );
 
                     case "WEAPON":
-                        int attackDmg      = rs.getInt("attack_damage");
+                        int attackDmg = rs.getInt("attack_damage");
                         return new Weapon(
-                            value, weight, name,
-                            /*components=*/null,
+                            value, weight, name, null,
                             attackDmg,
                             longDesc, shortDesc
                         );
+
                     case "ARMOR":
-                        double attackBoost      = rs.getDouble("attack_boost");
-                        int defenseBoost      = rs.getInt("defense_boost");
-                        int  healing1     = rs.getInt("healing");
-                        return new Armor(value, weight,name, null,  longDesc,  shortDesc,  healing1, attackBoost, defenseBoost);
+                        // Now these columns actually exist in your ResultSet:
+                        int   healAmt     = rs.getInt("healing");
+                        double atkBoost  = rs.getDouble("attack_boost");
+                        int   defBoost   = rs.getInt("defense_boost");
+                        ArmorSlot slot    = ArmorSlot.valueOf(rs.getString("slot"));
+                        return new Armor(
+                            value, weight, name, null,
+                            longDesc, shortDesc,
+                            healAmt,
+                            atkBoost,
+                            defBoost,
+                            slot
+                        );
 
                     default:
-                        // fallback to plain Item
                         return new Item(
-                            value, weight, name,
-                            /*components=*/null,
+                            value, weight, name, null,
                             longDesc, shortDesc
                         );
                 }
             }
         }
     }
-
-
+    
+    /**
+     * Load a player by class (ATTACK, DEFENSE, NORMAL) from the DB.
+     */
+    public void loadPlayerByType(String cls) throws SQLException {
+        String sql = "SELECT name, hp, skill_points, damage_multi,"
+                   + " long_description, short_description,"
+                   + " attack_boost, defense_boost"
+                   + " FROM PLAYER WHERE player_type = ?";
+        try (Connection conn = DerbyDatabase.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, cls);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    throw new SQLException("No PLAYER of class=" + cls);
+                }
+                // build Player exactly as in loadPlayer()
+                Player p = new Player(
+                    rs.getString("name"),
+                    rs.getInt("hp"),
+                    rs.getInt("skill_points"),
+                    new Inventory(new ArrayList<>(), 100),  // or load inventory if desired
+                    rs.getString("long_description"),
+                    rs.getString("short_description"),
+                    rs.getDouble("damage_multi"),
+                    rs.getInt("attack_boost"),
+                    rs.getInt("defense_boost")
+                );
+                engine.setPlayer(p);
+            }
+        }
+    }
 }
+    
+
+
+
+		

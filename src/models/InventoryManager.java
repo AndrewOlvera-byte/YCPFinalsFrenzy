@@ -2,13 +2,17 @@ package models;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 import GameEngine.GameEngine;
 import models.DerbyDatabase;
+import models.Armor;
+import models.ArmorSlot;
+import models.Item;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class InventoryManager {
     private GameEngine engine;
@@ -238,6 +242,140 @@ public class InventoryManager {
         }
         return sb.toString();
     }
+    public String equipArmor(int itemNum) {
+        // 1) bounds check
+        if (itemNum < 0 || itemNum >= engine.getPlayer().getInventorySize()) {
+            return "\n<b>Invalid item selection.</b>";
+        }
+        // 2) type check
+        Item raw = engine.getPlayer().getItem(itemNum);
+        if (!(raw instanceof Armor)) {
+            return "\n<b>You can't equip that!</b>";
+        }
+        Armor armor = (Armor) raw;
+
+        // 3) decide slot
+        ArmorSlot slot = armor.slot();
+
+        // 4) in-memory: equip
+        engine.getPlayer().equip(slot, armor);
+        // ─── ADDED: remove it from in-memory inventory ───
+        engine.getPlayer().removeItem(itemNum);
+
+        // 5) DB: delete old, insert new, **then** delete from inventory
+        try (Connection conn = DerbyDatabase.getConnection();
+             PreparedStatement del   = conn.prepareStatement(
+                 "DELETE FROM PLAYER_EQUIPMENT WHERE player_id = 1 AND slot = ?"
+             );
+             PreparedStatement ins   = conn.prepareStatement(
+                 "INSERT INTO PLAYER_EQUIPMENT (player_id, slot, armor_id) VALUES (?,?,?)"
+             );
+             // ─── ADDED: prep to delete from PLAYER_INVENTORY ───
+             PreparedStatement delInv= conn.prepareStatement(
+                 "DELETE FROM PLAYER_INVENTORY WHERE player_id = 1 AND item_id = ?"
+             )
+        ) {
+            conn.setAutoCommit(false);
+
+            // lookup DB item_id
+            int databaseItemId = -1;
+            try (PreparedStatement psGetItemId = conn.prepareStatement(
+                     "SELECT item_id FROM ITEM WHERE name = ?"
+                 )) {
+                psGetItemId.setString(1, armor.getName());
+                try (ResultSet rs = psGetItemId.executeQuery()) {
+                    if (rs.next()) databaseItemId = rs.getInt("item_id");
+                }
+            }
+            if (databaseItemId == -1) {
+                databaseItemId = itemNum + 1;
+            }
+
+            del.setString(1, slot.name());
+            del.executeUpdate();
+
+            ins.setInt   (1, 1);
+            ins.setString(2, slot.name());
+            ins.setInt   (3, databaseItemId);
+            ins.executeUpdate();
+
+            // ─── ADDED: finally remove from PLAYER_INVENTORY ───
+            delInv.setInt(1, databaseItemId);
+            delInv.executeUpdate();
+
+            conn.commit();
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to update DB after equipping armor", e);
+        }
+
+        return "\n<b>" + armor.getName() + " equipped to "
+             + slot.name().toLowerCase() + " slot.</b>";
+    }
+    public String unequipArmor(String slot) {
+        // 0) convert the incoming string to an ArmorSlot, safely
+        ArmorSlot armorSlot;
+        try {
+            armorSlot = ArmorSlot.valueOf(slot.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return "\n<b>Invalid slot: " + slot + ".</b>";
+        }
+
+        // 1) check there is something to unequip
+        Armor equipped = engine.getPlayer().getEquippedArmor(armorSlot);
+        if (equipped == null) {
+            return "\n<b>No armor is equipped in the " 
+                 + armorSlot.name().toLowerCase() + " slot.</b>";
+        }
+
+        // 2) in-memory: remove from equipment and add back to inventory
+        engine.getPlayer().unequip(armorSlot);
+        engine.getPlayer().addItem(equipped);
+
+        // 3) DB: delete from PLAYER_EQUIPMENT, insert back into PLAYER_INVENTORY
+        try (Connection conn = DerbyDatabase.getConnection();
+             PreparedStatement delEq  = conn.prepareStatement(
+                 "DELETE FROM PLAYER_EQUIPMENT WHERE player_id = ? AND slot = ?"
+             );
+             PreparedStatement insInv = conn.prepareStatement(
+                 "INSERT INTO PLAYER_INVENTORY (player_id, item_id) VALUES (?,?)"
+             )) {
+            conn.setAutoCommit(false);
+
+            // look up the real item_id
+            int databaseItemId = -1;
+            try (PreparedStatement ps = conn.prepareStatement(
+                       "SELECT item_id FROM ITEM WHERE name = ?"
+                 )) {
+                ps.setString(1, equipped.getName());
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) databaseItemId = rs.getInt("item_id");
+                }
+            }
+            if (databaseItemId == -1) {
+                throw new RuntimeException("Could not resolve item_id for " + equipped.getName());
+            }
+
+            // delete from equipment table
+            delEq.setInt   (1, 1);
+            delEq.setString(2, armorSlot.name());
+            delEq.executeUpdate();
+
+            // insert back into inventory
+            insInv.setInt(1, 1);
+            insInv.setInt(2, databaseItemId);
+            insInv.executeUpdate();
+
+            conn.commit();
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to update DB after unequipping armor", e);
+        }
+
+        return "\n<b>" + equipped.getName() 
+             + " has been unequipped from " 
+             + armorSlot.name().toLowerCase() 
+             + " slot and returned to your inventory.</b>";
+    }
+
 
 
 }
