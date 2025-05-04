@@ -3,6 +3,7 @@ package GameEngine;
 import java.util.*;
 import models.*;
 import models.Character;  // your NPC base
+import java.sql.SQLException;
 
 public class GameEngine {
 	
@@ -82,6 +83,28 @@ public class GameEngine {
             GameStateManager.loadState(this);             // from GAME_STATE
             this.currentRoomNum = getCurrentRoomNum();
         }
+    }
+    
+    /** Like start(), but only load rooms & conversations so we can inject our own Player. */
+    public void startWithoutPlayer() {
+        if (!USE_FAKE_DB) {
+            DatabaseInitializer.initialize();
+        }
+        // 1) Rooms
+        roomManager.loadRooms();
+        // 2) Conversations
+        conversationManager.loadConversations();
+        this.currentRoomNum = 0;
+        this.isRunning = true;
+    }
+
+    /** After startWithoutPlayer(), load exactly the class they picked. */
+    public void loadPlayerOfClass(String className) {
+    	try {
+    		new PlayerManager(this).loadPlayerByType(className);
+    	       } catch (SQLException e) {
+    	           throw new RuntimeException("Failed to load player of class: " + className, e);
+    	       }
     }
     
     // Getters and setters for managers to access GameEngine state

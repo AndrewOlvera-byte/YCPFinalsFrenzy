@@ -134,9 +134,39 @@ public class PlayerManager {
             }
         }
     }
-
-            
+    
+    /**
+     * Load a player by class (ATTACK, DEFENSE, NORMAL) from the DB.
+     */
+    public void loadPlayerByType(String cls) throws SQLException {
+        String sql = "SELECT name, hp, skill_points, damage_multi,"
+                   + " long_description, short_description,"
+                   + " attack_boost, defense_boost"
+                   + " FROM PLAYER WHERE player_type = ?";
+        try (Connection conn = DerbyDatabase.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, cls);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    throw new SQLException("No PLAYER of class=" + cls);
+                }
+                // build Player exactly as in loadPlayer()
+                Player p = new Player(
+                    rs.getString("name"),
+                    rs.getInt("hp"),
+                    rs.getInt("skill_points"),
+                    new Inventory(new ArrayList<>(), 100),  // or load inventory if desired
+                    rs.getString("long_description"),
+                    rs.getString("short_description"),
+                    rs.getDouble("damage_multi"),
+                    rs.getInt("attack_boost"),
+                    rs.getInt("defense_boost")
+                );
+                engine.setPlayer(p);
+            }
         }
+    }
+}
     
 
 

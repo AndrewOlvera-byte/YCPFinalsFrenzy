@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
+<c:if test="${not empty sessionScope.selectedClass}">
 <html>
 <head>
     <title>YCP Finals Frenzy</title>
@@ -232,3 +233,4 @@
     </script>
 </body>
 </html>
+</c:if>
