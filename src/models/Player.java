@@ -7,6 +7,7 @@ import java.util.EnumMap;
 import java.util.Map;
 
 public class Player extends Character {
+	private int id;
     private int skillPoints;
     private double damageMulti;
     private int attackBoost;
@@ -134,5 +135,13 @@ public class Player extends Character {
                 System.out.printf("%-9s: none%n", slot);
             }
         }
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }
