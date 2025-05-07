@@ -11,5 +11,5 @@ item_id,name,value,weight,long_description,short_description,type,healing,damage
 10,Armor,30,5,"<b>Weak armor will increase your health.</b>","<b>armor.</b>",ARMOR,0,0,0,0,20,TORSO,false
 11,Helmet,30,5,"<b>Weak armor will increase your health.</b>","<b>armor.</b>",ARMOR,0,0,0,0,20,HEAD,false
 12,Pants,30,5,"<b>Weak armor will increase your health.</b>","<b>armor.</b>",ARMOR,0,0,0,0,20,LEGS,false
-13,Stick,1,2,"<b>A sturdy wooden stick. Useful for crafting recipes.</b>","<b>Stick.</b>",ITEM,0,0,0,0,0,0,false
-14,String,1,1,"<b>A length of string. Useful for crafting recipes.</b>","<b>String.</b>",ITEM,0,0,0,0,0,0,false
+13,Stick,1,2,"<b>A sturdy wooden stick. Useful for crafting.</b>","<b>Stick.</b>",ITEM,0,0,0,0,0,0,false
+14,String,1,1,"<b>A length of string. Useful for crafting.</b>","<b>String.</b>",ITEM,0,0,0,0,0,0,false

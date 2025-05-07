@@ -17,12 +17,13 @@ public class UIManager {
     }
     
  // Style settings per armor slot
-    private static final Map<ArmorSlot, String> armorSlotStyles = Map.of(
-        ArmorSlot.HEAD,      "top:0%; left:20%; width:1in;",
-        ArmorSlot.TORSO,     "top:25%; left:10%; width:2.2in;",
-        ArmorSlot.LEGS,      "top:55%; left:15%; width:2in;",
-        ArmorSlot.ACCESSORY, "top:30%; left:0%; width:2.5in;" // e.g., gauntlets or gloves
-    );
+    private static final Map<ArmorSlot, String> armorSlotStyles = new HashMap<>();
+    static {
+        armorSlotStyles.put(ArmorSlot.HEAD,      "top:0%; left:20%; width:1in;");
+        armorSlotStyles.put(ArmorSlot.TORSO,     "top:25%; left:10%; width:2.2in;");
+        armorSlotStyles.put(ArmorSlot.LEGS,      "top:55%; left:15%; width:2in;");
+        armorSlotStyles.put(ArmorSlot.ACCESSORY, "top:30%; left:0%; width:2.5in;");
+    }
 
     // Returns help text for player
     public String getHelp() {
@@ -35,8 +36,8 @@ public class UIManager {
         help.append("<b>\nShuttle is the same as movement but for traveling via shuttle. (ex. shuttle | drive)</b>\n");
         help.append("<b>\nTalk is how to interact with valid NPCs. (ex. (talk) curly. Continue conversation with Respond #</b>\n");
         help.append("<b>\nDrink is used to consume potions. (ex. (drink | apply) potion.</b>");
-        help.append("<b>\nCraft or make items from components. (ex. (craft|make) gold key)</b>\n");
         help.append("<b>\nDisassemble items into components if possible. (ex. disassemble gold key)</b>\n");
+        help.append("<b>\nCombine two items without naming the result. (ex. combine string and stick)</b>\n");
         return help.toString();
     }
     

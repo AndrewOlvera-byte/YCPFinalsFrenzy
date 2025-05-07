@@ -326,14 +326,14 @@ public class GameEngine {
     	   loadData();
     }
 
-    // Crafting command wrapper
-    public String craftItem(String itemName) {
-        return craftingManager.craftItem(itemName);
-    }
-
     // Disassemble command wrapper
     public String disassembleItem(String itemName) {
         return craftingManager.disassembleItem(itemName);
+    }
+
+    // Combine two components into a new item
+    public String combineItems(String compA, String compB) {
+        return craftingManager.combineItems(compA, compB);
     }
 
 }

@@ -17,7 +17,7 @@ public class GameInputHandler {
         "look", "help", "shuttle", "drive", "respond",
         "apply", "drink", "reset", "initialize", "forward", "backward", "left", "right",
         "North", "N", "north", "n", "South", "south", "S", "s", "East", "east", "E", "e",
-        "West", "west", "w", "W","equip","unequip", "craft","make","disassemble"
+        "West", "west", "w", "W","equip","unequip","disassemble","combine"
     ));
 
     private static final Set<String> PREPOSITIONS = new HashSet<>(Arrays.asList(
@@ -236,18 +236,6 @@ public class GameInputHandler {
                     );
                 }
                 break;
-            case "craft":
-            case "make":
-                if (noun == null || noun.trim().isEmpty()) {
-                    gameEngine.appendMessage(
-                        "\n<b>You must specify an item to craft. Try: craft [item]</b>"
-                    );
-                } else {
-                    gameEngine.appendMessage(
-                        gameEngine.craftItem(noun)
-                    );
-                }
-                break;
             case "disassemble":
                 if (noun == null || noun.trim().isEmpty()) {
                     gameEngine.appendMessage(
@@ -257,6 +245,24 @@ public class GameInputHandler {
                     gameEngine.appendMessage(
                         gameEngine.disassembleItem(noun)
                     );
+                }
+                break;
+            case "combine":
+                if (noun == null || noun.trim().isEmpty()) {
+                    gameEngine.appendMessage(
+                        "\n<b>You must specify two items to combine. Try: combine [item1] and [item2]</b>"
+                    );
+                } else {
+                    String[] parts = noun.split("\\s+and\\s+");
+                    if (parts.length != 2) {
+                        gameEngine.appendMessage(
+                            "\n<b>Usage: combine [item1] and [item2]</b>"
+                        );
+                    } else {
+                        gameEngine.appendMessage(
+                            gameEngine.combineItems(parts[0], parts[1])
+                        );
+                    }
                 }
                 break;
             	   
