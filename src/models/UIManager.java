@@ -27,6 +27,7 @@ public class UIManager {
         help.append("<b>\nShuttle is the same as movement but for traveling via shuttle. (ex. shuttle | drive)</b>\n");
         help.append("<b>\nTalk is how to interact with valid NPCs. (ex. (talk) curly. Continue conversation with Respond #</b>\n");
         help.append("<b>\nDrink is used to consume potions. (ex. (drink | apply) potion.</b>");
+        help.append("<b>\nCraft or make items from components. (ex. (craft|make) gold key)</b>\n");
         return help.toString();
     }
     
@@ -47,7 +48,7 @@ public class UIManager {
     public String getPlayerInventoryString() {
         StringBuilder inventoryString = new StringBuilder("Player Inventory:\n");
         Player p = engine.getPlayer();
-        // ← these two lines are the “easiest fix”
+        // ← these two lines are the "easiest fix"
         if (p == null || p.getInventory() == null || p.getInventorySize() == 0) {
             inventoryString.append("(no items)\n");
             return inventoryString.toString();
