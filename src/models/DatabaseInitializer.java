@@ -32,7 +32,7 @@ public class DatabaseInitializer {
                 runDDL(conn);
                 seedTable(conn, "rooms.csv",           "INSERT INTO ROOM VALUES (?, ?, ?, ?, ?)");
                 seedTable(conn, "connections.csv",     "INSERT INTO ROOM_CONNECTIONS VALUES (?, ?, ?)");
-                seedTable(conn, "items.csv",           "INSERT INTO ITEM VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                seedTable(conn, "items.csv",           "INSERT INTO ITEM VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 seedTable(conn, "item_components.csv", "INSERT INTO ITEM_COMPONENT VALUES (?, ?)");
                 seedTable(conn, "npcs.csv",            "INSERT INTO NPC VALUES (?, ?, ?, ?, ?, ?, ?)");
                 seedTable(conn, "npc_room.csv",        "INSERT INTO NPC_ROOM VALUES (?, ?)");

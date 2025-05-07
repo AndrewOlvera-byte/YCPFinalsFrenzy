@@ -331,4 +331,9 @@ public class GameEngine {
         return craftingManager.craftItem(itemName);
     }
 
+    // Disassemble command wrapper
+    public String disassembleItem(String itemName) {
+        return craftingManager.disassembleItem(itemName);
+    }
+
 }

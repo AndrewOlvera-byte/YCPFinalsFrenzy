@@ -28,6 +28,7 @@ public class UIManager {
         help.append("<b>\nTalk is how to interact with valid NPCs. (ex. (talk) curly. Continue conversation with Respond #</b>\n");
         help.append("<b>\nDrink is used to consume potions. (ex. (drink | apply) potion.</b>");
         help.append("<b>\nCraft or make items from components. (ex. (craft|make) gold key)</b>\n");
+        help.append("<b>\nDisassemble items into components if possible. (ex. disassemble gold key)</b>\n");
         return help.toString();
     }
     
