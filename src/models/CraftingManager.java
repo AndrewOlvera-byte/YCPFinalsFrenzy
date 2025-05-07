@@ -81,7 +81,7 @@ public class CraftingManager {
                 }
                 engine.getPlayer().removeItem(idx);
                 try (PreparedStatement psDel = conn.prepareStatement(
-                        "DELETE FROM PLAYER_INVENTORY WHERE player_id = 1 AND item_id = ?"
+                        "DELETE FROM PLAYER_INVENTORY WHERE player_id = 1 AND item_id =?"
                     )) {
                     psDel.setInt(1, targetItemId);
                     psDel.executeUpdate();
@@ -133,7 +133,7 @@ public class CraftingManager {
         }
         String a = compA.trim();
         String b = compB.trim();
-        Set<String> provided = new HashSet<>(Arrays.asList(a, b));
+        Set<String> provided = new HashSet<>(Arrays.asList(a.toLowerCase(), b.toLowerCase()));
         try (Connection conn = DerbyDatabase.getConnection()) {
             // Load all recipes
             Map<Integer, Set<String>> recipes = new HashMap<>();
@@ -142,7 +142,8 @@ public class CraftingManager {
                  ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     int id = rs.getInt("item_id");
-                    recipes.computeIfAbsent(id, k -> new HashSet<>()).add(rs.getString("component"));
+                    String compName = rs.getString("component").trim().toLowerCase();
+                    recipes.computeIfAbsent(id, k -> new HashSet<>()).add(compName);
                 }
             }
             // Find recipe matching exactly provided components
