@@ -16,6 +16,14 @@ public class UIManager {
         this.itemPositions = new HashMap<>();
     }
     
+ // Style settings per armor slot
+    private static final Map<ArmorSlot, String> armorSlotStyles = Map.of(
+        ArmorSlot.HEAD,      "top:0%; left:20%; width:1in;",
+        ArmorSlot.TORSO,     "top:25%; left:10%; width:2.2in;",
+        ArmorSlot.LEGS,      "top:55%; left:15%; width:2in;",
+        ArmorSlot.ACCESSORY, "top:30%; left:0%; width:2.5in;" // e.g., gauntlets or gloves
+    );
+
     // Returns help text for player
     public String getHelp() {
         StringBuilder help = new StringBuilder();
@@ -238,20 +246,23 @@ public class UIManager {
             sb.append("</div>\n");
         }
 
-        // 2. Render the Player separately on the far right
+     // 2. Render the Player separately on the far right
         Player player = engine.getPlayer();
         if (player != null) {
             int playerHealth = player.getHp();
             int fullHearts = playerHealth / 50;
             boolean showHalfHeart = (playerHealth % 50) > 0;
-            
-            // Position player on far right (e.g., 8 inches)
-            double leftOffsetInches = 8;
+
+            double leftOffsetInches = 8; // Far right
+            double topOffset = 40;
 
             sb.append("<div style='position:absolute; left:")
               .append(leftOffsetInches)
-              .append("in; top:40%; width:2.5in; text-align:center;'>\n");
+              .append("in; top:")
+              .append(topOffset)
+              .append("%; width:2.5in; text-align:center;'>\n");
 
+            // Hearts
             sb.append("<div style='height:0.5in;'>\n");
             for (int h = 0; h < fullHearts; h++) {
                 sb.append("<img src='images/heart.png' alt='heart' style='width:0.25in; height:auto; display:inline-block;'/>\n");
@@ -261,14 +272,37 @@ public class UIManager {
             }
             sb.append("</div>\n");
 
+            // Base player image
+            sb.append("<div style='position: relative; display: inline-block;'>\n");
             sb.append("<img src='images/")
               .append(player.getName())
               .append(".png' alt='")
               .append(player.getName())
               .append("' style='width:2.5in; height:auto; background-color: transparent;'/>\n");
 
-            sb.append("</div>\n");
+            // Equipped armor overlays (must exist in /images)
+            for (ArmorSlot slot : ArmorSlot.values()) {
+                Armor equipped = player.getEquippedArmor(slot);
+                if (equipped != null) {
+                    String imageName = equipped.getName().replaceAll("\\s+", "") + ".png";
+                    String slotClass = slot.name().toLowerCase(); // e.g., head, legs, accessory
+
+                    String customStyle = armorSlotStyles.getOrDefault(slot, "top:0; left:0; width:2.5in;");
+
+                    sb.append("<img src='images/")
+                      .append(imageName)
+                      .append("' alt='")
+                      .append(slot.name())
+                      .append("' style='position:absolute; ")
+                      .append(customStyle)
+                      .append(" height:auto; background-color: transparent;'/>\n");
+
+                }
+            }
+
+            sb.append("</div>\n</div>\n");
         }
+
 
         return sb.toString();
     }

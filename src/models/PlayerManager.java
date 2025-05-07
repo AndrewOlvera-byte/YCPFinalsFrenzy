@@ -41,27 +41,24 @@ public class PlayerManager {
                         inv.addItem(loadItem(conn, irs.getInt("item_id")));
                     }
                 }
+                Player player;
+
                 switch (Class) {
-                case "ATTACK":
-                    engine.setPlayer(
-                      new Player(name, hp, sp, inv, ldesc, sdesc, dm, 20,0)
-                    );
-                    break;
+                    case "ATTACK":
+                        player = new Player(name, hp, sp, inv, ldesc, sdesc, dm, 20, 0);
+                        break;
+                    case "DEFENSE":
+                        player = new Player(name, hp, sp, inv, ldesc, sdesc, dm, 0, 20);
+                        break;
+                    case "NORMAL":
+                    default:
+                        player = new Player(name, hp, sp, inv, ldesc, sdesc, dm, 0, 0);
+                        break;
+                }
 
-                case "DEFENSE":  // <— correct spelling
-                    engine.setPlayer(
-                      new Player(name, hp, sp, inv, ldesc, sdesc, dm, 0,20)
-                    );
-                    break;
+                loadEquippedArmor(conn, player);  // 🔁 Load from DB
+                engine.setPlayer(player);         // ✅ Set player after fully loaded
 
-                case "NORMAL":
-                default:
-                    engine.setPlayer(
-                      new Player(name, hp, sp, inv, ldesc, sdesc, dm,0,0)
-                    );
-                    break;
-              }
-                
                 
             }
                 
@@ -135,6 +132,25 @@ public class PlayerManager {
         }
     }
     
+    private void loadEquippedArmor(Connection conn, Player player) throws SQLException {
+        String sql = "SELECT pe.slot, i.item_id FROM PLAYER_EQUIPMENT pe " +
+                     "JOIN ITEM i ON pe.armor_id = i.item_id " +
+                     "WHERE pe.player_id = 1";
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                ArmorSlot slot = ArmorSlot.valueOf(rs.getString("slot"));
+                int itemId = rs.getInt("item_id");
+                Item item = loadItem(conn, itemId);
+                if (item instanceof Armor) {
+                    player.equip(slot, (Armor) item);
+                } else {
+                    System.err.println("Warning: Equipped item is not armor: " + item.getName());
+                }
+            }
+        }
+    }
+
     /**
      * Load a player by class (ATTACK, DEFENSE, NORMAL) from the DB.
      */
