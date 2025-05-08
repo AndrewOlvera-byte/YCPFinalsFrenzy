@@ -42,6 +42,9 @@ public class DatabaseInitializer {
                 seedTable(conn, "player_inventory.csv","INSERT INTO PLAYER_INVENTORY VALUES (?, ?)");
                 seedTable(conn, "conversation_nodes.csv","INSERT INTO CONVERSATION_NODES VALUES (?, ?, ?, ?, ?, ?, ?)");
                 seedTable(conn, "conversation_edges.csv","INSERT INTO CONVERSATION_EDGES VALUES (?, ?, ?, ?)");
+                seedTable(conn, "companion.csv", 	   "INSERT INTO COMPANION VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                seedTable(conn, "companion_room.csv",  "INSERT INTO COMPANION_ROOM VALUES (?, ?)");
+                seedTable(conn, "player_companion.csv", "INSERT INTO PLAYER_COMPANION VALUES (?,?)");
             }
         } catch (Exception e) {
             throw new RuntimeException("DB initialization failed", e);

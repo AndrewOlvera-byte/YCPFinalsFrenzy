@@ -91,7 +91,8 @@ public class FakeGameDatabase {
                     new ArrayList<>(),
                     row.get(2),
                     row.get(3),
-                    row.get(4)
+                    row.get(4),
+                    new ArrayList<>()
                 ));
             }
         } catch (IOException e) {
@@ -166,6 +167,39 @@ public class FakeGameDatabase {
             }
         } catch (IOException e) {
             throw new RuntimeException("Failed to load npc_room.csv", e);
+        }
+        
+        // 7) Load Companion Skeletons
+        try(ReadCSV reader = new ReadCSV("db/companion.csv")) {
+        	List<String> row;
+        	while((row = reader.next()) != null) {
+        		int    companionID     = Integer.parseInt(row.get(0));
+                String name      = row.get(1);
+                int    hp        = Integer.parseInt(row.get(2));
+                boolean agress   = Boolean.parseBoolean(row.get(3));
+                int    dmg       = Integer.parseInt(row.get(4));
+                String longDesc  = row.get(5);
+                String shortDesc = row.get(6);
+                boolean companion = Boolean.parseBoolean(row.get(7));
+                Companion newCompanion = new Companion(name, hp, agress, new String[]{}, dmg,
+                                  new Inventory(new ArrayList<>(), 100),
+                                  longDesc, shortDesc, companion);
+                npcMap.put(companionID, newCompanion);
+        	}
+        } catch (IOException e) {
+        	throw new RuntimeException("Failed to load companion.csv", e);
+        }
+        
+        // 8) place Companion in Room
+        try(ReadCSV reader = new ReadCSV("db/companion_room.csv")) {
+        	List<String> row;
+        	while((row = reader.next()) != null) {
+        		int companionID = Integer.parseInt(row.get(0));
+        		int roomID = Integer.parseInt(row.get(1));
+        		rooms.get(roomID).getCharacterContainer().add(npcMap.get(companionID));
+        	}
+        }catch (IOException e) {
+        	throw new RuntimeException("Failed to load companion_room.csv", e);
         }
 
         return rooms;

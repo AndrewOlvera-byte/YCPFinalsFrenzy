@@ -63,6 +63,26 @@ public class UIManager {
         }
         return inventoryString.toString();
     }
+    
+    public String getPlayerCompanionString() {
+    	StringBuilder playerCompanionString = new StringBuilder("Player Companion: \n");
+    	Player p = engine.getPlayer();
+    	
+    	if(p == null || p.getPlayerCompanion() == null) {
+    		playerCompanionString.append("(no companions) \n");
+    		return playerCompanionString.toString();
+    	}
+    	
+    	int size = 1;
+    	for (int i = 0; i < size; i++) {
+    		playerCompanionString
+    			.append(i+1)
+    			.append("\t")
+    			.append(p.getPlayerCompanion().getName())
+    			.append("\n");
+    	}
+    	return playerCompanionString.toString();
+    }
 
     
     // Returns formatted string of player stats
@@ -99,6 +119,21 @@ public class UIManager {
         }
         
         return charactersInfo.toString();
+    }
+    
+    public String getRoomCompanionsInfo() {
+    	StringBuilder companionsInfo = new StringBuilder("Companions in Room: \n");
+    	Room currentRoom = engine.getRooms().get(engine.getCurrentRoomNum());
+    	 int size = currentRoom.getCompanionContainerSize();
+    	 for (int i = 0; i < size; i++) {
+             companionsInfo.append(i + 1).append("\t")
+                     .append(currentRoom.getCompanion(i).getName())
+                     .append("\nHealth: ")
+                     .append(currentRoom.getCompanionHealth(i))
+                     .append("\n");
+         }
+    	 
+    	 return companionsInfo.toString();
     }
     
     // Returns formatted string of room connections
@@ -265,12 +300,62 @@ public class UIManager {
     }
 
     
+    
+    public String getRoomCompanionsOverlay() {
+        Room currentRoom = engine.getRooms().get(engine.getCurrentRoomNum());
+        StringBuilder sb = new StringBuilder();
+        
+        // Arrange characters side by side
+        for (int i = 0; i < currentRoom.getCompanionContainerSize(); i++) {
+            String compName = currentRoom.getCompanionName(i);
+            int compHealth = currentRoom.getCompanionHealth(i);
+            
+            // Calculate number of full hearts and check for a half heart
+            int fullHearts = compHealth / 50;
+            boolean showHalfHeart = (compHealth % 50) > 0;
+            
+            double leftOffsetInches = 5;   // horizontal offset for each companion
+            
+            // Container div for hearts and character image
+            sb.append("<div style='position:absolute; left:")
+              .append(leftOffsetInches)
+              .append("in; top:40%; width:1.5in; text-align:center;'>");
+            
+            // Row of hearts above the character image
+            sb.append("<div style='height:0.5in;'>");
+            
+            // Append full hearts
+            for (int h = 0; h < fullHearts; h++) {
+                sb.append("<img src='images/heart.png' alt='heart' style='width:0.25in; height:auto; display:inline-block;'/>");
+            }
+            
+            // Append a half heart if needed
+            if (showHalfHeart) {
+                sb.append("<img src='images/halfheart.png' alt='half heart' style='width:0.25in; height:auto; display:inline-block;'/>");
+            }
+            
+            sb.append("</div>");
+            
+            // Character image
+            sb.append("<img src='images/")
+              .append(compName)
+              .append(".png' alt='")
+              .append(compName)
+              .append("' style='width:2.5in; height:auto; background-color: transparent;'/>");
+            
+            sb.append("</div>");
+        }
+        
+        return sb.toString();
+    }
     // Main display method to construct Response object
     public Response display() {
         Response response = new Response(
             getCurrentRoomItems(),
             getPlayerInventoryString(),
+            getPlayerCompanionString(),
             getRoomCharactersInfo(),
+            getRoomCompanionsInfo(),
             getPlayerInfo(),
             getRoomConnectionOutput(),
             engine.getRunningMessage(),
@@ -278,7 +363,8 @@ public class UIManager {
             getCurrentRoomImage(),
             engine.getCurrentRoomNumber(),
             getRoomItemsOverlay(),
-            getRoomCharactersOverlay()
+            getRoomCharactersOverlay(),
+            getRoomCompanionsOverlay()
         );
         
         return response;

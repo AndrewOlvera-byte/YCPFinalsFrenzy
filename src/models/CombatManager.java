@@ -27,14 +27,15 @@ public class CombatManager {
         Room currentRoom   = engine.getRooms().get(engine.getCurrentRoomNum());
         double damageMulti = engine.getPlayer().getdamageMulti();
         double boost       = 0;
+        int companionDamage = 0;
         boost = engine.getPlayer().getAttackBoost();
+        if(engine.getPlayer().getPlayerCompanion() != null) {
+        	companionDamage = engine.getPlayer().getPlayerCompanion().damage;
+        }
         
         // calculate raw and total damage
         int    rawDmg    = engine.getPlayer().getAttackDmg(itemNum);
-        
-        double attack = engine.getPlayer().getArmorAttackTotal();
-        
-        double attackDmg = rawDmg * damageMulti + boost + attack;
+        double attackDmg = rawDmg * damageMulti + boost + companionDamage;
         
         int    charHealth = currentRoom.getCharacterHealth(characterNum);
         double newHealth  = charHealth - attackDmg;

@@ -16,8 +16,8 @@ public class GameInputHandler {
         "talk", "attack", "swing", "slash", "strike", "hit",
         "look", "help", "shuttle", "drive", "respond",
         "apply", "drink", "reset", "initialize", "forward", "backward", "left", "right",
-        "North", "N", "north", "n", "South", "south", "S", "s", "East", "east", "E", "e",
-        "West", "west", "w", "W","equip","unequip"
+        "North", "N", "north", "n", "South", "south", "S", "s", "East", "east", "E", "e", "equip","unequip",
+        "choose", "shoo"
     ));
 
     private static final Set<String> PREPOSITIONS = new HashSet<>(Arrays.asList(
@@ -159,6 +159,23 @@ public class GameInputHandler {
             case "help":
                 gameEngine.appendMessage(gameEngine.getHelp());
                 break;
+            case "choose":
+            	if (noun == null || noun.trim().isEmpty()) {
+                    gameEngine.appendMessage(
+                        "<b>\nYou must specify a Companion to choose. Try: choose [Companion name]</b>"
+                    );
+                } else {
+                    gameEngine.appendMessage(
+                        gameEngine.chooseCompanion(gameEngine.RoomCompanionNameToID(noun))
+                    );
+                }
+                break;
+            case "shoo":
+            	gameEngine.appendMessage(
+            			gameEngine.shooCompanion(gameEngine.playerCompanionNameToID(noun))
+            			);
+            	break;
+                
 
             case "shuttle":
             case "drive":

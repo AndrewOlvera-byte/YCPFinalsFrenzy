@@ -143,3 +143,31 @@ CREATE TABLE PLAYER_EQUIPMENT (
   FOREIGN KEY (armor_id)  REFERENCES ITEM(item_id)
 );
 
+CREATE TABLE COMPANION (
+  companion_id         INT PRIMARY KEY,
+  name           VARCHAR(255),
+  hp             INT,
+  aggression     BOOLEAN,
+  damage         INT,
+  long_description   VARCHAR(1024),
+  short_description  VARCHAR(255),
+  companion BOOLEAN,
+  room_num INT
+);
+
+CREATE TABLE COMPANION_ROOM (
+	companion_id INT,
+	room_id INT,
+	PRIMARY KEY (companion_id, room_id),
+	FOREIGN KEY (companion_id)     REFERENCES COMPANION(companion_id),
+  	FOREIGN KEY (room_id)    REFERENCES ROOM(room_id)
+);
+
+CREATE TABLE PLAYER_COMPANION (
+	player_id INT,
+	companion_id INT,
+	PRIMARY KEY (player_id, companion_id),
+    FOREIGN KEY (player_id)  REFERENCES PLAYER(player_id),
+    FOREIGN KEY (companion_id)    REFERENCES COMPANION(companion_id)
+);
+

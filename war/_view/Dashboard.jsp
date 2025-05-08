@@ -203,7 +203,9 @@
                         </div>
                         <pre class="formatted">${response.roomInventory}</pre>
                         <pre class="formatted">${response.playerInventory}</pre>
+						<pre class="formatted">${response.playerCompanion}</pre>
                         <pre class="formatted">${response.charactersInRoom}</pre>
+						<pre class="formatted">${response.companionsInRoom}</pre>
                         <pre class="formatted">${response.playerInfo}</pre>
                         <pre class="formatted">${response.roomConnections}</pre>
                     </div>
@@ -214,6 +216,7 @@
                    
                     ${response.roomItemsOverlay}
                     ${response.roomCharactersOverlay}
+					${response.roomCompanionsOverlay}
                 </div>
             </div>
         </div>

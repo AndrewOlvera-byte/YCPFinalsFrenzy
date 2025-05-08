@@ -2,9 +2,9 @@ package models;
 
 public class NPC extends Character {
    private boolean aggression;
-   private String[] dialogue;
-   private int damage;
-   private ConversationTree conversationTree;
+   protected String[] dialogue;
+   protected int damage;
+   protected ConversationTree conversationTree;
    public NPC(String name, int hp, boolean aggression, String[] dialogue, int damage, Inventory inventory, String longdescription, String shortdescription) {
        super(name, hp, inventory, longdescription, shortdescription);
        this.aggression = aggression;

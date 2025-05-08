@@ -10,7 +10,7 @@ public class GameEngine {
     private static final boolean USE_FAKE_DB = false;
     
     private String[] tables = {"conversation_edges", "conversation_nodes", "GAME_STATE", "PLAYER_INVENTORY", "NPC_INVENTORY",
-    		"ROOM_INVENTORY", "NPC_ROOM", "ROOM_CONNECTIONS", "ITEM_COMPONENT", "NPC", "ROOM", "ITEM", "PLAYER"};
+    		"ROOM_INVENTORY", "NPC_ROOM", "ROOM_CONNECTIONS", "ITEM_COMPONENT", "COMPANION_ROOM", "PLAYER_COMPANION", "COMPANION", "NPC", "ROOM", "ITEM", "PLAYER"};
 
     private Player player;
     private boolean isRunning = false;
@@ -27,6 +27,7 @@ public class GameEngine {
     private InventoryManager inventoryManager;
     private UIManager uiManager;
     private ConversationManager conversationManager;
+    private CompanionManager companionManager;
     
     // CSV-fake loader
     private FakeGameDatabase fakeDb = new FakeGameDatabase();
@@ -39,6 +40,7 @@ public class GameEngine {
         this.inventoryManager = new InventoryManager(this);
         this.uiManager = new UIManager(this);
         this.conversationManager = new ConversationManager(this);
+        this.companionManager = new CompanionManager(this);
     }
 
     /** Called once to seed/initialize, then loadData. */
@@ -166,6 +168,15 @@ public class GameEngine {
     public String getOnShuttle() {
         return roomManager.getOnShuttle();
     }
+    
+    //Companion Commands
+    public String chooseCompanion(int companionID) {
+    	return companionManager.chooseCompanion(companionID);
+    }
+    
+    public String shooCompanion(int companionID) {
+    	return companionManager.shooCompanion(companionID);
+    }
      
     // Combat commands - delegate to CombatManager
     public String playerAttackChar(int itemNum, int characterNum) {
@@ -212,10 +223,27 @@ public class GameEngine {
         return roomManager.examineCharacter(charNum);
     }
     
+    public String examineCompanion(String name) {
+    	return companionManager.examineCompanion(name);
+    }
+    
+    public int RoomCompanionNameToID(String name) {
+        return companionManager.RoomCompanionNameToID(name);
+    }
+    
+    public int playerCompanionNameToID(String name) {
+    	return companionManager.playerCompanionNameToID(name);
+    }
+    
+    public int companionNameToID(String name) {
+    	return roomManager.CompanionNameToID(name);
+    }
+    
     public String getExamine(String noun) {
         String message = "";
         int itemNum = CharItemNameToID(noun);
         int charNum = CharNameToID(noun);
+        int companionNum = companionNameToID(noun);
         
         if(noun.toLowerCase().equals("room")) {
             message = "\n" + roomManager.getCurrentRoom().getRoomDescription();
@@ -225,6 +253,9 @@ public class GameEngine {
         }
         if(itemNum >= 0) {
             message = examineItemName(itemNum);
+        }
+        if(companionNum >= 0) {
+        	message = examineCompanion(noun);
         }
         return message;
     }
@@ -298,6 +329,7 @@ public class GameEngine {
         return conversationManager;
     }
     
+    
     // Main display method for constructing Response
     public Response display() {
         // if the player is dead, return a special "game over" response
@@ -311,6 +343,9 @@ public class GameEngine {
         // otherwise, fall back to the normal UIManager flow
         return uiManager.display();
     }
+    //Companion methods in gameEngine
+
+    
     public String reset() {
     		DerbyDatabase.reset(tables);
        		DatabaseInitializer.initialize();
