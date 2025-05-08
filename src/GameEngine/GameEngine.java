@@ -4,6 +4,7 @@ import java.util.*;
 import models.*;
 import models.Character;  // your NPC base
 import java.sql.SQLException;
+import models.CraftingManager;
 
 public class GameEngine {
 	
@@ -28,6 +29,8 @@ public class GameEngine {
     private UIManager uiManager;
     private ConversationManager conversationManager;
     private CompanionManager companionManager;
+    private CraftingManager craftingManager;
+
     
     // CSV-fake loader
     private FakeGameDatabase fakeDb = new FakeGameDatabase();
@@ -41,6 +44,7 @@ public class GameEngine {
         this.uiManager = new UIManager(this);
         this.conversationManager = new ConversationManager(this);
         this.companionManager = new CompanionManager(this);
+        this.craftingManager = new CraftingManager(this);
     }
 
     /** Called once to seed/initialize, then loadData. */
@@ -356,6 +360,16 @@ public class GameEngine {
        public void initialize() {
     	   DatabaseInitializer.initialize();
     	   loadData();
+    }
+
+    // Disassemble command wrapper
+    public String disassembleItem(String itemName) {
+        return craftingManager.disassembleItem(itemName);
+    }
+
+    // Combine two components into a new item
+    public String combineItems(String compA, String compB) {
+        return craftingManager.combineItems(compA, compB);
     }
 
 }

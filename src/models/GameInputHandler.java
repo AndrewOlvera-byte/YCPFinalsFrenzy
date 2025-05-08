@@ -17,7 +17,7 @@ public class GameInputHandler {
         "look", "help", "shuttle", "drive", "respond",
         "apply", "drink", "reset", "initialize", "forward", "backward", "left", "right",
         "North", "N", "north", "n", "South", "south", "S", "s", "East", "east", "E", "e", "equip","unequip",
-        "choose", "shoo"
+        "choose", "shoo", "disassemble","combine"
     ));
 
     private static final Set<String> PREPOSITIONS = new HashSet<>(Arrays.asList(
@@ -251,6 +251,35 @@ public class GameInputHandler {
                     gameEngine.appendMessage(
                         gameEngine.unequipArmor(noun)
                     );
+                }
+                break;
+            case "disassemble":
+                if (noun == null || noun.trim().isEmpty()) {
+                    gameEngine.appendMessage(
+                        "\n<b>You must specify an item to disassemble. Try: disassemble [item]</b>"
+                    );
+                } else {
+                    gameEngine.appendMessage(
+                        gameEngine.disassembleItem(noun)
+                    );
+                }
+                break;
+            case "combine":
+                if (noun == null || noun.trim().isEmpty()) {
+                    gameEngine.appendMessage(
+                        "\n<b>You must specify two items to combine. Try: combine [item1] and [item2]</b>"
+                    );
+                } else {
+                    String[] parts = noun.split("\\s+and\\s+");
+                    if (parts.length != 2) {
+                        gameEngine.appendMessage(
+                            "\n<b>Usage: combine [item1] and [item2]</b>"
+                        );
+                    } else {
+                        gameEngine.appendMessage(
+                            gameEngine.combineItems(parts[0], parts[1])
+                        );
+                    }
                 }
                 break;
             	   

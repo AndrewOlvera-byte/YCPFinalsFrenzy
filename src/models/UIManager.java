@@ -16,6 +16,15 @@ public class UIManager {
         this.itemPositions = new HashMap<>();
     }
     
+ // Style settings per armor slot
+    private static final Map<ArmorSlot, String> armorSlotStyles = new HashMap<>();
+    static {
+        armorSlotStyles.put(ArmorSlot.HEAD,      "top:0%; left:20%; width:1in;");
+        armorSlotStyles.put(ArmorSlot.TORSO,     "top:25%; left:10%; width:2.2in;");
+        armorSlotStyles.put(ArmorSlot.LEGS,      "top:55%; left:15%; width:2in;");
+        armorSlotStyles.put(ArmorSlot.ACCESSORY, "top:30%; left:0%; width:2.5in;");
+    }
+
     // Returns help text for player
     public String getHelp() {
         StringBuilder help = new StringBuilder();
@@ -27,6 +36,8 @@ public class UIManager {
         help.append("<b>\nShuttle is the same as movement but for traveling via shuttle. (ex. shuttle | drive)</b>\n");
         help.append("<b>\nTalk is how to interact with valid NPCs. (ex. (talk) curly. Continue conversation with Respond #</b>\n");
         help.append("<b>\nDrink is used to consume potions. (ex. (drink | apply) potion.</b>");
+        help.append("<b>\nDisassemble items into components if possible. (ex. disassemble gold key)</b>\n");
+        help.append("<b>\nCombine two items without naming the result. (ex. combine string and stick)</b>\n");
         return help.toString();
     }
     
@@ -47,7 +58,7 @@ public class UIManager {
     public String getPlayerInventoryString() {
         StringBuilder inventoryString = new StringBuilder("Player Inventory:\n");
         Player p = engine.getPlayer();
-        // ← these two lines are the “easiest fix”
+        // ← these two lines are the "easiest fix"
         if (p == null || p.getInventory() == null || p.getInventorySize() == 0) {
             inventoryString.append("(no items)\n");
             return inventoryString.toString();
@@ -99,6 +110,15 @@ public class UIManager {
             .append("\nHealth: ")
             .append(player.getHp())
             .append("\n");
+        
+        info.append("Equipped Armor:\n");
+            for (ArmorSlot slot : ArmorSlot.values()) {
+                Armor a = player.getEquippedArmor(slot);
+                info.append(slot.name())
+                    .append(": ")
+                    .append(a != null ? a.getName() : "none")
+                    .append("\n");
+            }
 
         return info.toString();
     }
@@ -264,20 +284,23 @@ public class UIManager {
             sb.append("</div>\n");
         }
 
-        // 2. Render the Player separately on the far right
+     // 2. Render the Player separately on the far right
         Player player = engine.getPlayer();
         if (player != null) {
             int playerHealth = player.getHp();
             int fullHearts = playerHealth / 50;
             boolean showHalfHeart = (playerHealth % 50) > 0;
-            
-            // Position player on far right (e.g., 8 inches)
-            double leftOffsetInches = 8;
+
+            double leftOffsetInches = 8; // Far right
+            double topOffset = 40;
 
             sb.append("<div style='position:absolute; left:")
               .append(leftOffsetInches)
-              .append("in; top:40%; width:2.5in; text-align:center;'>\n");
+              .append("in; top:")
+              .append(topOffset)
+              .append("%; width:2.5in; text-align:center;'>\n");
 
+            // Hearts
             sb.append("<div style='height:0.5in;'>\n");
             for (int h = 0; h < fullHearts; h++) {
                 sb.append("<img src='images/heart.png' alt='heart' style='width:0.25in; height:auto; display:inline-block;'/>\n");
@@ -287,14 +310,37 @@ public class UIManager {
             }
             sb.append("</div>\n");
 
+            // Base player image
+            sb.append("<div style='position: relative; display: inline-block;'>\n");
             sb.append("<img src='images/")
               .append(player.getName())
               .append(".png' alt='")
               .append(player.getName())
               .append("' style='width:2.5in; height:auto; background-color: transparent;'/>\n");
 
-            sb.append("</div>\n");
+            // Equipped armor overlays (must exist in /images)
+            for (ArmorSlot slot : ArmorSlot.values()) {
+                Armor equipped = player.getEquippedArmor(slot);
+                if (equipped != null) {
+                    String imageName = equipped.getName().replaceAll("\\s+", "") + ".png";
+                    String slotClass = slot.name().toLowerCase(); // e.g., head, legs, accessory
+
+                    String customStyle = armorSlotStyles.getOrDefault(slot, "top:0; left:0; width:2.5in;");
+
+                    sb.append("<img src='images/")
+                      .append(imageName)
+                      .append("' alt='")
+                      .append(slot.name())
+                      .append("' style='position:absolute; ")
+                      .append(customStyle)
+                      .append(" height:auto; background-color: transparent;'/>\n");
+
+                }
+            }
+
+            sb.append("</div>\n</div>\n");
         }
+
 
         return sb.toString();
     }

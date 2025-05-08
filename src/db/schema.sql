@@ -26,7 +26,8 @@ CREATE TABLE ITEM (
   attack_damage     INT,           -- for weapons
   attack_boost      INT,           -- bonus to attack for armor
   defense_boost     INT,           -- bonus to defense for armor
-  slot              VARCHAR(16)    -- HEAD, TORSO, LEGS or ACCESSORY
+  slot              VARCHAR(16),   -- HEAD, TORSO, LEGS or ACCESSORY
+  disassemblable    BOOLEAN DEFAULT FALSE
 );
 
 

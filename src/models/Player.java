@@ -7,13 +7,13 @@ import java.util.EnumMap;
 import java.util.Map;
 
 public class Player extends Character {
-
+	private int id;
+    private int skillPoints;
+    private double damageMulti;
+    private int attackBoost;
+    private int defenseBoost;
     // --- new field: track equipped armor per slot ---
    private final Map<ArmorSlot, Armor> equippedArmor = new EnumMap<>(ArmorSlot.class);
-   private int skillPoints;
-   private double damageMulti;
-   private int attackBoost;
-   private int defenseBoost;
    private Companion hasCompanion;
    // private Room location;
    public Player(String name, int hp, int skillPoints, Inventory inventory, String longdescription, String shortdescription,double damageMulti,int attackBoost,int defenseBoost) {
@@ -133,9 +133,6 @@ public class Player extends Character {
     	return this.hasCompanion;
     }
     
-    public void setHasCompanion(Companion companion) {
-    	this.hasCompanion = companion;
-    }
     
     public void dropCompanion() {
     	this.hasCompanion = null;
@@ -146,5 +143,13 @@ public class Player extends Character {
     }
     public void removePlayerCompanion() {
     	this.hasCompanion = null;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }

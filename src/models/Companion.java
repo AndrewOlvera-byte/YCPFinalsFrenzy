@@ -25,6 +25,7 @@ public class Companion extends NPC {
 		return name;
 	}
 
+
 	public boolean getCompanion() {
 		return this.companion;
 	}
