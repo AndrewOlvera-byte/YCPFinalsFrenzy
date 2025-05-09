@@ -35,9 +35,11 @@ public class UIManager {
         help.append("<b>\nExamine and look are for looking at the description of an item or room. (ex. (examine|look) dagger)</b>\n");
         help.append("<b>\nShuttle is the same as movement but for traveling via shuttle. (ex. shuttle | drive)</b>\n");
         help.append("<b>\nTalk is how to interact with valid NPCs. (ex. (talk) curly. Continue conversation with Respond #</b>\n");
-        help.append("<b>\nDrink is used to consume potions. (ex. (drink | apply) potion.</b>");
+        help.append("<b>\nDrink is used to consume potions. (ex. (drink | apply) potion.</b>\n");
         help.append("<b>\nDisassemble items into components if possible. (ex. disassemble gold key)</b>\n");
         help.append("<b>\nCombine two items without naming the result. (ex. combine string and stick)</b>\n");
+        help.append("<b>\nEquip a piece of armor. (ex. equip helmet)</b>\n");
+        help.append("<b>\nTo unequip a piece of armor. (ex. unequip head)</b>\n");
         return help.toString();
     }
     
