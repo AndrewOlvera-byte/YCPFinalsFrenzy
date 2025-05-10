@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Login (AJAX)</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+  <h2>Login (AJAX)</h2>
+  <div id="errorField" style="color:red;"></div>
+  <label>
+    Username or Email:
+    <input type="text" id="usernameOrEmail" />
+  </label><br/><br/>
+  <label>
+    Password:
+    <input type="password" id="password" />
+  </label><br/><br/>
+  <button id="loginButton">Login</button>
+
+  <script>
+    $(function() {
+      $('#loginButton').click(function() {
+        $('#errorField').text('');
+        $.ajax({
+          type: 'POST',
+          url: '/YourAppContext/ajax/loginAjaxServlet',
+          data: {
+            usernameOrEmail: $('#usernameOrEmail').val(),
+            password: $('#password').val()
+          },
+          dataType: 'json',
+          success: function(resp) {
+            if (resp.errorMessage) {
+              $('#errorField').text(resp.errorMessage);
+            } else {
+              // on success, maybe redirect:
+              window.location.href = resp.redirectUrl || '/YourAppContext/dashboard';
+            }
+          },
+          error: function() {
+            $('#errorField').text('An unexpected error occurred.');
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

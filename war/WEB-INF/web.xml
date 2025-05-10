@@ -32,4 +32,36 @@
   <welcome-file-list>
     <welcome-file>index.html</welcome-file>
   </welcome-file-list>
+  <servlet>
+  	<servlet-name>LoginServlet</servlet-name>
+  	<servlet-class>servlet.loginServlet</servlet-class>
+  </servlet>
+  <servlet>
+  	<servlet-name>LoginAjaxServlet</servlet-name>
+  	<servlet-class>servlet.ajax.loginAjaxServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+  	<servlet-name>LoginServlet</servlet-name>
+  	<url-pattern>/login</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>LoginAjaxServlet</servlet-name>
+  	<url-pattern>/ajax/login</url-pattern>
+  </servlet-mapping>
+  <servlet>
+  	<servlet-name>RegisterServlet</servlet-name>
+  	<servlet-class>servlet.registerServlet</servlet-class>
+  </servlet>
+  <servlet>
+  	<servlet-name>RegisterAjaxServlet</servlet-name>
+  	<servlet-class>servlet.ajax.registerAjaxServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+  	<servlet-name>RegisterServlet</servlet-name>
+  	<url-pattern>/register</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>RegisterAjaxServlet</servlet-name>
+  	<url-pattern>/ajax/register</url-pattern>
+  </servlet-mapping>
 </web-app>

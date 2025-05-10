@@ -13,29 +13,33 @@ public class dashboardAjaxServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        // Retrieve the GameEngine instance from session.
+        // 1) ensure user is logged in
         HttpSession session = req.getSession(false);
-        if (session == null || session.getAttribute("gameEngine") == null) {
-            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Session expired or not found.");
+        if (session == null || session.getAttribute("user_id") == null) {
+            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, 
+                           "Session expired or not found.");
             return;
         }
-        GameEngine gameEngine = (GameEngine) session.getAttribute("gameEngine");
         
-        // Process the user input.
+        // 2) retrieve the GameEngine from servlet-context (same as dashboardServlet#doGet)
+        GameEngine gameEngine = (GameEngine)getServletContext()
+                                        .getAttribute("gameEngine");
+        if (gameEngine == null) {
+            throw new ServletException("Game Engine doesn't exist");
+        }
+        
+        // 3) process input & render
         String input = req.getParameter("input");
         gameEngine.processInput(input);
         
-        // Get updated game state.
         Response updatedResponse = gameEngine.display();
+        String jsonResponse    = updatedResponse.toJson();
         
-        // Use the toJson() method from Response to convert it to a JSON string.
-        String jsonResponse = updatedResponse.toJson();
-        
-        // Send the JSON string as the response.
+        // 4) send JSON back
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
-        PrintWriter out = resp.getWriter();
-        out.write(jsonResponse);
-        out.flush();
+        try (PrintWriter out = resp.getWriter()) {
+            out.write(jsonResponse);
+        }
     }
 }

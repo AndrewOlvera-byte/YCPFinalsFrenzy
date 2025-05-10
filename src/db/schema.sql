@@ -143,4 +143,14 @@ CREATE TABLE PLAYER_EQUIPMENT (
   FOREIGN KEY (player_id) REFERENCES PLAYER(player_id),
   FOREIGN KEY (armor_id)  REFERENCES ITEM(item_id)
 );
+CREATE TABLE users (
+  user_id INT 
+    GENERATED ALWAYS AS IDENTITY
+      (START WITH 1, INCREMENT BY 1),
+  username VARCHAR(50) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  email    VARCHAR(255) NOT NULL UNIQUE,
+  current_player_saves INT NOT NULL DEFAULT 0,
+  PRIMARY KEY (user_id)
+);
 

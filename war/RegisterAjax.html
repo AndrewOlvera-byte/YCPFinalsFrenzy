@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Register (AJAX)</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+  <h2>Register (AJAX)</h2>
+  <div id="errorField" style="color:red;"></div>
+  <label>
+    Username:
+    <input type="text" id="username" />
+  </label><br/><br/>
+  <label>
+    Email:
+    <input type="email" id="email" />
+  </label><br/><br/>
+  <label>
+    Password:
+    <input type="password" id="password" />
+  </label><br/><br/>
+  <button id="registerButton">Sign Up</button>
+
+  <script>
+    $(function() {
+      $('#registerButton').click(function() {
+        $('#errorField').text('');
+        $.ajax({
+          type: 'POST',
+          url: '/YourAppContext/ajax/registrationAjaxServlet',
+          data: {
+            username: $('#username').val(),
+            email: $('#email').val(),
+            password: $('#password').val()
+          },
+          dataType: 'json',
+          success: function(resp) {
+            if (resp.errorMessage) {
+              $('#errorField').text(resp.errorMessage);
+            } else {
+              // on success, maybe redirect:
+              window.location.href = resp.redirectUrl || '/YourAppContext/login';
+            }
+          },
+          error: function() {
+            $('#errorField').text('An unexpected error occurred.');
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
