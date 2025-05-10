@@ -8,7 +8,7 @@ public class GameStateManager {
     public static void loadState(GameEngine engine) {
         try (Connection conn = DerbyDatabase.getConnection();
              PreparedStatement ps = conn.prepareStatement(
-               "SELECT current_room, player_hp, damage_multi, running_message, skill_points "
+               "SELECT current_room, player_hp, damage_multi, running_message "
              + "FROM GAME_STATE WHERE state_id = 1");
              ResultSet rs = ps.executeQuery()) {
 
@@ -16,7 +16,6 @@ public class GameStateManager {
                 engine.setCurrentRoomNum(rs.getInt("current_room") - 1);
                 engine.getPlayer().setHp(rs.getInt("player_hp"));
                 engine.getPlayer().setdamageMulti(rs.getDouble("damage_multi"));
-                engine.getPlayer().setSkillPoints(rs.getInt("skill_points"));
                 
                 // Load the running message
                 String runningMessage = rs.getString("running_message");
@@ -32,7 +31,7 @@ public class GameStateManager {
     /** Call this after every turn or action that changes state */
     public static void saveState(GameEngine engine) {
         try (Connection conn = DerbyDatabase.getConnection()) {
-            // Check if state exists
+            // 1) Check if state row already exists
             boolean exists;
             try (PreparedStatement check = conn.prepareStatement(
                      "SELECT 1 FROM GAME_STATE WHERE state_id = 1"
@@ -43,28 +42,35 @@ public class GameStateManager {
             }
 
             if (exists) {
-                // Update existing state
-                try (PreparedStatement ps = conn.prepareStatement(
-                    "UPDATE GAME_STATE SET current_room = ?, player_hp = ?, damage_multi = ?, running_message = ?, skill_points = ? WHERE state_id = 1")) {
-                    
-                    ps.setInt(1, engine.getCurrentRoomNum() + 1);  // 1-based room numbers
-                    ps.setInt(2, engine.getPlayer().getHp());
+                // 2a) UPDATE the existing row
+                String updateSql =
+                    "UPDATE GAME_STATE " +
+                    "   SET current_room = ?, " +
+                    "       player_hp    = ?, " +
+                    "       damage_multi = ?, " +
+                    "       running_message = ?, " +
+                    "       last_saved   = CURRENT_TIMESTAMP " +
+                    " WHERE state_id     = 1";
+                try (PreparedStatement ps = conn.prepareStatement(updateSql)) {
+                    ps.setInt   (1, engine.getCurrentRoomNum() + 1);
+                    ps.setInt   (2, engine.getPlayer().getHp());
                     ps.setDouble(3, engine.getPlayer().getdamageMulti());
                     ps.setString(4, engine.getRunningMessage());
-                    ps.setInt(5, engine.getPlayer().getSkillPoints());
                     ps.executeUpdate();
                 }
             } else {
-                // Insert new state
-                try (PreparedStatement ps = conn.prepareStatement(
-                    "INSERT INTO GAME_STATE(state_id, current_room, player_hp, damage_multi, running_message, skill_points, last_saved) " +
-                    "VALUES (1, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)")) {
-                    
-                    ps.setInt(1, engine.getCurrentRoomNum() + 1);
-                    ps.setInt(2, engine.getPlayer().getHp());
+                // 2b) INSERT a brand-new row
+                String insertSql =
+                    "INSERT INTO GAME_STATE(" +
+                    "    state_id, current_room, player_hp, damage_multi, running_message, last_saved" +
+                    ") VALUES (" +
+                    "    1, ?, ?, ?, ?, CURRENT_TIMESTAMP" +
+                    ")";
+                try (PreparedStatement ps = conn.prepareStatement(insertSql)) {
+                    ps.setInt   (1, engine.getCurrentRoomNum() + 1);
+                    ps.setInt   (2, engine.getPlayer().getHp());
                     ps.setDouble(3, engine.getPlayer().getdamageMulti());
                     ps.setString(4, engine.getRunningMessage());
-                    ps.setInt(5, engine.getPlayer().getSkillPoints());
                     ps.executeUpdate();
                 }
             }

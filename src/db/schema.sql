@@ -108,7 +108,6 @@ CREATE TABLE GAME_STATE (
   player_hp     INT,
   damage_multi  DOUBLE,
   running_message CLOB,    -- Adding column for runningMessage persistence
-  skill_points  INT,       -- Adding column for skill points persistence
   last_saved    TIMESTAMP
 );
 
