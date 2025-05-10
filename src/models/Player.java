@@ -112,7 +112,7 @@ public class Player extends Character {
             .sum();
     }
 
-    /** Print out each slot and what’s in it */
+    /** Print out each slot and what's in it */
     public void printEquipment() {
         for (ArmorSlot slot : ArmorSlot.values()) {
             Armor a = equippedArmor.get(slot);
@@ -151,5 +151,25 @@ public class Player extends Character {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public int getSkillPoints() {
+        return skillPoints;
+    }
+
+    public void setSkillPoints(int skillPoints) {
+        this.skillPoints = skillPoints;
+    }
+
+    public void addSkillPoints(int points) {
+        this.skillPoints += points;
+    }
+
+    public boolean useSkillPoints(int points) {
+        if (this.skillPoints >= points) {
+            this.skillPoints -= points;
+            return true;
+        }
+        return false;
     }
 }

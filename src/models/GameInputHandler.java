@@ -17,7 +17,7 @@ public class GameInputHandler {
         "look", "help", "shuttle", "drive", "respond",
         "apply", "drink", "reset", "initialize", "forward", "backward", "left", "right",
         "North", "N", "north", "n", "South", "south", "S", "s", "East", "east", "E", "e", "equip","unequip",
-        "choose", "shoo", "disassemble","combine"
+        "choose", "shoo", "disassemble","combine", "increase"
     ));
 
     private static final Set<String> PREPOSITIONS = new HashSet<>(Arrays.asList(
@@ -280,6 +280,85 @@ public class GameInputHandler {
                             gameEngine.combineItems(parts[0], parts[1])
                         );
                     }
+                }
+                break;
+            case "use":
+                if (noun == null || noun.trim().isEmpty()) {
+                    gameEngine.appendMessage(
+                        "\n<b>Invalid use. You must specify what to use. "
+                      + "Try: use [skill points]</b>"
+                    );
+                } else if (noun.toLowerCase().equals("skill points")) {
+                    if (noun2 == null || noun2.trim().isEmpty()) {
+                        gameEngine.appendMessage(
+                            "\n<b>Invalid use. You must specify how many skill points to use. "
+                          + "Try: use skill points [number]</b>"
+                        );
+                    } else {
+                        try {
+                            int points = Integer.parseInt(noun2);
+                            if (gameEngine.getPlayer().useSkillPoints(points)) {
+                                gameEngine.appendMessage(
+                                    "\n<b>Successfully used " + points + " skill points!</b>"
+                                );
+                            } else {
+                                gameEngine.appendMessage(
+                                    "\n<b>Not enough skill points! You have " 
+                                  + gameEngine.getPlayer().getSkillPoints() + " skill points.</b>"
+                                );
+                            }
+                        } catch (NumberFormatException e) {
+                            gameEngine.appendMessage(
+                                "\n<b>Invalid number of skill points. Please enter a valid number.</b>"
+                            );
+                        }
+                    }
+                } else {
+                    gameEngine.appendMessage(
+                        gameEngine.usePotion(gameEngine.CharItemNameToID(noun))
+                    );
+                }
+                break;
+            case "increase":
+                if (noun == null || noun.trim().isEmpty()) {
+                    gameEngine.appendMessage(
+                        "\n<b>Invalid increase. You must specify what to increase. "
+                      + "Try: increase [attack|defense]</b>"
+                    );
+                } else if (noun.toLowerCase().equals("attack")) {
+                    if (gameEngine.getPlayer().useSkillPoints(1)) {
+                        gameEngine.getPlayer().setAttackBoost(
+                            gameEngine.getPlayer().getAttackBoost() + 5
+                        );
+                        gameEngine.appendMessage(
+                            "\n<b>Successfully increased attack by 5 points! New attack boost: " 
+                          + gameEngine.getPlayer().getAttackBoost() + "</b>"
+                        );
+                    } else {
+                        gameEngine.appendMessage(
+                            "\n<b>Not enough skill points! You have " 
+                          + gameEngine.getPlayer().getSkillPoints() + " skill points.</b>"
+                        );
+                    }
+                } else if (noun.toLowerCase().equals("defense")) {
+                    if (gameEngine.getPlayer().useSkillPoints(1)) {
+                        gameEngine.getPlayer().setdefenseBoost(
+                            gameEngine.getPlayer().getdefenseBoost() + 5
+                        );
+                        gameEngine.appendMessage(
+                            "\n<b>Successfully increased defense by 5 points! New defense boost: " 
+                          + gameEngine.getPlayer().getdefenseBoost() + "</b>"
+                        );
+                    } else {
+                        gameEngine.appendMessage(
+                            "\n<b>Not enough skill points! You have " 
+                          + gameEngine.getPlayer().getSkillPoints() + " skill points.</b>"
+                        );
+                    }
+                } else {
+                    gameEngine.appendMessage(
+                        "\n<b>Invalid increase. You can only increase attack or defense.</b>"
+                    );
                 }
                 break;
             	   

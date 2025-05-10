@@ -40,6 +40,7 @@ public class UIManager {
         help.append("<b>\nCombine two items without naming the result. (ex. combine string and stick)</b>\n");
         help.append("<b>\nEquip a piece of armor. (ex. equip helmet)</b>\n");
         help.append("<b>\nTo unequip a piece of armor. (ex. unequip head)</b>\n");
+        help.append("<b>\nIncrease attack or defense using skill points. (ex. increase attack or increase defense)</b>\n");
         return help.toString();
     }
     
@@ -111,6 +112,8 @@ public class UIManager {
             .append(player.getName() != null ? player.getName() : "(unknown)")
             .append("\nHealth: ")
             .append(player.getHp())
+            .append("\nSkill Points: ")
+            .append(player.getSkillPoints())
             .append("\n");
         
         info.append("Equipped Armor:\n");
