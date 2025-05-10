@@ -45,6 +45,7 @@ public class DatabaseInitializer {
                 seedTable(conn, "companion.csv", 	   "INSERT INTO COMPANION VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 seedTable(conn, "companion_room.csv",  "INSERT INTO COMPANION_ROOM VALUES (?, ?)");
                 seedTable(conn, "player_companion.csv", "INSERT INTO PLAYER_COMPANION VALUES (?,?)");
+                seedTable(conn, "companion_inventory.csv", "INSERT INTO COMPANION_INVENTORY VALUES (?, ?)");
             }
         } catch (Exception e) {
             throw new RuntimeException("DB initialization failed", e);

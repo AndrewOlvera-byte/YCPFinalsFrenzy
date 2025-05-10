@@ -172,3 +172,11 @@ CREATE TABLE PLAYER_COMPANION (
     FOREIGN KEY (companion_id)    REFERENCES COMPANION(companion_id)
 );
 
+Create Table COMPANION_INVENTORY (
+	companion_id INT,
+	item_id INT,
+	PRIMARY KEY (companion_id, item_id),
+    FOREIGN KEY (companion_id)  REFERENCES COMPANION(companion_id),
+    FOREIGN KEY (companion_id)    REFERENCES ITEM(item_id)
+);
+

@@ -107,9 +107,18 @@ public class RoomManager {
             		+ "   from COMPANION n join COMPANION_ROOM nr ON n.companion_id = nr.companion_id "
             		);
             ResultSet rsCompanion = psCompanion.executeQuery();
-            Inventory companionInventory = new Inventory(new ArrayList<>(), 100);
             
             while(rsCompanion.next()) {
+            	int companionId = rsCompanion.getInt("companion_id");
+                Inventory companionInventory = new Inventory(new ArrayList<>(), 10);
+                PreparedStatement psInv = conn.prepareStatement("SELECT item_id FROM COMPANION_INVENTORY WHERE companion_id = ?");
+                psInv.setInt(1, companionId);
+                ResultSet rsInv = psInv.executeQuery();
+                while (rsInv.next()) {
+                    Item CompanionItem = loadItemById(conn, rsInv.getInt("item_id"));
+                    companionInventory.addItem(CompanionItem);
+                }
+                
             	boolean companion = false;
             	
             	Companion newCompanion = new Companion(

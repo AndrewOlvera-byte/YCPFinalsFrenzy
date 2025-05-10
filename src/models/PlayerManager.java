@@ -70,7 +70,7 @@ public class PlayerManager {
     
     private Companion loadCompanion(Connection conn, int companionId) throws SQLException {
     	ArrayList<Item> inventory_items = new ArrayList<>();
-    	Inventory inventory = new Inventory(inventory_items, 50);
+    	Inventory inventory = new Inventory(inventory_items, 10);
     	String [] dialogue = new String [0];
         String sql =
             "SELECT name, hp, aggression,\n" +
@@ -92,6 +92,15 @@ public class PlayerManager {
                 	String longDesc  = rs.getString("long_description");
                 	String shortDesc = rs.getString("short_description");
                 	boolean companion      = rs.getBoolean("companion");
+                	
+                	try (PreparedStatement ips = conn.prepareStatement(
+                            "SELECT item_id FROM COMPANION_INVENTORY WHERE companion_id = 1"
+                        );
+                        ResultSet irs = ips.executeQuery()) {
+                       while (irs.next()) {
+                           inventory.addItem(loadItem(conn, irs.getInt("item_id")));
+                       }
+                   }
                 	return new Companion(
                 	name, hp, aggression, dialogue, damage, inventory,
                 	longDesc, shortDesc, companion

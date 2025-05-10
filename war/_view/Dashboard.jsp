@@ -204,6 +204,7 @@
                         <pre class="formatted">${response.roomInventory}</pre>
                         <pre class="formatted">${response.playerInventory}</pre>
 						<pre class="formatted">${response.playerCompanion}</pre>
+						<pre class="formatted">${response.companionInventory}</pre>
                         <pre class="formatted">${response.charactersInRoom}</pre>
 						<pre class="formatted">${response.companionsInRoom}</pre>
                         <pre class="formatted">${response.playerInfo}</pre>

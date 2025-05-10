@@ -8,6 +8,7 @@ public class Response {
     private String  roomInventory;
     private String  playerInventory;
     private String playerCompanion;
+    private String companionInventory;
     private String  charactersInRoom;
     private String companionsInRoom;
     private String  playerInfo;
@@ -32,6 +33,7 @@ public class Response {
     public Response(String roomInventory,
                     String playerInventory,
                     String playerCompanion,
+                    String companionInventory,
                     String charactersInRoom,
                     String companionsInRoom,
                     String playerInfo,
@@ -47,6 +49,7 @@ public class Response {
         this.roomInventory         = roomInventory;
         this.playerInventory       = playerInventory;
         this.playerCompanion 	   = playerCompanion;
+        this.companionInventory	   = companionInventory;
         this.charactersInRoom      = charactersInRoom;
         this.companionsInRoom      = companionsInRoom;
         this.playerInfo            = playerInfo;
@@ -64,6 +67,7 @@ public class Response {
     public String  getRoomInventory()         { return roomInventory; }
     public String  getPlayerInventory()       { return playerInventory; }
     public String getPlayerCompanion() 		  { return playerCompanion; }
+    public String getCompanionInventory() 	  { return companionInventory; }
     public String  getCharactersInRoom()      { return charactersInRoom; }
     public String getCompanionsInRoom() 	  { return companionsInRoom; }
     public String  getPlayerInfo()            { return playerInfo; }
@@ -82,6 +86,7 @@ public class Response {
     public void setRoomInventory(String s)         { this.roomInventory = s; }
     public void setPlayerInventory(String s)       { this.playerInventory = s; }
     public void setPlayerCompanion(String s) 	   { this.playerCompanion = s; }
+    public void setCompanionInventory(String s)    { this.companionInventory = s; }
     public void setCharactersInRoom(String s)      { this.charactersInRoom = s; }
     public void setCompanionsInRoom(String s)	   { this.companionsInRoom = s; }
     public void setPlayerInfo(String s)            { this.playerInfo = s; }
@@ -102,6 +107,7 @@ public class Response {
             + "\"roomInventory\":\""        + escapeJson(roomInventory)           + "\","
             + "\"playerInventory\":\""      + escapeJson(playerInventory)         + "\","
             + "\"playerCompanion\":\"" 		+ escapeJson(playerCompanion) 		  + "\","
+            + "\"companionInventory\":\""   + escapeJson(companionInventory)	  + "\","
             + "\"charactersInRoom\":\""     + escapeJson(charactersInRoom)        + "\","
             + "\"companionsInRoom\":\"" 	+ escapeJson(companionsInRoom) 		  + "\","
             + "\"playerInfo\":\""           + escapeJson(playerInfo)              + "\","

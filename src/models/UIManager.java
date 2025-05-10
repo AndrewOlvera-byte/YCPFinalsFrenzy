@@ -77,6 +77,26 @@ public class UIManager {
         return inventoryString.toString();
     }
     
+    public String getCompanionInventoryString() {
+        StringBuilder inventoryString = new StringBuilder("Companion Inventory:\n");
+        Companion companion = engine.getPlayer().getPlayerCompanion();
+        // ← these two lines are the "easiest fix"
+        if (companion == null || companion.getInventory() == null || companion.getInventorySize() == 0) {
+            inventoryString.append("(no items)\n");
+            return inventoryString.toString();
+        }
+
+        int size = companion.getInventorySize();
+        for (int i = 0; i < size; i++) {
+            inventoryString
+              .append(i + 1)
+              .append("\t")
+              .append(companion.getItemName(i))
+              .append("\n");
+        }
+        return inventoryString.toString();
+    }
+    
     public String getPlayerCompanionString() {
     	StringBuilder playerCompanionString = new StringBuilder("Player Companion: \n");
     	Player p = engine.getPlayer();
@@ -402,6 +422,7 @@ public class UIManager {
             getCurrentRoomItems(),
             getPlayerInventoryString(),
             getPlayerCompanionString(),
+            getCompanionInventoryString(),
             getRoomCharactersInfo(),
             getRoomCompanionsInfo(),
             getPlayerInfo(),

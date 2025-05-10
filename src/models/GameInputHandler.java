@@ -16,8 +16,9 @@ public class GameInputHandler {
         "talk", "attack", "swing", "slash", "strike", "hit",
         "look", "help", "shuttle", "drive", "respond",
         "apply", "drink", "reset", "initialize", "forward", "backward", "left", "right",
-        "North", "N", "north", "n", "South", "south", "S", "s", "East", "east", "E", "e", "equip","unequip",
-        "choose", "shoo", "disassemble","combine"
+        "North", "N", "north", "n", "South", "south", "S", "s", "East", "east", "E", "e",
+        "West", "W", "west", "w", "equip","unequip","choose", "shoo", "disassemble",
+        "combine", "give", "takec"
     ));
 
     private static final Set<String> PREPOSITIONS = new HashSet<>(Arrays.asList(
@@ -61,10 +62,28 @@ public class GameInputHandler {
                     );
                 }
                 break;
-
+                
+            case "takec":
+            	if (noun == null || noun.trim().isEmpty()) {
+                    gameEngine.appendMessage(
+                        "<b>\nYou must specify an item to grab. Try: grab [item name]</b>"
+                    );
+                } else {
+                    gameEngine.appendMessage(
+                        gameEngine.pickupItemFromCompanion(gameEngine.CompanionItemNameToID(noun))
+                    );
+                }
+            	break;
+            	
             case "drop":
                 gameEngine.appendMessage(
                     gameEngine.dropItem(gameEngine.CharItemNameToID(noun))
+                );
+                break;
+                
+            case "give":
+                gameEngine.appendMessage(
+                    gameEngine.giveItemToCompanion(gameEngine.CharItemNameToID(noun))
                 );
                 break;
 

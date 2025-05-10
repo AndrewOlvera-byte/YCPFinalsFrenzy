@@ -24,7 +24,25 @@ public class Companion extends NPC {
 	public String getName() {
 		return name;
 	}
+	
+	public Inventory getInventory() {
+		return inventory;
+	}
 
+    public Item getItem(int itemNum)
+    {
+        return this.inventory.getItem(itemNum);
+    }
+    
+    public String getItemName(int itemNum)
+    {
+        return inventory.getItemName(itemNum);
+    }
+    
+    public void removeItem(int itemNum)
+    {
+        this.inventory.removeItem(itemNum);
+    }
 
 	public boolean getCompanion() {
 		return this.companion;
