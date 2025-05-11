@@ -294,10 +294,16 @@ public class RoomManager {
         }
         Room dest = engine.getRooms().get(destNum);
         String req = dest.getRequiredKey();
-        if (req != null && !req.isEmpty()
-                && !engine.getPlayer().hasKey(req)) {
-            return "\n<b>You do not have the required key ("+req+") to enter "
-                   + dest.getRoomName()+".</b>";
+        if (req != null && !req.isEmpty()) {
+            boolean hasAccess = engine.getPlayer().hasKey(req);
+            Companion comp = engine.getPlayer().getPlayerCompanion();
+            if (!hasAccess && comp != null && comp.getName().equalsIgnoreCase(req)) {
+                hasAccess = true;
+            }
+            if (!hasAccess) {
+                return "\n<b>You do not have the required key or companion (" + req + ") to enter "
+                    + dest.getRoomName() + ".</b>";
+            }
         }
         if(engine.getPlayer().getPlayerCompanion() != null) {
         	engine.setCurrentRoomNum(destNum);
@@ -397,7 +403,7 @@ public class RoomManager {
     }
 
     /**
-     * Handle the “shuttle” command (requires the shuttle pass).
+     * Handle the "shuttle" command (requires the shuttle pass).
      */
     public String getOnShuttle() {
         String newMessage;
