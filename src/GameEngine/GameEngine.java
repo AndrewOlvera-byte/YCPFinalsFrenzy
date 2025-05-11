@@ -31,6 +31,7 @@ public class GameEngine {
     private CompanionManager companionManager;
     private CraftingManager craftingManager;
     private QuestManager questManager;
+    private QuestManager questManager;
 
     
     // CSV-fake loader
@@ -46,6 +47,8 @@ public class GameEngine {
         this.conversationManager = new ConversationManager(this);
         this.companionManager = new CompanionManager(this);
         this.craftingManager = new CraftingManager(this);
+        this.questManager = new QuestManager();
+        this.questManager.loadAll();
         this.questManager = new QuestManager();
         this.questManager.loadAll();
     }

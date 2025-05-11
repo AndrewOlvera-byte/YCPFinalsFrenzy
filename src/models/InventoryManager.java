@@ -173,7 +173,7 @@ public class InventoryManager {
         } catch (SQLException e) {
             throw new RuntimeException("Inventory DB update failed", e);
         }
-
+            
         return "<b>\n" + itemName + " was picked up.</b>";
     }
 
