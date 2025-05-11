@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>YCP Finals Frenzy - Home Ajax</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        window.onload = function() {
+            // Load save slots when page loads
+            loadSaveSlots();
+            
+            // Setup event listeners
+            document.getElementById('createPlayerForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                createNewPlayer();
+            });
+        };
+        
+        // Load save slots from server
+        function loadSaveSlots() {
+            $.ajax({
+                type: 'GET',
+                url: 'home',
+                dataType: 'json',
+                success: function(data) {
+                    // Handle successful response
+                    if (data.saveSlots) {
+                        updateSaveSlots(data.saveSlots);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error loading save slots:', error);
+                }
+            });
+        }
+        
+        // Update save slots display
+        function updateSaveSlots(saveSlots) {
+            const container = document.getElementById('saveSlotContainer');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < saveSlots.length; i++) {
+                const slot = saveSlots[i];
+                const slotNumber = i + 1;
+                
+                const slotElement = document.createElement('div');
+                slotElement.className = 'save-slot';
+                
+                if (slot && slot.playerId) {
+                    // Populated slot
+                    slotElement.innerHTML = `
+                        <h3>Save Slot ${slotNumber}</h3>
+                        <p>${slot.saveName || 'Unnamed Save'}</p>
+                    `;
+                    slotElement.onclick = function() {
+                        loadSaveSlot(slotNumber, slot.playerId);
+                    };
+                } else {
+                    // Empty slot
+                    slotElement.innerHTML = `
+                        <h3>Save Slot ${slotNumber}</h3>
+                        <p>Empty - Create New Game</p>
+                    `;
+                    slotElement.onclick = function() {
+                        openNewGameModal(slotNumber);
+                    };
+                }
+                
+                container.appendChild(slotElement);
+            }
+        }
+        
+        // Load save slot
+        function loadSaveSlot(slotNumber, playerId) {
+            $.ajax({
+                type: 'POST',
+                url: 'home',
+                data: {
+                    action: 'loadSaveSlot',
+                    slotNumber: slotNumber,
+                    playerId: playerId
+                },
+                success: function(data) {
+                    // Redirect to dashboard (should be handled by server)
+                    window.location.href = 'dashboard';
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error loading save slot:', error);
+                }
+            });
+        }
+        
+        // Create new player
+        function createNewPlayer() {
+            const form = document.getElementById('createPlayerForm');
+            const formData = new FormData(form);
+            
+            $.ajax({
+                type: 'POST',
+                url: 'home',
+                data: {
+                    action: 'createNewPlayer',
+                    slotNumber: formData.get('slotNumber'),
+                    playerName: formData.get('playerName'),
+                    playerClass: formData.get('playerClass'),
+                    playerDescription: formData.get('playerDescription')
+                },
+                success: function(data) {
+                    // Redirect to dashboard (should be handled by server)
+                    window.location.href = 'dashboard';
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error creating player:', error);
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+    <!-- This is just a utility page for AJAX operations -->
+</body>
+</html>

@@ -1,7 +1,21 @@
 -- 1) Core entity tables
--- in schema.sql, either…
+-- Users table must be defined first since it's referenced by PLAYER
+CREATE TABLE users (
+  user_id INT 
+    GENERATED ALWAYS AS IDENTITY
+      (START WITH 1, INCREMENT BY 1),
+  username VARCHAR(50) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  PRIMARY KEY (user_id)
+);
+
+-- Player table with reference to user
 CREATE TABLE PLAYER (
-  player_id INT PRIMARY KEY,
+  player_id INT PRIMARY KEY
+    GENERATED ALWAYS AS IDENTITY
+      (START WITH 1, INCREMENT BY 1),
+  user_id INT NOT NULL,
   name VARCHAR(100),
   hp INT,
   skill_points INT,
@@ -10,8 +24,11 @@ CREATE TABLE PLAYER (
   short_description VARCHAR(500),
   player_type VARCHAR(20),
   attack_boost INT,
-  defense_boost INT
+  defense_boost INT,
+  last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
+
 -- 6) Equipment linkage
 CREATE TABLE ITEM (
   item_id           INT          PRIMARY KEY,
@@ -29,9 +46,6 @@ CREATE TABLE ITEM (
   slot              VARCHAR(16),   -- HEAD, TORSO, LEGS or ACCESSORY
   disassemblable    BOOLEAN DEFAULT FALSE
 );
-
-
-
 
 CREATE TABLE ROOM (
   room_id        INT PRIMARY KEY,
@@ -103,12 +117,21 @@ CREATE TABLE PLAYER_INVENTORY (
 
 -- 4) Game state persistence
 CREATE TABLE GAME_STATE (
-  state_id      INT        PRIMARY KEY,
-  current_room  INT,
-  player_hp     INT,
-  damage_multi  DOUBLE,
-  running_message CLOB,    -- Adding column for runningMessage persistence
-  last_saved    TIMESTAMP
+  state_id INT PRIMARY KEY
+    GENERATED ALWAYS AS IDENTITY
+      (START WITH 1, INCREMENT BY 1),
+  user_id INT NOT NULL,
+  player_id INT NOT NULL,
+  current_room INT,
+  player_hp INT,
+  damage_multi DOUBLE,
+  running_message CLOB,
+  attack_boost INT,  
+  defense_boost INT,  
+  last_saved TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  save_name VARCHAR(100),
+  FOREIGN KEY (user_id) REFERENCES users(user_id),
+  FOREIGN KEY (player_id) REFERENCES PLAYER(player_id)
 );
 
 -- 5) Conversation node then edges
@@ -135,6 +158,7 @@ CREATE TABLE conversation_edges (
     REFERENCES conversation_nodes(conversation_id, node_id)
     ON DELETE CASCADE
 );
+
 CREATE TABLE PLAYER_EQUIPMENT (
   player_id   INT         NOT NULL,
   slot        VARCHAR(16) NOT NULL,   -- e.g. 'HEAD','TORSO','LEGS','ACCESSORY'
@@ -142,16 +166,6 @@ CREATE TABLE PLAYER_EQUIPMENT (
   PRIMARY KEY (player_id, slot),
   FOREIGN KEY (player_id) REFERENCES PLAYER(player_id),
   FOREIGN KEY (armor_id)  REFERENCES ITEM(item_id)
-);
-CREATE TABLE users (
-  user_id INT 
-    GENERATED ALWAYS AS IDENTITY
-      (START WITH 1, INCREMENT BY 1),
-  username VARCHAR(50) NOT NULL UNIQUE,
-  password VARCHAR(255) NOT NULL,
-  email    VARCHAR(255) NOT NULL UNIQUE,
-  current_player_saves INT NOT NULL DEFAULT 0,
-  PRIMARY KEY (user_id)
 );
 
 CREATE TABLE COMPANION (
@@ -187,6 +201,9 @@ Create Table COMPANION_INVENTORY (
 	item_id INT,
 	PRIMARY KEY (companion_id, item_id),
     FOREIGN KEY (companion_id)  REFERENCES COMPANION(companion_id),
-    FOREIGN KEY (companion_id)    REFERENCES ITEM(item_id)
+    FOREIGN KEY (item_id)    REFERENCES ITEM(item_id)
 );
+
+-- Note: The limit of 3 game saves per user will be implemented in the application code
+-- instead of using a database trigger
 

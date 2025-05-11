@@ -38,6 +38,6 @@ public class loginServlet extends HttpServlet {
         int userId = auth.getUserID(id);
         HttpSession session = req.getSession(true);
         session.setAttribute("user_id", userId);
-        resp.sendRedirect(req.getContextPath() + "/dashboard");
+        resp.sendRedirect(req.getContextPath() + "/home");
     }
 }

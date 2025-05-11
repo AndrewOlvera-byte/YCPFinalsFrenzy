@@ -5,16 +5,31 @@
          version="2.5"
          xmlns="http://java.sun.com/xml/ns/javaee">
 
+  <!-- Context Listeners -->
+  <listener>
+    <listener-class>listeners.GameEngineContextListener</listener-class>
+  </listener>
+
   <!-- Servlets -->
   <servlet>
     <servlet-name>DashboardServlet</servlet-name>
     <servlet-class>servlet.dashboardServlet</servlet-class>
   </servlet>
   
+  <servlet>
+    <servlet-name>HomeServlet</servlet-name>
+    <servlet-class>servlet.homeServlet</servlet-class>
+  </servlet>
+  
   <!-- AJAX servlets. -->
   <servlet>
     <servlet-name>DashboardAjaxServlet</servlet-name>
     <servlet-class>servlet.ajax.dashboardAjaxServlet</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <servlet-name>HomeAjaxServlet</servlet-name>
+    <servlet-class>servlet.ajax.homeAjaxServlet</servlet-class>
   </servlet>
 
   <!-- Servlet mappings -->
@@ -23,10 +38,20 @@
     <url-pattern>/dashboard</url-pattern>
   </servlet-mapping>
   
+  <servlet-mapping>
+    <servlet-name>HomeServlet</servlet-name>
+    <url-pattern>/home</url-pattern>
+  </servlet-mapping>
+  
   <!--  AJAX servlet mappings. -->
   <servlet-mapping>
     <servlet-name>DashboardAjaxServlet</servlet-name>
     <url-pattern>/ajax/dashboard</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>HomeAjaxServlet</servlet-name>
+    <url-pattern>/ajax/home</url-pattern>
   </servlet-mapping>
 
   <welcome-file-list>
@@ -64,4 +89,9 @@
   	<servlet-name>RegisterAjaxServlet</servlet-name>
   	<url-pattern>/ajax/register</url-pattern>
   </servlet-mapping>
+  
+  <!-- Session Configuration -->
+  <session-config>
+    <session-timeout>60</session-timeout>
+  </session-config>
 </web-app>

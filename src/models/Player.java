@@ -12,6 +12,7 @@ public class Player extends Character {
     private double damageMulti;
     private int attackBoost;
     private int defenseBoost;
+    private String playerType;
     // --- new field: track equipped armor per slot ---
    private final Map<ArmorSlot, Armor> equippedArmor = new EnumMap<>(ArmorSlot.class);
    private Companion hasCompanion;
@@ -23,6 +24,7 @@ public class Player extends Character {
        this.attackBoost = attackBoost;
        this.defenseBoost = defenseBoost;
        this.hasCompanion = null;
+       this.playerType = "NORMAL";
    }
    public void move(String direction) {
        System.out.println(name + " moves " + direction + " to a new location.");
@@ -61,7 +63,7 @@ public class Player extends Character {
         this.defenseBoost = defenseBoost;
     }
 
-    // --- NEW armor‐related methods ---
+    // --- NEW armor-related methods ---
 
     /** Equip an Armor item into the given slot */
     public void equip(ArmorSlot slot, Armor armor) {
@@ -91,8 +93,8 @@ public class Player extends Character {
         return equippedArmor.get(slot);
     }
 
-    /** Sum of all armor‐provided defense boosts */
-    /** Sum of all armor‐provided defense boosts (no streams) */
+    /** Sum of all armor-provided defense boosts */
+    /** Sum of all armor-provided defense boosts (no streams) */
     public int getArmorDefenseTotal() {
         int total = 0;
         for (Armor a : equippedArmor.values()) {
@@ -104,7 +106,7 @@ public class Player extends Character {
     }
 
 
-    /** Sum of all armor‐provided attack boosts */
+    /** Sum of all armor-provided attack boosts */
     public double getArmorAttackTotal() {
         return equippedArmor.values().stream()
             .filter(a -> a != null)
@@ -112,7 +114,7 @@ public class Player extends Character {
             .sum();
     }
 
-    /** Print out each slot and what’s in it */
+    /** Print out each slot and what's in it */
     public void printEquipment() {
         for (ArmorSlot slot : ArmorSlot.values()) {
             Armor a = equippedArmor.get(slot);
@@ -151,5 +153,42 @@ public class Player extends Character {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getPlayerType() {
+        return playerType;
+    }
+    
+    public void setPlayerType(String playerType) {
+        this.playerType = playerType;
+    }
+    
+    // New fields for persistence
+    private int userId;
+    private int currentRoomNum = -1; // Default to -1 to indicate not set
+    private String runningMessage;
+    
+    public int getUserId() {
+        return userId;
+    }
+    
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+    
+    public int getCurrentRoomNum() {
+        return currentRoomNum;
+    }
+    
+    public void setCurrentRoomNum(int currentRoomNum) {
+        this.currentRoomNum = currentRoomNum;
+    }
+    
+    public String getRunningMessage() {
+        return runningMessage;
+    }
+    
+    public void setRunningMessage(String runningMessage) {
+        this.runningMessage = runningMessage;
     }
 }

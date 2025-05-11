@@ -57,8 +57,10 @@ public class PlayerManager {
                 }
 
                 loadEquippedArmor(conn, player);  // 🔁 Load from DB
-                loadPlayerCompanion(conn,player);
-                engine.setPlayer(player);         // ✅ Set player after fully loaded
+                loadPlayerCompanion(conn, player);
+                
+                // Add player to the players ArrayList
+                engine.addPlayer(player);         // ✅ Add player after fully loaded
 
                 
             }
@@ -199,45 +201,57 @@ public class PlayerManager {
                      "WHERE pc.player_id = 1";
         try (PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
+            if (rs.next()) {
                 int companionId = rs.getInt("companion_id");
                 Companion companion = loadCompanion(conn, companionId);
-                if(companion != null) {
-                	player.setPlayerCompanion(companion);
-                }
+                player.setPlayerCompanion(companion);
             }
         }
     }
-
-    /**
-     * Load a player by class (ATTACK, DEFENSE, NORMAL) from the DB.
-     */
+    
+    // Create a player of the specified type (armor, attack, etc)
     public void loadPlayerByType(String cls) throws SQLException {
-        String sql = "SELECT name, hp, skill_points, damage_multi,"
-                   + " long_description, short_description,"
-                   + " attack_boost, defense_boost"
-                   + " FROM PLAYER WHERE player_type = ?";
-        try (Connection conn = DerbyDatabase.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, cls);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (!rs.next()) {
-                    throw new SQLException("No PLAYER of class=" + cls);
+        try (Connection conn = DerbyDatabase.getConnection()) {
+            String sql = "SELECT name, hp, skill_points, long_description, short_description "
+                       + "FROM PLAYER WHERE player_type = ? AND player_id = 1";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, cls);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        String name  = rs.getString("name");
+                        int    hp    = rs.getInt("hp");
+                        int    sp    = rs.getInt("skill_points");
+                        String ldesc = rs.getString("long_description");
+                        String sdesc = rs.getString("short_description");
+                        
+                        // Create inventory
+                        Inventory inv = new Inventory(new ArrayList<>(), 30);
+                        
+                        Player player;
+                        cls = cls.toUpperCase(); // normalize
+                        switch (cls) {
+                            case "ATTACK":
+                                player = new Player(name, hp, sp, inv, ldesc, sdesc, 1.0, 20, 0);
+                                break;
+                            case "DEFENSE":
+                                player = new Player(name, hp, sp, inv, ldesc, sdesc, 1.0, 0, 20);
+                                break;
+                            case "NORMAL":
+                            default:
+                                player = new Player(name, hp, sp, inv, ldesc, sdesc, 1.0, 0, 0);
+                                break;
+                        }
+                        
+                        // Add player to the players ArrayList
+                        engine.addPlayer(player);
+                    } else {
+                        throw new SQLException("No player of type: " + cls);
+                    }
                 }
-                // build Player exactly as in loadPlayer()
-                Player p = new Player(
-                    rs.getString("name"),
-                    rs.getInt("hp"),
-                    rs.getInt("skill_points"),
-                    new Inventory(new ArrayList<>(), 100),  // or load inventory if desired
-                    rs.getString("long_description"),
-                    rs.getString("short_description"),
-                    rs.getDouble("damage_multi"),
-                    rs.getInt("attack_boost"),
-                    rs.getInt("defense_boost")
-                );
-                engine.setPlayer(p);
             }
+        } catch (SQLException ex) {
+            System.err.println("Failed to load player by type: " + cls);
+            throw ex;
         }
     }
 }

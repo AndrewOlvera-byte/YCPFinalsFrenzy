@@ -51,7 +51,7 @@ public class AuthHandler {
      * Returns true on success, false if username/email conflict.
      */
     public boolean createUser(String username, String email, String password) {
-        String sql = "INSERT INTO users (username, email, password, current_player_saves) VALUES (?, ?, ?, 0)";
+        String sql = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)";
         try (Connection conn = DerbyDatabase.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, username);

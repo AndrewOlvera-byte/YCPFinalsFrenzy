@@ -5,15 +5,32 @@ import models.*;
 import models.Character;  // your NPC base
 import java.sql.SQLException;
 import models.CraftingManager;
+import java.sql.Connection;
+import java.sql.Statement;
 
 public class GameEngine {
 	
     private static final boolean USE_FAKE_DB = false;
     
+    // Add singleton instance
+    private static GameEngine instance;
+    
+    /**
+     * Get the singleton instance of the GameEngine
+     * @return GameEngine instance
+     */
+    public static GameEngine getInstance() {
+        if (instance == null) {
+            instance = new GameEngine();
+        }
+        return instance;
+    }
+    
     private String[] tables = {"conversation_edges", "conversation_nodes", "GAME_STATE", "PLAYER_INVENTORY", "NPC_INVENTORY",
     		"ROOM_INVENTORY", "NPC_ROOM", "ROOM_CONNECTIONS", "ITEM_COMPONENT", "COMPANION_ROOM", "PLAYER_COMPANION", "COMPANION_INVENTORY", "COMPANION", "NPC", "ROOM", "ITEM", "PLAYER", "users"};
 
-    private Player player;
+    // Change from single player to ArrayList of players
+    private ArrayList<Player> players = new ArrayList<>();
     private boolean isRunning = false;
     private int currentRoomNum;
     private ArrayList<Room> rooms = new ArrayList<>();
@@ -51,10 +68,38 @@ public class GameEngine {
     public void start() {
         if (!USE_FAKE_DB) {
             DatabaseInitializer.initialize();
-            System.out.println("Seeding DB for the first time…");
+            // Reinitialize rooms from CSV files on server restart
+            reinitializeRoomsFromCSV();
+            System.out.println("Rooms reinitialized from CSV files for MMO functionality");
         }
         loadData();
         this.isRunning = true;
+    }
+    
+    /**
+     * Reinitialize rooms from CSV files
+     * This ensures the map is in its original state on server restart
+     */
+    private void reinitializeRoomsFromCSV() {
+        try (Connection conn = DerbyDatabase.getConnection()) {
+            // First delete the junction tables
+            String[] roomTables = {
+                "ROOM_INVENTORY", "NPC_ROOM", "COMPANION_ROOM", "ROOM_CONNECTIONS"
+            };
+            
+            try (Statement stmt = conn.createStatement()) {
+                for (String table : roomTables) {
+                    stmt.executeUpdate("DELETE FROM " + table);
+                }
+                // Then delete the main room table
+                stmt.executeUpdate("DELETE FROM ROOM");
+            }
+            
+            // Now reseed from CSV files
+            DatabaseInitializer.seedRoomsFromCSV(conn);
+        } catch (Exception e) {
+            System.err.println("Failed to reinitialize rooms from CSV: " + e.getMessage());
+        }
     }
 
     /** Load rooms + player either from Derby or from CSV (FakeGameDatabase). */
@@ -65,7 +110,12 @@ public class GameEngine {
             this.rooms.addAll(fakeDb.loadAllRooms());
 
             // 2) Player + inventory
-            this.player = fakeDb.loadPlayer();
+            Player player = fakeDb.loadPlayer();
+            if (players.isEmpty()) {
+                players.add(player);
+            } else {
+                players.set(0, player);
+            }
             this.currentRoomNum = 0;  // start in room #1
 
             // 3) Conversations can remain empty or implement a fake loader later
@@ -86,8 +136,10 @@ public class GameEngine {
                 }
             }
             playerManager.loadPlayer();                   // from PLAYER & PLAYER_INVENTORY tables
-            GameStateManager.loadState(this);             // from GAME_STATE
-            this.currentRoomNum = getCurrentRoomNum();
+            if (!players.isEmpty()) {
+                GameStateManager.loadState(this);             // from GAME_STATE
+                this.currentRoomNum = getCurrentRoomNum();
+            }
         }
     }
     
@@ -114,12 +166,59 @@ public class GameEngine {
     }
     
     // Getters and setters for managers to access GameEngine state
+    // For backward compatibility, get the first player by default
     public Player getPlayer() {
-        return player;
+        if (players.isEmpty()) {
+            return null;
+        }
+        return players.get(0);
     }
     
+    // Get player by ID
+    public Player getPlayerById(int playerId) {
+        if (playerId >= 0 && playerId < players.size()) {
+            return players.get(playerId);
+        }
+        return null;
+    }
+    
+    // Set the player at the specified index
     public void setPlayer(Player player) {
-        this.player = player;
+        if (players.isEmpty()) {
+            players.add(player);
+        } else {
+            players.set(0, player);
+        }
+    }
+    
+    // Add a player and return its index
+    public int addPlayer(Player player) {
+        // Check if player with this database ID already exists
+        int existingIndex = findPlayerIndexById(player.getId());
+        
+        if (existingIndex >= 0) {
+            // Player already exists, update it instead of adding new
+            players.set(existingIndex, player);
+            return existingIndex;
+        } else {
+            // Add new player
+            players.add(player);
+            return players.size() - 1;
+        }
+    }
+    
+    // Find player by database ID
+    public int findPlayerIndexById(int databaseId) {
+        for (int i = 0; i < players.size(); i++) {
+            if (players.get(i).getId() == databaseId) {
+                return i;
+            }
+        }
+        return -1; // not found
+    }
+    
+    public ArrayList<Player> getPlayers() {
+        return players;
     }
     
     public ArrayList<Room> getRooms() {
@@ -303,6 +402,11 @@ public class GameEngine {
         return inputHandler.processInput(input);
     }
     
+    // Updated to support player_id
+    public boolean processInput(String input, int playerId) {
+        return inputHandler.processInput(input, playerId);
+    }
+    
     // UI/Display methods - delegate to UIManager
     public String getCurrentRoomItems() {
         return uiManager.getCurrentRoomItems();
@@ -348,6 +452,7 @@ public class GameEngine {
     
     // Main display method for constructing Response
     public Response display() {
+        Player player = getPlayer();
         // if the player is dead, return a special "game over" response
         if (player != null && player.getHp() <= 0) {
             Response resp = new Response();
@@ -359,8 +464,44 @@ public class GameEngine {
         // otherwise, fall back to the normal UIManager flow
         return uiManager.display();
     }
+    
+    // Display for a specific player
+    public Response display(int playerId) {
+        Player player = getPlayerById(playerId);
+        // if the player is dead, return a special "game over" response
+        if (player != null && player.getHp() <= 0) {
+            Response resp = new Response();
+            resp.setGameOver(true);
+            // relative to your webapp root—adjust if needed
+            resp.setGameOverImage("/images/GameOver.png");
+            return resp;
+        }
+        
+        // Use player-specific room number if available
+        int roomToDisplay = player.getCurrentRoomNum() >= 0 ? 
+                           player.getCurrentRoomNum() : this.currentRoomNum;
+        
+        // Temporarily set the current room for UI methods
+        int originalRoomNum = this.currentRoomNum;
+        this.currentRoomNum = roomToDisplay;
+        
+        // Use player-specific running message if available
+        String originalMessage = this.runningMessage;
+        if (player.getRunningMessage() != null && !player.getRunningMessage().isEmpty()) {
+            this.runningMessage = player.getRunningMessage();
+        }
+        
+        // Get the response from UIManager
+        Response response = uiManager.display(playerId);
+        
+        // Restore original state
+        this.currentRoomNum = originalRoomNum;
+        this.runningMessage = originalMessage;
+        
+        return response;
+    }
+    
     //Companion methods in gameEngine
-
     
     public String reset() {
     		DerbyDatabase.reset(tables);

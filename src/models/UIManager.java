@@ -27,79 +27,113 @@ public class UIManager {
 
     // Returns help text for player
     public String getHelp() {
-        StringBuilder help = new StringBuilder();
-        help.append("<b>\nTake, get, grab, pickup are for picking up an item. (ex. (get|grab|pickup) sword)</b>\n");
-        help.append("<b>\nDrop is to drop an item (ex. drop dagger)</b>\n");
-        help.append("<b>\nAttack, swing, slash, hit, strike are for attacking an enemy. (ex. (attack|swing|slash|hit|strike) moe with trident)</b>\n");
-        help.append("<b>\nGo, move, walk are for moving in a direction. (ex. (walk|move) north)</b>\n");
-        help.append("<b>\nExamine and look are for looking at the description of an item or room. (ex. (examine|look) dagger)</b>\n");
-        help.append("<b>\nShuttle is the same as movement but for traveling via shuttle. (ex. shuttle | drive)</b>\n");
-        help.append("<b>\nTalk is how to interact with valid NPCs. (ex. (talk) curly. Continue conversation with Respond #</b>\n");
-        help.append("<b>\nDrink is used to consume potions. (ex. (drink | apply) potion.</b>\n");
-        help.append("<b>\nDisassemble items into components if possible. (ex. disassemble gold key)</b>\n");
-        help.append("<b>\nCombine two items without naming the result. (ex. combine string and stick)</b>\n");
-        help.append("<b>\nEquip a piece of armor. (ex. equip helmet)</b>\n");
-        help.append("<b>\nTo unequip a piece of armor. (ex. unequip head)</b>\n");
-        return help.toString();
+        StringBuilder output = new StringBuilder("Help Menu:\n\n" +
+            "- Basic Commands -\n\n" +
+            "look (room/item/character): Examine the room, an item, or a character.\n" +
+            "go (direction): Move player in the specified direction (North, South, East, West).\n" +
+            "pickup/grab/take (item): Pick up an item from the current room.\n" +
+            "drop (item): Drop an item from your inventory into the current room.\n\n" +
+            
+            "- Items and Combat -\n\n" +
+            "hit (enemy) with (weapon): Attack an enemy with a specified weapon.\n" +
+            "apply/drink (potion): Use a potion to restore health.\n" +
+            "equip (armor): Put on a piece of armor to increase protection.\n" +
+            "unequip (armor): Take off a piece of armor.\n\n" +
+            
+            "- Characters and Dialogue -\n\n" +
+            "talk (character): Start a conversation with a character.\n" +
+            "respond (1/2): Choose dialogue options during conversations.\n\n" +
+            
+            "- Companions -\n\n" +
+            "choose (companion): Select a companion to join you.\n" +
+            "shoo (companion): Send away your current companion.\n" +
+            "takec (item): Take an item from your companion's inventory.\n" +
+            "give (item): Give an item to your companion.\n\n" +
+            
+            "- Crafting -\n\n" +
+            "disassemble (item): Break down an item into components.\n" +
+            "combine (itemA) with (itemB): Combine two components into a new item.\n\n" +
+            
+            "You can also use shorthand directions like n, s, e, w for movement."
+        );
+        return output.toString();
     }
-    
-    // Returns formatted string of items in the current room
+
+    // Returns formatted string of items in current room
     public String getCurrentRoomItems() {
-        StringBuilder itemsString = new StringBuilder("Room Inventory:\n");
+        return getCurrentRoomItems(0); // Default to first player
+    }
+    
+    // Returns formatted string of items in current room for specific player
+    public String getCurrentRoomItems(int playerId) {
+        StringBuilder roomItems = new StringBuilder("Items in Room:\n");
         Room currentRoom = engine.getRooms().get(engine.getCurrentRoomNum());
-        int size = currentRoom.getInventorySize();
         
-        for (int i = 0; i < size; i++) {
-            itemsString.append(i + 1).append("\t").append(currentRoom.getItemName(i)).append("\n");
+        for (int i = 0; i < currentRoom.getInventorySize(); i++) {
+            roomItems.append(i + 1).append("\t")
+                    .append(currentRoom.getItemName(i)).append("\n");
         }
         
-        return itemsString.toString();
+        return roomItems.toString();
     }
-    
-    // Returns formatted string of player's inventory
+
+    // Return player's inventory as formatted string
     public String getPlayerInventoryString() {
-        StringBuilder inventoryString = new StringBuilder("Player Inventory:\n");
-        Player p = engine.getPlayer();
-        // ← these two lines are the "easiest fix"
-        if (p == null || p.getInventory() == null || p.getInventorySize() == 0) {
-            inventoryString.append("(no items)\n");
-            return inventoryString.toString();
-        }
-
-        int size = p.getInventorySize();
-        for (int i = 0; i < size; i++) {
-            inventoryString
-              .append(i + 1)
-              .append("\t")
-              .append(p.getItemName(i))
-              .append("\n");
-        }
-        return inventoryString.toString();
+        return getPlayerInventoryString(0); // Default to first player
     }
     
-    public String getCompanionInventoryString() {
-        StringBuilder inventoryString = new StringBuilder("Companion Inventory:\n");
-        Companion companion = engine.getPlayer().getPlayerCompanion();
-        // ← these two lines are the "easiest fix"
-        if (companion == null || companion.getInventory() == null || companion.getInventorySize() == 0) {
-            inventoryString.append("(no items)\n");
-            return inventoryString.toString();
+    // Return specified player's inventory as formatted string
+    public String getPlayerInventoryString(int playerId) {
+        StringBuilder inventory = new StringBuilder("Player Inventory:\n");
+        Player player = engine.getPlayerById(playerId);
+        if (player == null) {
+            inventory.append("(no player loaded)");
+            return inventory.toString();
         }
+        
+        // Get inventory size and iterate through items
+        int size = player.getInventorySize();
+        for (int i = 0; i < size; i++) {
+            inventory.append(i + 1).append("\t")
+                    .append(player.getItemName(i)).append("\n");
+        }
+        
+        return inventory.toString();
+    }
 
+    public String getCompanionInventoryString() {
+        return getCompanionInventoryString(0); // Default to first player
+    }
+    
+    public String getCompanionInventoryString(int playerId) {
+        StringBuilder companionInventory = new StringBuilder("Companion Inventory:\n");
+        Player player = engine.getPlayerById(playerId);
+        
+        if (player == null || player.getPlayerCompanion() == null) {
+            companionInventory.append("(no companion or no companion inventory)\n");
+            return companionInventory.toString();
+        }
+        
+        // Get companion inventory size and iterate through items
+        Companion companion = player.getPlayerCompanion();
         int size = companion.getInventorySize();
         for (int i = 0; i < size; i++) {
-            inventoryString
-              .append(i + 1)
-              .append("\t")
-              .append(companion.getItemName(i))
-              .append("\n");
+            companionInventory.append(i + 1)
+                        .append("\t")
+                        .append(companion.getItemName(i))
+                        .append("\n");
         }
-        return inventoryString.toString();
+        
+        return companionInventory.toString();
     }
     
     public String getPlayerCompanionString() {
+        return getPlayerCompanionString(0); // Default to first player
+    }
+    
+    public String getPlayerCompanionString(int playerId) {
     	StringBuilder playerCompanionString = new StringBuilder("Player Companion: \n");
-    	Player p = engine.getPlayer();
+    	Player p = engine.getPlayerById(playerId);
     	
     	if(p == null || p.getPlayerCompanion() == null) {
     		playerCompanionString.append("(no companions) \n");
@@ -120,8 +154,13 @@ public class UIManager {
     
     // Returns formatted string of player stats
     public String getPlayerInfo() {
+        return getPlayerInfo(0); // Default to first player
+    }
+    
+    // Returns formatted string of specified player stats
+    public String getPlayerInfo(int playerId) {
         StringBuilder info = new StringBuilder("Player Info:\n");
-        Player player = engine.getPlayer();
+        Player player = engine.getPlayerById(playerId);
         if (player == null) {
             info.append("(no player loaded)\n");
             return info.toString();
@@ -271,6 +310,10 @@ public class UIManager {
     
     // Generate overlay of characters in room
     public String getRoomCharactersOverlay() {
+        return getRoomCharactersOverlay(0); // Default to first player
+    }
+    
+    public String getRoomCharactersOverlay(int playerId) {
         Room currentRoom = engine.getRooms().get(engine.getCurrentRoomNum());
         StringBuilder sb = new StringBuilder();
         
@@ -306,8 +349,8 @@ public class UIManager {
             sb.append("</div>\n");
         }
 
-     // 2. Render the Player separately on the far right
-        Player player = engine.getPlayer();
+        // 2. Render the Player separately on the far right
+        Player player = engine.getPlayerById(playerId);
         if (player != null) {
             int playerHealth = player.getHp();
             int fullHearts = playerHealth / 50;
@@ -370,6 +413,10 @@ public class UIManager {
     
     
     public String getRoomCompanionsOverlay() {
+        return getRoomCompanionsOverlay(0); // Default to first player
+    }
+    
+    public String getRoomCompanionsOverlay(int playerId) {
         Room currentRoom = engine.getRooms().get(engine.getCurrentRoomNum());
         StringBuilder sb = new StringBuilder();
         
@@ -416,24 +463,30 @@ public class UIManager {
         
         return sb.toString();
     }
+    
     // Main display method to construct Response object
     public Response display() {
+        return display(0); // Default to first player
+    }
+    
+    // Display for specific player
+    public Response display(int playerId) {
         Response response = new Response(
-            getCurrentRoomItems(),
-            getPlayerInventoryString(),
-            getPlayerCompanionString(),
-            getCompanionInventoryString(),
+            getCurrentRoomItems(playerId),
+            getPlayerInventoryString(playerId),
+            getPlayerCompanionString(playerId),
+            getCompanionInventoryString(playerId),
             getRoomCharactersInfo(),
             getRoomCompanionsInfo(),
-            getPlayerInfo(),
+            getPlayerInfo(playerId),
             getRoomConnectionOutput(),
             engine.getRunningMessage(),
             "",  // Error message (empty for now)
             getCurrentRoomImage(),
             engine.getCurrentRoomNumber(),
             getRoomItemsOverlay(),
-            getRoomCharactersOverlay(),
-            getRoomCompanionsOverlay()
+            getRoomCharactersOverlay(playerId),
+            getRoomCompanionsOverlay(playerId)
         );
         
         return response;

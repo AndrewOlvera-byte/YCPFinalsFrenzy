@@ -35,10 +35,21 @@ public class GameInputHandler {
     }
 
     public boolean processInput(String input) {
+        return processInput(input, 0); // Default to first player
+    }
+
+    public boolean processInput(String input, int player_id) {
         String[] parsedInput = parseInput(input);
         String verb  = parsedInput[0];
         String noun  = parsedInput[1];
         String noun2 = parsedInput[3];
+
+        Player playerCurrentUse = gameEngine.getPlayerById(player_id);
+        
+        if (playerCurrentUse == null) {
+            gameEngine.appendMessage("\n<b>Invalid player ID.</b>");
+            return false;
+        }
 
         if (verb == null || verb.isEmpty() || !VALID_VERBS.contains(verb)) {
             gameEngine.appendMessage("\n<b>Invalid command.</b>");
@@ -47,6 +58,8 @@ public class GameInputHandler {
 
         gameEngine.appendMessage("\n" + input);
 
+        boolean commandExecuted = true;
+        
         switch (verb.toLowerCase()) {
             case "take":
             case "get":
@@ -284,33 +297,37 @@ public class GameInputHandler {
                 }
                 break;
             case "combine":
-                if (noun == null || noun.trim().isEmpty()) {
+                if (noun == null || noun2 == null || noun.trim().isEmpty() || noun2.trim().isEmpty()) {
                     gameEngine.appendMessage(
-                        "\n<b>You must specify two items to combine. Try: combine [item1] and [item2]</b>"
+                        "\n<b>You must specify two components to combine. "
+                      + "Try: combine [componentA] with [componentB]</b>"
                     );
                 } else {
-                    String[] parts = noun.split("\\s+and\\s+");
-                    if (parts.length != 2) {
-                        gameEngine.appendMessage(
-                            "\n<b>Usage: combine [item1] and [item2]</b>"
-                        );
-                    } else {
-                        gameEngine.appendMessage(
-                            gameEngine.combineItems(parts[0], parts[1])
-                        );
-                    }
+                    gameEngine.appendMessage(
+                        gameEngine.combineItems(noun, noun2)
+                    );
                 }
                 break;
             	   
 
 
             default:
-                gameEngine.appendMessage("<b>\nCommand not implemented.</b>");
+                gameEngine.appendMessage("\n<b>Command not implemented.</b>");
+                commandExecuted = false;
         }
-
-        // Persist the updated game state after every valid command
-        GameStateManager.saveState(gameEngine);
-
+        
+        // Save player state after every command
+        if (commandExecuted) {
+            // Update player's room number to current room before saving
+            playerCurrentUse.setCurrentRoomNum(gameEngine.getCurrentRoomNum());
+            
+            // Update player's running message to current running message
+            playerCurrentUse.setRunningMessage(gameEngine.getRunningMessage());
+            
+            // Save state to database
+            GameStateManager.saveState(gameEngine);
+        }
+        
         return true;
     }
 
