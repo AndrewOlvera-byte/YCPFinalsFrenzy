@@ -127,6 +127,7 @@
                     $("#playerInfoField").text(data.playerInfo);
                     $("#charactersInRoomField").text(data.charactersInRoom);
                     $("#roomConnectionsField").text(data.roomConnections);
+					$("#roomCompanionsField").text(data.roomConnections);
                     $("#messageField").html(data.message);
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
@@ -151,6 +152,7 @@
             <pre id="playerInventoryField" class="formatted"></pre>
             <pre id="playerInfoField" class="formatted"></pre>
             <pre id="charactersInRoomField" class="formatted"></pre>
+			<pre id="companionInRoomField" class="formatted"></pre>
             <pre id="roomConnectionsField" class="formatted"></pre>
         </div>
         

@@ -12,40 +12,32 @@ public class Player extends Character {
     private double damageMulti;
     private int attackBoost;
     private int defenseBoost;
-
     // --- new field: track equipped armor per slot ---
-    private final Map<ArmorSlot, Armor> equippedArmor = new EnumMap<>(ArmorSlot.class);
-
-    public Player(String name,
-                  int hp,
-                  int skillPoints,
-                  Inventory inventory,
-                  String longdescription,
-                  String shortdescription,
-                  double damageMulti,
-                  int attackBoost,
-                  int defenseBoost) {
-        super(name, hp, inventory, longdescription, shortdescription);
-        this.skillPoints   = skillPoints;
-        this.damageMulti   = damageMulti;
-        this.attackBoost   = attackBoost;
-        this.defenseBoost  = defenseBoost;
-    }
-
-    public void move(String direction) {
-        System.out.println(name + " moves " + direction + " to a new location.");
-        // Implement movement logic based on Room class
-    }
-
-    public double getdamageMulti() {
-        return damageMulti;
-    }
-
-    public void setdamageMulti(double damageMulti) {
-        this.damageMulti = damageMulti;
-    }
-
-    // key‐checking in inventory:
+   private final Map<ArmorSlot, Armor> equippedArmor = new EnumMap<>(ArmorSlot.class);
+   private Companion hasCompanion;
+   // private Room location;
+   public Player(String name, int hp, int skillPoints, Inventory inventory, String longdescription, String shortdescription,double damageMulti,int attackBoost,int defenseBoost) {
+       super(name, hp, inventory, longdescription, shortdescription);
+       this.skillPoints = skillPoints;
+       this.damageMulti = damageMulti;
+       this.attackBoost = attackBoost;
+       this.defenseBoost = defenseBoost;
+       this.hasCompanion = null;
+   }
+   public void move(String direction) {
+       System.out.println(name + " moves " + direction + " to a new location.");
+       // Implement movement logic based on Room class
+   }
+   
+   public double getdamageMulti() {
+		return damageMulti;
+	}
+	
+	public void setdamageMulti(double damageMulti) {
+		this.damageMulti = damageMulti;
+	}
+    
+    // New method to check if the player has a specific key in their inventory.
     public boolean hasKey(String keyName) {
         for (int i = 0; i < getInventory().getSize(); i++) {
             if (getInventory().getItemName(i).equalsIgnoreCase(keyName)) {
@@ -135,6 +127,22 @@ public class Player extends Character {
                 System.out.printf("%-9s: none%n", slot);
             }
         }
+    }
+    
+    public Companion getPlayerCompanion() {
+    	return this.hasCompanion;
+    }
+    
+    
+    public void dropCompanion() {
+    	this.hasCompanion = null;
+    }
+    
+    public void setPlayerCompanion(Companion companion) {
+    	this.hasCompanion = companion;
+    }
+    public void removePlayerCompanion() {
+    	this.hasCompanion = null;
     }
 
     public int getId() {

@@ -1,0 +1,2 @@
+companion_id,name,hp,aggression,damage,long_description,short_description, companion, room_num
+1, Dog, 50, false, 15, <b>an awesome dog friend</b>, <b>a dog</b>, false, 3

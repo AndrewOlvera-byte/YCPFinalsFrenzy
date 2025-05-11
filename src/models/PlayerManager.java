@@ -57,6 +57,7 @@ public class PlayerManager {
                 }
 
                 loadEquippedArmor(conn, player);  // 🔁 Load from DB
+                loadPlayerCompanion(conn,player);
                 engine.setPlayer(player);         // ✅ Set player after fully loaded
 
                 
@@ -64,6 +65,47 @@ public class PlayerManager {
                 
         } catch (SQLException ex) {
             throw new RuntimeException("Failed to load player", ex);
+        }
+    }
+    
+    private Companion loadCompanion(Connection conn, int companionId) throws SQLException {
+    	ArrayList<Item> inventory_items = new ArrayList<>();
+    	Inventory inventory = new Inventory(inventory_items, 10);
+    	String [] dialogue = new String [0];
+        String sql =
+            "SELECT name, hp, aggression,\n" +
+            "       damage, long_description, short_description,\n" +
+            "       companion" +
+            "  FROM COMPANION\n" +
+            " WHERE companion_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, companionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    throw new SQLException("COMPANION not found: " + companionId);
+                }
+
+                	String name      = rs.getString("name");
+                	int    hp     = rs.getInt("hp");
+                	boolean aggression = rs.getBoolean("aggression");
+                	int    damage    = rs.getInt("damage");
+                	String longDesc  = rs.getString("long_description");
+                	String shortDesc = rs.getString("short_description");
+                	boolean companion      = rs.getBoolean("companion");
+                	
+                	try (PreparedStatement ips = conn.prepareStatement(
+                            "SELECT item_id FROM COMPANION_INVENTORY WHERE companion_id = 1"
+                        );
+                        ResultSet irs = ips.executeQuery()) {
+                       while (irs.next()) {
+                           inventory.addItem(loadItem(conn, irs.getInt("item_id")));
+                       }
+                   }
+                	return new Companion(
+                	name, hp, aggression, dialogue, damage, inventory,
+                	longDesc, shortDesc, companion
+                );
+            }
         }
     }
     /** Duplicate the same helper from RoomManager */
@@ -146,6 +188,22 @@ public class PlayerManager {
                     player.equip(slot, (Armor) item);
                 } else {
                     System.err.println("Warning: Equipped item is not armor: " + item.getName());
+                }
+            }
+        }
+    }
+    
+    private void loadPlayerCompanion(Connection conn, Player player) throws SQLException {
+        String sql = "SELECT pc.companion_id FROM PLAYER_COMPANION pc " +
+                     "JOIN COMPANION companion ON pc.companion_id = companion.companion_id " +
+                     "WHERE pc.player_id = 1";
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                int companionId = rs.getInt("companion_id");
+                Companion companion = loadCompanion(conn, companionId);
+                if(companion != null) {
+                	player.setPlayerCompanion(companion);
                 }
             }
         }

@@ -33,7 +33,8 @@ public class RoomManager {
                     new ArrayList<>(),
                     rs.getString("required_key"),
                     rs.getString("long_description"),
-                    rs.getString("short_description")
+                    rs.getString("short_description"),
+                    new ArrayList<>()
                 ));
             }
             engine.getRooms().clear();
@@ -100,13 +101,48 @@ public class RoomManager {
                 engine.getRooms().get(roomIdx).getCharacterContainer().add(npc);
             }
 
+            // 5) Load Companions into Room
+            PreparedStatement psCompanion = conn.prepareStatement(
+            		"     Select n.companion_id, n.name, n.hp, n.aggression, n.damage, n.long_description, n.short_description, n.companion, nr.room_id    " 
+            		+ "   from COMPANION n join COMPANION_ROOM nr ON n.companion_id = nr.companion_id "
+            		);
+            ResultSet rsCompanion = psCompanion.executeQuery();
+            
+            while(rsCompanion.next()) {
+            	int companionId = rsCompanion.getInt("companion_id");
+                Inventory companionInventory = new Inventory(new ArrayList<>(), 10);
+                PreparedStatement psInv = conn.prepareStatement("SELECT item_id FROM COMPANION_INVENTORY WHERE companion_id = ?");
+                psInv.setInt(1, companionId);
+                ResultSet rsInv = psInv.executeQuery();
+                while (rsInv.next()) {
+                    Item CompanionItem = loadItemById(conn, rsInv.getInt("item_id"));
+                    companionInventory.addItem(CompanionItem);
+                }
+                
+            	boolean companion = false;
+            	
+            	Companion newCompanion = new Companion(
+            			rsCompanion.getString("name"),
+            			rsCompanion.getInt("hp"),
+            			rsCompanion.getBoolean("aggression"),
+            			new String[] {},
+            			rsCompanion.getInt("damage"),
+            			companionInventory,
+            			rsCompanion.getString("long_description"),
+            			rsCompanion.getString("short_description"),
+            			companion
+            			);
+            	
+            	int roomIdx = rsCompanion.getInt("room_id") - 1;
+            	engine.getRooms().get(roomIdx).getCompanionContainer().add(newCompanion);
+            }
 
 
-
-            // 4) (optionally) load NPCs, NPC_INVENTORY, NPC_ROOM, etc.
+            // 5) (optionally) load NPCs, NPC_INVENTORY, NPC_ROOM, etc.
         } catch (SQLException ex) {
             throw new RuntimeException("Failed to load rooms", ex);
         }
+        
     }
 
     // helper to pull a single item from the ITEM table
@@ -250,6 +286,9 @@ public class RoomManager {
     public String updateCurrentRoom(String direction) {
         Room current = getCurrentRoom();
         int destNum = current.getConnectedRoom(direction);
+        if(destNum == -1 && direction.equals("Shuttle")) {
+        	return"\n<b>This is not a shuttle stop.</b>";
+        }
         if (destNum == -1) {
             return "\n<b>There is no room in this direction.</b>";
         }
@@ -260,10 +299,16 @@ public class RoomManager {
             return "\n<b>You do not have the required key ("+req+") to enter "
                    + dest.getRoomName()+".</b>";
         }
+        if(engine.getPlayer().getPlayerCompanion() != null) {
+        	engine.setCurrentRoomNum(destNum);
+            dest.setRequiredKey(null);
+        	return "<b>\nYou have entered " +dest.getRoomName()+" with your " +engine.getPlayer().getPlayerCompanion().name +"!</b>";
+        }
         engine.setCurrentRoomNum(destNum);
         dest.setRequiredKey(null);
         return "\n<b>You have entered "+dest.getRoomName()+"!</b>";
     }
+    
 
     /** Used by UIManager & GameEngine for map display */
     public int getMapOutput(String direction) {
@@ -296,6 +341,16 @@ public class RoomManager {
             }
         }
         return -1;
+    }
+    
+    public int CompanionNameToID(String name) {
+    	Room room = getCurrentRoom();
+    	for(int i = 0; i< room.getCompanionContainer().size(); i++) {
+    		if(room.getCompanionContainer().get(i).getName().equalsIgnoreCase(name)) {
+    			return i;
+    		}
+    	}
+    	return -1;
     }
 
     /** NPC interaction stubs */

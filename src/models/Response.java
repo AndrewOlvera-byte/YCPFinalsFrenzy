@@ -7,7 +7,10 @@ public class Response {
     // ─── Fields ────────────────────────────────────────────────────────────────
     private String  roomInventory;
     private String  playerInventory;
+    private String playerCompanion;
+    private String companionInventory;
     private String  charactersInRoom;
+    private String companionsInRoom;
     private String  playerInfo;
     private String  roomConnections;
     private String  message;
@@ -16,6 +19,7 @@ public class Response {
     private String  roomNumber;
     private String  roomItemsOverlay;
     private String  roomCharactersOverlay;
+    private String roomCompanionsOverlay;
 
     // ▶ New “game over” fields
     private boolean gameOver = false;
@@ -28,7 +32,10 @@ public class Response {
     /** Optional multi-arg constructor for full initialization */
     public Response(String roomInventory,
                     String playerInventory,
+                    String playerCompanion,
+                    String companionInventory,
                     String charactersInRoom,
+                    String companionsInRoom,
                     String playerInfo,
                     String roomConnections,
                     String message,
@@ -36,11 +43,15 @@ public class Response {
                     String roomImage,
                     String roomNumber,
                     String roomItemsOverlay,
-                    String roomCharactersOverlay)
+                    String roomCharactersOverlay,
+                    String roomCompanionsOverlay)
     {
         this.roomInventory         = roomInventory;
         this.playerInventory       = playerInventory;
+        this.playerCompanion 	   = playerCompanion;
+        this.companionInventory	   = companionInventory;
         this.charactersInRoom      = charactersInRoom;
+        this.companionsInRoom      = companionsInRoom;
         this.playerInfo            = playerInfo;
         this.roomConnections       = roomConnections;
         this.message               = message;
@@ -49,12 +60,16 @@ public class Response {
         this.roomNumber            = roomNumber;
         this.roomItemsOverlay      = roomItemsOverlay;
         this.roomCharactersOverlay = roomCharactersOverlay;
+        this.roomCompanionsOverlay = roomCompanionsOverlay;
     }
 
     // ─── Getters ──────────────────────────────────────────────────────────────
     public String  getRoomInventory()         { return roomInventory; }
     public String  getPlayerInventory()       { return playerInventory; }
+    public String getPlayerCompanion() 		  { return playerCompanion; }
+    public String getCompanionInventory() 	  { return companionInventory; }
     public String  getCharactersInRoom()      { return charactersInRoom; }
+    public String getCompanionsInRoom() 	  { return companionsInRoom; }
     public String  getPlayerInfo()            { return playerInfo; }
     public String  getRoomConnections()       { return roomConnections; }
     public String  getMessage()               { return message; }
@@ -63,13 +78,17 @@ public class Response {
     public String  getRoomNumber()            { return roomNumber; }
     public String  getRoomItemsOverlay()      { return roomItemsOverlay; }
     public String  getRoomCharactersOverlay() { return roomCharactersOverlay; }
+    public String getRoomCompanionsOverlay()  { return roomCompanionsOverlay; }
     public boolean isGameOver()               { return gameOver; }
     public String  getGameOverImage()         { return gameOverImage; }
 
     // ─── Setters ──────────────────────────────────────────────────────────────
     public void setRoomInventory(String s)         { this.roomInventory = s; }
     public void setPlayerInventory(String s)       { this.playerInventory = s; }
+    public void setPlayerCompanion(String s) 	   { this.playerCompanion = s; }
+    public void setCompanionInventory(String s)    { this.companionInventory = s; }
     public void setCharactersInRoom(String s)      { this.charactersInRoom = s; }
+    public void setCompanionsInRoom(String s)	   { this.companionsInRoom = s; }
     public void setPlayerInfo(String s)            { this.playerInfo = s; }
     public void setRoomConnections(String s)       { this.roomConnections = s; }
     public void setMessage(String s)               { this.message = s; }
@@ -78,6 +97,7 @@ public class Response {
     public void setRoomNumber(String s)            { this.roomNumber = s; }
     public void setRoomItemsOverlay(String s)      { this.roomItemsOverlay = s; }
     public void setRoomCharactersOverlay(String s) { this.roomCharactersOverlay = s; }
+    public void setRoomCompanionsOverlay(String s) { this.roomCompanionsOverlay = s; }
     public void setGameOver(boolean b)             { this.gameOver = b; }
     public void setGameOverImage(String s)         { this.gameOverImage = s; }
 
@@ -86,7 +106,10 @@ public class Response {
         return "{"
             + "\"roomInventory\":\""        + escapeJson(roomInventory)           + "\","
             + "\"playerInventory\":\""      + escapeJson(playerInventory)         + "\","
+            + "\"playerCompanion\":\"" 		+ escapeJson(playerCompanion) 		  + "\","
+            + "\"companionInventory\":\""   + escapeJson(companionInventory)	  + "\","
             + "\"charactersInRoom\":\""     + escapeJson(charactersInRoom)        + "\","
+            + "\"companionsInRoom\":\"" 	+ escapeJson(companionsInRoom) 		  + "\","
             + "\"playerInfo\":\""           + escapeJson(playerInfo)              + "\","
             + "\"roomConnections\":\""      + escapeJson(roomConnections)         + "\","
             + "\"message\":\""              + escapeJson(message)                 + "\","
@@ -95,6 +118,7 @@ public class Response {
             + "\"roomNumber\":\""           + escapeJson(roomNumber)              + "\","
             + "\"roomItemsOverlay\":\""     + escapeJson(roomItemsOverlay)        + "\","
             + "\"roomCharactersOverlay\":\""+ escapeJson(roomCharactersOverlay)   + "\","
+            + "\"roomCompanionsOverlay\":\""+ escapeJson(roomCompanionsOverlay) + "\","
             + "\"gameOver\":"               + gameOver                             + ","
             + "\"gameOverImage\":\""        + escapeJson(gameOverImage)           + "\""
             + "}";

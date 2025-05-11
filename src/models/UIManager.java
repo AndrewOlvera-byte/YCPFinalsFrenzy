@@ -35,9 +35,11 @@ public class UIManager {
         help.append("<b>\nExamine and look are for looking at the description of an item or room. (ex. (examine|look) dagger)</b>\n");
         help.append("<b>\nShuttle is the same as movement but for traveling via shuttle. (ex. shuttle | drive)</b>\n");
         help.append("<b>\nTalk is how to interact with valid NPCs. (ex. (talk) curly. Continue conversation with Respond #</b>\n");
-        help.append("<b>\nDrink is used to consume potions. (ex. (drink | apply) potion.</b>");
+        help.append("<b>\nDrink is used to consume potions. (ex. (drink | apply) potion.</b>\n");
         help.append("<b>\nDisassemble items into components if possible. (ex. disassemble gold key)</b>\n");
         help.append("<b>\nCombine two items without naming the result. (ex. combine string and stick)</b>\n");
+        help.append("<b>\nEquip a piece of armor. (ex. equip helmet)</b>\n");
+        help.append("<b>\nTo unequip a piece of armor. (ex. unequip head)</b>\n");
         return help.toString();
     }
     
@@ -73,6 +75,46 @@ public class UIManager {
               .append("\n");
         }
         return inventoryString.toString();
+    }
+    
+    public String getCompanionInventoryString() {
+        StringBuilder inventoryString = new StringBuilder("Companion Inventory:\n");
+        Companion companion = engine.getPlayer().getPlayerCompanion();
+        // ← these two lines are the "easiest fix"
+        if (companion == null || companion.getInventory() == null || companion.getInventorySize() == 0) {
+            inventoryString.append("(no items)\n");
+            return inventoryString.toString();
+        }
+
+        int size = companion.getInventorySize();
+        for (int i = 0; i < size; i++) {
+            inventoryString
+              .append(i + 1)
+              .append("\t")
+              .append(companion.getItemName(i))
+              .append("\n");
+        }
+        return inventoryString.toString();
+    }
+    
+    public String getPlayerCompanionString() {
+    	StringBuilder playerCompanionString = new StringBuilder("Player Companion: \n");
+    	Player p = engine.getPlayer();
+    	
+    	if(p == null || p.getPlayerCompanion() == null) {
+    		playerCompanionString.append("(no companions) \n");
+    		return playerCompanionString.toString();
+    	}
+    	
+    	int size = 1;
+    	for (int i = 0; i < size; i++) {
+    		playerCompanionString
+    			.append(i+1)
+    			.append("\t")
+    			.append(p.getPlayerCompanion().getName())
+    			.append("\n");
+    	}
+    	return playerCompanionString.toString();
     }
 
     
@@ -119,6 +161,21 @@ public class UIManager {
         }
         
         return charactersInfo.toString();
+    }
+    
+    public String getRoomCompanionsInfo() {
+    	StringBuilder companionsInfo = new StringBuilder("Companions in Room: \n");
+    	Room currentRoom = engine.getRooms().get(engine.getCurrentRoomNum());
+    	 int size = currentRoom.getCompanionContainerSize();
+    	 for (int i = 0; i < size; i++) {
+             companionsInfo.append(i + 1).append("\t")
+                     .append(currentRoom.getCompanion(i).getName())
+                     .append("\nHealth: ")
+                     .append(currentRoom.getCompanionHealth(i))
+                     .append("\n");
+         }
+    	 
+    	 return companionsInfo.toString();
     }
     
     // Returns formatted string of room connections
@@ -311,12 +368,63 @@ public class UIManager {
     }
 
     
+    
+    public String getRoomCompanionsOverlay() {
+        Room currentRoom = engine.getRooms().get(engine.getCurrentRoomNum());
+        StringBuilder sb = new StringBuilder();
+        
+        // Arrange characters side by side
+        for (int i = 0; i < currentRoom.getCompanionContainerSize(); i++) {
+            String compName = currentRoom.getCompanionName(i);
+            int compHealth = currentRoom.getCompanionHealth(i);
+            
+            // Calculate number of full hearts and check for a half heart
+            int fullHearts = compHealth / 50;
+            boolean showHalfHeart = (compHealth % 50) > 0;
+            
+            double leftOffsetInches = 5;   // horizontal offset for each companion
+            
+            // Container div for hearts and character image
+            sb.append("<div style='position:absolute; left:")
+              .append(leftOffsetInches)
+              .append("in; top:40%; width:1.5in; text-align:center;'>");
+            
+            // Row of hearts above the character image
+            sb.append("<div style='height:0.5in;'>");
+            
+            // Append full hearts
+            for (int h = 0; h < fullHearts; h++) {
+                sb.append("<img src='images/heart.png' alt='heart' style='width:0.25in; height:auto; display:inline-block;'/>");
+            }
+            
+            // Append a half heart if needed
+            if (showHalfHeart) {
+                sb.append("<img src='images/halfheart.png' alt='half heart' style='width:0.25in; height:auto; display:inline-block;'/>");
+            }
+            
+            sb.append("</div>");
+            
+            // Character image
+            sb.append("<img src='images/")
+              .append(compName)
+              .append(".png' alt='")
+              .append(compName)
+              .append("' style='width:2.5in; height:auto; background-color: transparent;'/>");
+            
+            sb.append("</div>");
+        }
+        
+        return sb.toString();
+    }
     // Main display method to construct Response object
     public Response display() {
         Response response = new Response(
             getCurrentRoomItems(),
             getPlayerInventoryString(),
+            getPlayerCompanionString(),
+            getCompanionInventoryString(),
             getRoomCharactersInfo(),
+            getRoomCompanionsInfo(),
             getPlayerInfo(),
             getRoomConnectionOutput(),
             engine.getRunningMessage(),
@@ -324,7 +432,8 @@ public class UIManager {
             getCurrentRoomImage(),
             engine.getCurrentRoomNumber(),
             getRoomItemsOverlay(),
-            getRoomCharactersOverlay()
+            getRoomCharactersOverlay(),
+            getRoomCompanionsOverlay()
         );
         
         return response;

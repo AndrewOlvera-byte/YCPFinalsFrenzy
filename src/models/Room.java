@@ -14,13 +14,14 @@ public class Room
     private Inventory inventory;
     private Connections connections;
     private ArrayList<Character> characterContainer;
+    private ArrayList<Companion> companionContainer;
     private String requiredKey;
 	private String longdescription;
 	private String shortdescription;
 	private Boolean examined;
 
     // Updated constructor to include requiredKey
-    public Room(String roomName, Inventory inventory, Connections connections, ArrayList<Character> characterContainer, String requiredKey, String longdescription, String shortdescription)
+    public Room(String roomName, Inventory inventory, Connections connections, ArrayList<Character> characterContainer, String requiredKey, String longdescription, String shortdescription, ArrayList<Companion> companionContainer)
     {
         this.roomName = roomName;
         this.inventory = inventory;
@@ -30,12 +31,13 @@ public class Room
 		this.longdescription = longdescription;
 		this.shortdescription = shortdescription;
 		this.examined = false;
+		this.companionContainer = companionContainer;
     }
     
     // Overloaded constructor for rooms with no key requirement
-    public Room(String roomName, Inventory inventory, Connections connections, ArrayList<Character> characterContainer, String longdescription, String shortdescription)
+    public Room(String roomName, Inventory inventory, Connections connections, ArrayList<Character> characterContainer, String longdescription, String shortdescription, ArrayList<Companion> companionContainer)
     {
-        this(roomName, inventory, connections, characterContainer, null, longdescription, shortdescription);
+        this(roomName, inventory, connections, characterContainer, null, longdescription, shortdescription, companionContainer);
     }
     
     // Returns the index of the available room to switch to based on direction input, and returns -1 if it is null
@@ -55,6 +57,28 @@ public class Room
         this.inventory.addItem(item);
     }
     
+    public ArrayList<Companion> getCompanionContainer() {
+    	return this.companionContainer;
+    }
+    
+    
+    public int getCompanionContainerSize() {
+    	return this.companionContainer.size();
+    }
+    
+    //get Companion from room
+    public Companion getCompanion(int companionID) {
+    	return this.companionContainer.get(companionID);
+    }
+    
+    public void removeCompanion(int companionID) {
+    	this.companionContainer.remove(companionID);
+    }
+    
+    public void addCompanion(Companion companion) {
+    	this.companionContainer.add(companion);
+    }
+    
     // Removes item from room (player picks up item)
     public void removeItem(int itemNum)
     {
@@ -67,6 +91,18 @@ public class Room
         Character currentCharacter = characterContainer.get(characterNum);
         return currentCharacter.getHp();
     }
+    
+    public int getCompanionHealth(int companionNum)
+    {
+        Companion currentCompanion = companionContainer.get(companionNum);
+        return currentCompanion.getHp();
+    }
+    
+    public String getCompanionName(int companionNum) {
+    	Companion currentCompanion = companionContainer.get(companionNum);
+    	return currentCompanion.getName();
+    }
+    
     
     // sets the health of the character (player attacks character)
     public void setCharacterHealth(int characterNum, double newHealth)
@@ -216,7 +252,7 @@ public class Room
 	public Character getCharacter(int characterNum) {
 		return characterContainer.get(characterNum);
 	}
-    
+	
     public void removeCharacter(int characterNum)
     {
         this.characterContainer.remove(characterNum);
