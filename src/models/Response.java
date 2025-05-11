@@ -23,7 +23,6 @@ public class Response {
     private String questOverlay = "";
 
     // ▶ New "game over" fields
-    // ▶ New "game over" fields
     private boolean gameOver = false;
     private String  gameOverImage = "";
 

@@ -74,7 +74,9 @@ public class dashboardServlet extends HttpServlet {
             session.setAttribute("selectedClass", cls);
 
             GameEngine engine = new GameEngine();
-            engine.startWithoutPlayer();
+            // full initialization runs DDL, seeds CSVs, loads data (including quests)
+            engine.start();
+            // override player by selected class
             engine.loadPlayerOfClass(cls);
             session.setAttribute("gameEngine", engine);
 

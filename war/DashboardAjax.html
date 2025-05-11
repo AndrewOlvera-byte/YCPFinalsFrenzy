@@ -111,9 +111,6 @@
             background-color: #3c9d6a;
         }
         
-        /* Quest popup floating style */
-        #resultDiv { position: relative; }
-        .quest-popup { position: absolute; top: 10px; right: 10px; background: white; border: 1px solid #333; padding: 10px; z-index: 1000; }
     </style>
     <script type="text/javascript">
     $(document).ready(function() {
@@ -132,8 +129,8 @@
                     $("#charactersInRoomField").text(data.charactersInRoom);
                     $("#roomConnectionsField").text(data.roomConnections);
                     $("#companionInRoomField").text(data.companionsInRoom);
-                    $("#questOverlayField").html(data.questOverlay);
                     $("#messageField").html(data.message);
+                    $("#questOverlayField").html(data.questOverlay);
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     $("#errorField").text("Error: " + textStatus + " - " + errorThrown);

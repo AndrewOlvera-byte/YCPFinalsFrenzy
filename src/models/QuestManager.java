@@ -9,6 +9,11 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Types;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
+import models.DerbyDatabase;
 
 // Manages quest definitions loaded from data source
 public class QuestManager {
@@ -89,6 +94,21 @@ public class QuestManager {
                 if (!already) {
                     // accept directly on Player and build the message
                     engine.getPlayer().acceptQuest(def.getId(), this);
+                    // Persist acceptance in DB
+                    try (Connection conn = DerbyDatabase.getConnection();
+                         PreparedStatement ps = conn.prepareStatement(
+                             "INSERT INTO player_quests (player_id, quest_id, status, progress) VALUES (?, ?, ?, ?)"
+                         )) {
+                        ps.setInt(1, engine.getPlayer().getId());
+                        ps.setInt(2, def.getId());
+                        ps.setString(3, Quest.Status.IN_PROGRESS.name());
+                        ps.setInt(4, 0);
+                        ps.executeUpdate();
+                    } catch (SQLIntegrityConstraintViolationException e) {
+                        // ignore FK errors if quest_definition entry is missing
+                    } catch (SQLException e) {
+                        throw new RuntimeException("Failed to persist auto-accepted quest", e);
+                    }
                     sb.append("\n<b>Quest accepted:</b> ").append(def.getName());
                 }
             }

@@ -196,3 +196,13 @@ Create Table COMPANION_INVENTORY (
     FOREIGN KEY (companion_id)    REFERENCES ITEM(item_id)
 );
 
+-- Persist each player's accepted and completed quests
+CREATE TABLE player_quests (
+  player_id INT         NOT NULL,
+  quest_id  INT         NOT NULL,
+  status    VARCHAR(20) NOT NULL,   -- 'IN_PROGRESS' or 'COMPLETE'
+  progress  INT         NOT NULL,   -- how many of the target have been done
+  PRIMARY KEY (player_id, quest_id),
+  FOREIGN KEY (player_id) REFERENCES PLAYER(player_id)
+);
+

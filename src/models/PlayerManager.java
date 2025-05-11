@@ -4,6 +4,9 @@ import java.sql.*;
 import java.util.*;
 import GameEngine.GameEngine;
 import models.DerbyDatabase;
+import models.QuestManager;
+import models.QuestDefinition;
+import models.Quest;
 
 public class PlayerManager {
     private GameEngine engine;
@@ -58,6 +61,8 @@ public class PlayerManager {
 
                 loadEquippedArmor(conn, player);  // 🔁 Load from DB
                 loadPlayerCompanion(conn,player);
+                player.setId(1);
+                loadPlayerQuests(conn, player);
                 engine.setPlayer(player);         // ✅ Set player after fully loaded
 
                 
@@ -213,7 +218,7 @@ public class PlayerManager {
      * Load a player by class (ATTACK, DEFENSE, NORMAL) from the DB.
      */
     public void loadPlayerByType(String cls) throws SQLException {
-        String sql = "SELECT name, hp, skill_points, damage_multi,"
+        String sql = "SELECT player_id, name, hp, skill_points, damage_multi,"
                    + " long_description, short_description,"
                    + " attack_boost, defense_boost"
                    + " FROM PLAYER WHERE player_type = ?";
@@ -224,19 +229,53 @@ public class PlayerManager {
                 if (!rs.next()) {
                     throw new SQLException("No PLAYER of class=" + cls);
                 }
-                // build Player exactly as in loadPlayer()
+                // Build Player with values from DB
+                int playerId = rs.getInt("player_id");
                 Player p = new Player(
                     rs.getString("name"),
                     rs.getInt("hp"),
                     rs.getInt("skill_points"),
-                    new Inventory(new ArrayList<>(), 100),  // or load inventory if desired
+                    new Inventory(new ArrayList<>(), 100),
                     rs.getString("long_description"),
                     rs.getString("short_description"),
                     rs.getDouble("damage_multi"),
                     rs.getInt("attack_boost"),
                     rs.getInt("defense_boost")
                 );
+                p.setId(playerId);
+                // Restore quests for this player
+                loadPlayerQuests(conn, p);
                 engine.setPlayer(p);
+            }
+        }
+    }
+
+    /**
+     * Populate player.activeQuests and completedQuests from the DB.
+     */
+    private void loadPlayerQuests(Connection conn, Player player) throws SQLException {
+        String sql = "SELECT quest_id, status, progress FROM player_quests WHERE player_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, player.getId());
+            try (ResultSet rs = ps.executeQuery()) {
+                QuestManager qm = new QuestManager();
+                qm.loadAll();
+                while (rs.next()) {
+                    int qid = rs.getInt("quest_id");
+                    String s = rs.getString("status");
+                    int prog = rs.getInt("progress");
+                    QuestDefinition def = qm.get(qid);
+                    if (def == null) {
+                        continue;
+                    }
+                    Quest.Status st = Quest.Status.valueOf(s);
+                    Quest q = new Quest(def, st, prog);
+                    if (st == Quest.Status.COMPLETE) {
+                        player.getCompletedQuests().add(q);
+                    } else {
+                        player.getActiveQuests().add(q);
+                    }
+                }
             }
         }
     }

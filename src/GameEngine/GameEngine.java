@@ -3,7 +3,7 @@ package GameEngine;
 import java.util.*;
 import models.*;
 import models.Character;  // your NPC base
-import java.sql.SQLException;
+import java.sql.*;
 import models.CraftingManager;
 
 public class GameEngine {
@@ -422,6 +422,19 @@ public class GameEngine {
     /** Accept a quest and return a message */
     public String acceptQuest(int questId) {
         player.acceptQuest(questId, questManager);
+        if (!USE_FAKE_DB) {
+            try (Connection conn = DerbyDatabase.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(
+                    "INSERT INTO player_quests (player_id, quest_id, status, progress) VALUES (1, ?, ?, ?)"
+                 )) {
+                ps.setInt(1, questId);
+                ps.setString(2, Quest.Status.IN_PROGRESS.name());
+                ps.setInt(3, 0);
+                ps.executeUpdate();
+            } catch (SQLException e) {
+                throw new RuntimeException("Failed to persist accepted quest", e);
+            }
+        }
         QuestDefinition def = questManager.get(questId);
         return def != null
             ? "\n<b>Quest accepted:</b> " + def.getName()

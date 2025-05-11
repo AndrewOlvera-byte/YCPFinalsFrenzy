@@ -11,6 +11,13 @@ public class Quest {
         this.def = def;
     }
 
+    /** Load a Quest with a given status & progress (for persistence) */
+    public Quest(QuestDefinition def, Status status, int progress) {
+        this(def);
+        this.status   = status;
+        this.progress = progress;
+    }
+
     public void advance(String eventType, String eventName, int amount) {
         if (status == Status.IN_PROGRESS
             && def.getTargetType().equals(eventType)

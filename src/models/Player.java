@@ -15,6 +15,10 @@ import java.util.ArrayList;
 import models.Quest;
 import models.QuestManager;
 import models.QuestDefinition;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import models.DerbyDatabase;
 
 public class Player extends Character {
 	private int id;
@@ -179,6 +183,19 @@ public class Player extends Character {
         List<Quest> copy = new ArrayList<>(activeQuests);
         for (Quest q : copy) {
             q.advance(type, name, amount);
+            // Persist quest progress and status
+            try (Connection conn = DerbyDatabase.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(
+                     "UPDATE player_quests SET progress = ?, status = ? WHERE player_id = ? AND quest_id = ?"
+                 )) {
+                ps.setInt(1, q.getProgress());
+                ps.setString(2, q.getStatus().name());
+                ps.setInt(3, this.id);
+                ps.setInt(4, q.getDef().getId());
+                ps.executeUpdate();
+            } catch (SQLException e) {
+                throw new RuntimeException("Failed to update quest progress", e);
+            }
             if (q.isComplete()) {
                 activeQuests.remove(q);
                 completedQuests.add(q);

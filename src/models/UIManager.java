@@ -423,19 +423,24 @@ public class UIManager {
     // Generate overlay of active quests
     public String getQuestOverlay() {
         List<Quest> qs = engine.getPlayer().getActiveQuests();
-        if (qs.isEmpty()) return "";
         StringBuilder sb = new StringBuilder();
-        sb.append("<div class='quest-popup'>Active Quests:<br/>");
-        for (Quest q : qs) {
-            QuestDefinition d = q.getDef();
-            sb.append(d.getName())
-              .append(" (")
-              .append(q.getProgress())
-              .append("/")
-              .append(d.getTargetCount())
-              .append(")<br/>");
+        sb.append("Active Quests:<br/>");
+        if (qs.isEmpty()) {
+            sb.append("(none)<br/>");
+        } else {
+            for (int i = 0; i < qs.size(); i++) {
+                Quest q = qs.get(i);
+                QuestDefinition d = q.getDef();
+                sb.append(i + 1)
+                  .append(". ")
+                  .append(d.getName())
+                  .append(" (")
+                  .append(q.getProgress())
+                  .append("/")
+                  .append(d.getTargetCount())
+                  .append(")<br/>");
+            }
         }
-        sb.append("</div>");
         return sb.toString();
     }
 

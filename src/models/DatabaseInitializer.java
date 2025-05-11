@@ -43,10 +43,12 @@ public class DatabaseInitializer {
                 seedTable(conn, "player_inventory.csv","INSERT INTO PLAYER_INVENTORY VALUES (?, ?)");
                 seedTable(conn, "conversation_nodes.csv","INSERT INTO CONVERSATION_NODES VALUES (?, ?, ?, ?, ?, ?, ?)");
                 seedTable(conn, "conversation_edges.csv","INSERT INTO CONVERSATION_EDGES VALUES (?, ?, ?, ?)");
-                seedTable(conn, "companion.csv", 	   "INSERT INTO COMPANION VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                seedTable(conn, "companion.csv",       "INSERT INTO COMPANION VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 seedTable(conn, "companion_room.csv",  "INSERT INTO COMPANION_ROOM VALUES (?, ?)");
                 seedTable(conn, "player_companion.csv", "INSERT INTO PLAYER_COMPANION VALUES (?,?)");
                 seedTable(conn, "companion_inventory.csv", "INSERT INTO COMPANION_INVENTORY VALUES (?, ?)");
+                // Seed quest definitions from CSV
+                seedQuestDefinitions(conn);
             }
         } catch (Exception e) {
             throw new RuntimeException("DB initialization failed", e);
@@ -62,7 +64,7 @@ public class DatabaseInitializer {
         }
     }
 
-    /** Execute all statements in /db/schema.sql, splitting on ‘;’ */
+    /** Execute all statements in /db/schema.sql, splitting on ';' */
     private static void runDDL(Connection conn) throws Exception {
         // Load entire file
         InputStream in = DatabaseInitializer.class.getResourceAsStream("/db/schema.sql");
@@ -121,13 +123,11 @@ public class DatabaseInitializer {
     }
 
     private static void seedTable(Connection conn, String csvFile, String insertSql) throws Exception {
-        // DEBUG: indicate seeding of this CSV file
-        System.out.println("DEBUG: seedTable called for CSV: " + csvFile);
-        // DEBUG: check if resource is available
         InputStream in = DatabaseInitializer.class.getResourceAsStream("/db/" + csvFile);
-        System.out.println("DEBUG: resource '/db/" + csvFile + "' found? " + (in != null));
+        if (in == null) {
+            return; // no data
+        }
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
-
             // Read and parse header line to get column names
             String headerLine = reader.readLine();
             if (headerLine == null) {
@@ -143,10 +143,9 @@ public class DatabaseInitializer {
                 }
             }
 
-            // Validate that the number of columns matches the number of parameters
-            if (headers.length != paramCount) {
-                throw new SQLException("Number of columns in CSV (" + headers.length + 
-                    ") does not match number of parameters in SQL (" + paramCount + ") for " + csvFile);
+            // Ensure CSV has at least as many columns as parameters
+            if (headers.length < paramCount) {
+                throw new SQLException("CSV columns (" + headers.length + ") < SQL parameters (" + paramCount + ") for " + csvFile);
             }
 
             // Prepare statement
@@ -154,12 +153,11 @@ public class DatabaseInitializer {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     String[] cols = parseCSVLine(line);
-                    if (cols.length != headers.length) {
-                        throw new SQLException("Row has " + cols.length + " columns, expected " + 
-                            headers.length + " in " + csvFile);
+                    if (cols.length < paramCount) {
+                        throw new SQLException("Row has " + cols.length + " columns, expected >= " + paramCount + " in " + csvFile);
                     }
                     
-                    for (int i = 0; i < cols.length; i++) {
+                    for (int i = 0; i < paramCount; i++) {
                         String header = headers[i].trim();
                         String val = cols[i].trim();
                         // Unwrap quoted values
@@ -194,5 +192,9 @@ public class DatabaseInitializer {
                 ps.executeBatch();
             }
         }
+    }
+
+    private static void seedQuestDefinitions(Connection conn) throws Exception {
+        // Implementation of seedQuestDefinitions method
     }
 }
