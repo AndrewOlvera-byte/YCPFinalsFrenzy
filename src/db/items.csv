@@ -13,3 +13,13 @@ item_id,name,value,weight,long_description,short_description,type,healing,damage
 12,Pants,30,5,"<b>Weak armor will increase your health.</b>","<b>armor.</b>",ARMOR,0,0,0,0,20,LEGS,false
 13,Stick,1,2,"<b>A sturdy wooden stick. Useful for crafting.</b>","<b>Stick.</b>",ITEM,0,0,0,0,0,0,false
 14,String,1,1,"<b>A length of string. Useful for crafting.</b>","<b>String.</b>",ITEM,0,0,0,0,0,0,false
+
+15,Pencil,5,1,"<b>A sharp pencil — useful for writing... or stabbing.</b>","<b>A pencil.</b>",WEAPON,0,0,20,0,0,0,false
+16,Spork of Doom,10,2,"<b>Forged in the fires of the dining hall dishwasher. Deadly and versatile.</b>","<b>Spork of Doom.</b>",WEAPON,0,0,40,0,0,0,false
+17,Textbook ,15,6,"<b>A dense reference book, perfect for smashing ignorance and enemies alike.</b>","<b>Encyclopedia.</b>",WEAPON,0,0,30,0,0,0,false
+18,3D Printer Arm,20,6,"<b>A repurposed printer arm with servo strength. Prints pain in real time.</b>","<b>3D printer arm.</b>",WEAPON,0,0,50,0,0,0,false
+19,Circuit Whip,10,3,"<b>Strands of live wire braided together. Shocking and stylish.</b>","<b>Circuit whip.</b>",WEAPON,0,0,60,0,0,0,false
+20,Capstone Cannon,30,10,"<b>Your final project turned into a portable, shoulder-mounted problem solver.</b>","<b>Capstone cannon.</b>",WEAPON,0,0,100,0,0,0,false
+21,Orb of Vengeance,15,4,"<b>It’s red, rubber, and full of trauma. Hits harder than your GPA drop after midterms.</b>","<b>Dodgeball orb.</b>",WEAPON,0,0,70,0,0,0,false
+22,Spork Supreme,12,2,"<b>Forged from rare alloys and blessed by the Lunch Lady. The final form of all utensils.</b>","<b>Spork Supreme X.</b>",WEAPON,0,0,90,0,0,0,false
+23,A reference to a sword,10,1,"<b>It is said this sword is the only weapon that can help you pass CS320. It answeres any question the BABHAKE throws at you!</b>","<b>A list of pairs</b>",WEAPON,0,0,9999999,0,0,,false
