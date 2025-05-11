@@ -185,7 +185,15 @@ public class GameEngine {
     
     // Movement commands - delegate to RoomManager
     public String getGo(String noun) {
-        return roomManager.getGo(noun);
+        // Move to the next room and capture message
+        String message = roomManager.getGo(noun);
+        // Auto-accept any ON_ENTER quests for this room
+        String roomName = getCurrentRoomName();
+        String qMsg = questManager.checkAndAccept(this, QuestDefinition.Trigger.ON_ENTER, roomName);
+        if (qMsg != null) {
+            message += qMsg;
+        }
+        return message;
     }
     
     public String getOnShuttle() {

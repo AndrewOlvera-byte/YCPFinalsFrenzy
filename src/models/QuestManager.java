@@ -13,7 +13,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.sql.ResultSet;
 import models.DerbyDatabase;
+import models.Item;
 
 // Manages quest definitions loaded from data source
 public class QuestManager {
@@ -110,6 +112,36 @@ public class QuestManager {
                         throw new RuntimeException("Failed to persist auto-accepted quest", e);
                     }
                     sb.append("\n<b>Quest accepted:</b> ").append(def.getName());
+                    // Add retroactive completion for kill-based quests if target already slain
+                    if (def.getTargetType().equalsIgnoreCase("KILL")) {
+                        try (Connection conn2 = DerbyDatabase.getConnection();
+                             PreparedStatement ps2 = conn2.prepareStatement(
+                                 "SELECT hp FROM NPC WHERE name = ?"
+                             )) {
+                            ps2.setString(1, def.getTargetName());
+                            try (ResultSet rs2 = ps2.executeQuery()) {
+                                if (rs2.next() && rs2.getInt("hp") <= 0) {
+                                    engine.fireEvent(def.getTargetType(), def.getTargetName(), def.getTargetCount());
+                                    sb.append("\n<b>Quest completed:</b> ").append(def.getName());
+                                }
+                            }
+                        } catch (SQLException e) {
+                            throw new RuntimeException("Failed to check NPC status for quest", e);
+                        }
+                    }
+                    // Add retroactive completion for collect-based quests if player already has target items
+                    if (def.getTargetType().equalsIgnoreCase("COLLECT")) {
+                        int have = 0;
+                        for (Item it : engine.getPlayer().getInventory().getInventory()) {
+                            if (it.getName().equalsIgnoreCase(def.getTargetName())) {
+                                have++;
+                            }
+                        }
+                        if (have >= def.getTargetCount()) {
+                            engine.fireEvent(def.getTargetType(), def.getTargetName(), def.getTargetCount());
+                            sb.append("\n<b>Quest completed:</b> ").append(def.getName());
+                        }
+                    }
                 }
             }
         }

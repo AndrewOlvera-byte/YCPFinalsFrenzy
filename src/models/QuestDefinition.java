@@ -3,7 +3,7 @@ package models;
 // No-frills quest definition template
 public class QuestDefinition {
     // When and on what target the quest is auto-accepted
-    public enum Trigger { ON_EXAMINE, ON_KILL, ON_COLLECT, ON_TALK }
+    public enum Trigger { ON_EXAMINE, ON_KILL, ON_COLLECT, ON_TALK, ON_ENTER }
     private final Trigger trigger;
     private final String triggerTarget;
     private final int id;
