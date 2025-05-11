@@ -95,6 +95,9 @@ public class InventoryManager {
             throw new RuntimeException("Inventory DB update failed", e);
         }
 
+        // Notify quest system of collect
+        engine.fireEvent("COLLECT", itemName, 1);
+
         return "<b>\n" + itemName + " was picked up.</b>";
     }
     

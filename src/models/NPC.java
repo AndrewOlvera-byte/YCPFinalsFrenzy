@@ -41,11 +41,19 @@ public class NPC extends Character {
    }
    
    public String getMessage() {
-	    if (conversationTree == null || conversationTree.getCurrentNode() == null) {
-	        return "<b>This character has nothing to say.</b>";
-	    }
-	    return conversationTree.getCurrentNode().getMessage();
-	}
+       // DEBUG: entering NPC.getMessage
+       System.out.println("DEBUG: NPC.getMessage for '" + name + "', conversationTree!=null: " + (conversationTree != null));
+       if (conversationTree != null && conversationTree.getCurrentNode() != null) {
+           System.out.println("DEBUG: NPC.getMessage returning tree message: " + conversationTree.getCurrentNode().getMessage());
+           return conversationTree.getCurrentNode().getMessage();
+       }
+       if (dialogue != null && dialogue.length > 0) {
+           System.out.println("DEBUG: NPC.getMessage falling back to dialogue[]");
+           return name + " says: " + String.join(" ", dialogue);
+       }
+       System.out.println("DEBUG: NPC.getMessage falling back to default 'This character has nothing to say.'");
+       return "<b>This character has nothing to say.</b>";
+   }
 
    
    public String[] getResponseOptions() {

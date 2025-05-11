@@ -47,6 +47,8 @@ public class CombatManager {
             currentRoom.handleCharacterDeath(characterNum);
             // Award skill point for defeating enemy
             engine.getPlayer().setSkillPoints(engine.getPlayer().getSkillPoints() + 1);
+            // Notify quest system of kill
+            engine.fireEvent("KILL", temp, 1);
             return "\n<b>" + temp + " has been slain and dropped its inventory! You gained 1 skill point!</b>";
         }
         else {

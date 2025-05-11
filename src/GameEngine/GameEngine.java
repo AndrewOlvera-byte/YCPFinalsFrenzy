@@ -30,6 +30,7 @@ public class GameEngine {
     private ConversationManager conversationManager;
     private CompanionManager companionManager;
     private CraftingManager craftingManager;
+    private QuestManager questManager;
 
     
     // CSV-fake loader
@@ -45,6 +46,8 @@ public class GameEngine {
         this.conversationManager = new ConversationManager(this);
         this.companionManager = new CompanionManager(this);
         this.craftingManager = new CraftingManager(this);
+        this.questManager = new QuestManager();
+        this.questManager.loadAll();
     }
 
     /** Called once to seed/initialize, then loadData. */
@@ -75,9 +78,11 @@ public class GameEngine {
             // real Derby path
             roomManager.loadRooms();                      // from DerbyDatabase
             conversationManager.loadConversations();      // fills NPC conversation trees
+            // DEBUG: verify conversation trees are found for NPCs
             for (Room room : getRooms()) {
                 for (Character npc : room.getCharacterContainer()) {
                     ConversationTree tree = conversationManager.getConversation(npc.getName());
+                    System.out.println("DEBUG: NPC '" + npc.getName() + "' has conversationTree? " + (tree != null));
                     if (tree != null) {
                         if (npc instanceof NPC) {
                             ((NPC) npc).addConversationTree(tree);
@@ -100,6 +105,18 @@ public class GameEngine {
         roomManager.loadRooms();
         // 2) Conversations
         conversationManager.loadConversations();
+        // Attach conversation trees to NPCs when starting without player
+        for (Room room : getRooms()) {
+            for (Character npcChar : room.getCharacterContainer()) {
+                if (npcChar instanceof NPC) {
+                    NPC npc = (NPC) npcChar;
+                    ConversationTree tree = conversationManager.getConversation(npc.getName());
+                    if (tree != null) {
+                        npc.addConversationTree(tree);
+                    }
+                }
+            }
+        }
         this.currentRoomNum = 0;
         this.isRunning = true;
     }
@@ -273,12 +290,27 @@ public class GameEngine {
         if(companionNum >= 0) {
         	message = examineCompanion(noun);
         }
+        // Trigger any quests tied to examining this noun
+        String qMsg = questManager.checkAndAccept(this,
+                          QuestDefinition.Trigger.ON_EXAMINE,
+                          noun);
+        if (qMsg != null) {
+            message += qMsg;
+        }
         return message;
     }
     
     // NPC interaction methods - delegate to RoomManager
     public String talkToNPC(int characterNum) {
-        return roomManager.talkToNPC(characterNum);
+        // Delegate to roomManager then handle any ON_TALK quests
+        String msg = roomManager.talkToNPC(characterNum);
+        // Auto-accept any ON_TALK quests for this NPC
+        String npcName = rooms.get(currentRoomNum).getCharacterName(characterNum);
+        String qMsg = questManager.checkAndAccept(this, QuestDefinition.Trigger.ON_TALK, npcName);
+        if (qMsg != null) {
+            msg += qMsg;
+        }
+        return msg;
     }
     
     public String[] getResponseOptions(int characterNum) {
@@ -382,6 +414,21 @@ public class GameEngine {
     // Combine two components into a new item
     public String combineItems(String compA, String compB) {
         return craftingManager.combineItems(compA, compB);
+    }
+
+    // Quest commands
+    /** Accept a quest and return a message */
+    public String acceptQuest(int questId) {
+        player.acceptQuest(questId, questManager);
+        QuestDefinition def = questManager.get(questId);
+        return def != null
+            ? "\n<b>Quest accepted:</b> " + def.getName()
+            : "\n<b>No such quest:</b> " + questId;
+    }
+
+    /** Notify player of an event for quest progression */
+    public void fireEvent(String type, String name, int amount) {
+        player.onEvent(type, name, amount);
     }
 
     public String increaseAttack() {

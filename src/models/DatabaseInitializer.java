@@ -3,6 +3,7 @@ package models;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -120,8 +121,12 @@ public class DatabaseInitializer {
     }
 
     private static void seedTable(Connection conn, String csvFile, String insertSql) throws Exception {
-        try (InputStream in = DatabaseInitializer.class.getResourceAsStream("/db/" + csvFile);
-             BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
+        // DEBUG: indicate seeding of this CSV file
+        System.out.println("DEBUG: seedTable called for CSV: " + csvFile);
+        // DEBUG: check if resource is available
+        InputStream in = DatabaseInitializer.class.getResourceAsStream("/db/" + csvFile);
+        System.out.println("DEBUG: resource '/db/" + csvFile + "' found? " + (in != null));
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
 
             // Read and parse header line to get column names
             String headerLine = reader.readLine();

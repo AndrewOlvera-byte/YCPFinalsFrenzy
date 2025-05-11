@@ -152,6 +152,13 @@
         .submit-button:hover {
             background-color: #3c9d6a;
         }
+        /* Quest popup styling */
+        .quest-popup {
+            background: white;
+            border: 1px solid #333;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -209,6 +216,7 @@
 						<pre class="formatted">${response.companionsInRoom}</pre>
                         <pre class="formatted">${response.playerInfo}</pre>
                         <pre class="formatted">${response.roomConnections}</pre>
+                        <div class="formatted">${response.questOverlay}</div>
                     </div>
                 </div>
                 <div class="sidebar">

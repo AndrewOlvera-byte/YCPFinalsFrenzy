@@ -172,6 +172,22 @@ CREATE TABLE PLAYER_COMPANION (
     FOREIGN KEY (companion_id)    REFERENCES COMPANION(companion_id)
 );
 
+-- 7) Quest definitions
+CREATE TABLE quest_definition (
+   quest_id            INT         PRIMARY KEY,
+   name                VARCHAR(100) NOT NULL,
+   description         VARCHAR(1000),
+   trigger             VARCHAR(20)  NOT NULL,
+   trigger_target      VARCHAR(100) NOT NULL,
+   target_type         VARCHAR(20)  NOT NULL,
+   target_item_id      INT,
+   target_npc_id       INT,
+   target_count        INT          NOT NULL,
+   reward_skill_points INT          NOT NULL,
+   FOREIGN KEY (target_item_id) REFERENCES ITEM(item_id),
+   FOREIGN KEY (target_npc_id)  REFERENCES NPC(npc_id)
+);
+
 Create Table COMPANION_INVENTORY (
 	companion_id INT,
 	item_id INT,

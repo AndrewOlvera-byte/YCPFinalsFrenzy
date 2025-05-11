@@ -4,6 +4,9 @@ import java.util.*;
 
 import GameEngine.GameEngine;
 import models.Player;
+import java.util.List;
+import models.Quest;
+import models.QuestDefinition;
 
 public class UIManager {
     private GameEngine engine;
@@ -416,6 +419,26 @@ public class UIManager {
         
         return sb.toString();
     }
+
+    // Generate overlay of active quests
+    public String getQuestOverlay() {
+        List<Quest> qs = engine.getPlayer().getActiveQuests();
+        if (qs.isEmpty()) return "";
+        StringBuilder sb = new StringBuilder();
+        sb.append("<div class='quest-popup'>Active Quests:<br/>");
+        for (Quest q : qs) {
+            QuestDefinition d = q.getDef();
+            sb.append(d.getName())
+              .append(" (")
+              .append(q.getProgress())
+              .append("/")
+              .append(d.getTargetCount())
+              .append(")<br/>");
+        }
+        sb.append("</div>");
+        return sb.toString();
+    }
+
     // Main display method to construct Response object
     public Response display() {
         Response response = new Response(
@@ -428,14 +451,14 @@ public class UIManager {
             getPlayerInfo(),
             getRoomConnectionOutput(),
             engine.getRunningMessage(),
-            "",  // Error message (empty for now)
+            "",  // Error message
             getCurrentRoomImage(),
             engine.getCurrentRoomNumber(),
             getRoomItemsOverlay(),
             getRoomCharactersOverlay(),
-            getRoomCompanionsOverlay()
+            getRoomCompanionsOverlay(),
+            getQuestOverlay()
         );
-        
         return response;
     }
 }

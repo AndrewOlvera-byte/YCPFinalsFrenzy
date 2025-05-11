@@ -5,6 +5,11 @@ import models.ArmorSlot;
 
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
+import models.Quest;
+import models.QuestManager;
+import models.QuestDefinition;
 
 public class Player extends Character {
 	private int id;
@@ -15,6 +20,9 @@ public class Player extends Character {
     // --- new field: track equipped armor per slot ---
    private final Map<ArmorSlot, Armor> equippedArmor = new EnumMap<>(ArmorSlot.class);
    private Companion hasCompanion;
+   // Quest tracking
+   private final List<Quest> activeQuests   = new ArrayList<>();
+   private final List<Quest> completedQuests= new ArrayList<>();
    // private Room location;
    public Player(String name, int hp, int skillPoints, Inventory inventory, String longdescription, String shortdescription,double damageMulti,int attackBoost,int defenseBoost) {
        super(name, hp, inventory, longdescription, shortdescription);
@@ -151,6 +159,38 @@ public class Player extends Character {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    /** Accept a quest by ID, via the QuestManager */
+    public void acceptQuest(int questId, QuestManager qm) {
+        QuestDefinition def = qm.get(questId);
+        if (def != null) {
+            activeQuests.add(new Quest(def));
+        }
+    }
+
+    /** Progress active quests on an event; complete and grant skill points */
+    public void onEvent(String type, String name, int amount) {
+        List<Quest> copy = new ArrayList<>(activeQuests);
+        for (Quest q : copy) {
+            q.advance(type, name, amount);
+            if (q.isComplete()) {
+                activeQuests.remove(q);
+                completedQuests.add(q);
+                // Award skill points upon quest completion
+                this.skillPoints += q.getDef().getRewardSkillPoints();
+            }
+        }
+    }
+
+    /** Returns all quests the player is currently undertaking */
+    public List<Quest> getActiveQuests() {
+        return activeQuests;
+    }
+
+    /** Returns all quests the player has completed */
+    public List<Quest> getCompletedQuests() {
+        return completedQuests;
     }
 
     public int getSkillPoints() {

@@ -35,6 +35,8 @@ public class ConversationManager {
      *   )
      */
     public void loadConversations() {
+        // clear previous conversation data
+        conversations.clear();
         // temp map: key = conversation_id + "::" + node_id → ConversationNode
         Map<String, ConversationNode> nodeMap = new HashMap<>();
         // track root nodes per conversation
@@ -49,7 +51,7 @@ public class ConversationManager {
             try (PreparedStatement ps = conn.prepareStatement(nodeSql);
                  ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    String convId = rs.getString("conversation_id");
+                    String convId = rs.getString("conversation_id").toLowerCase();
                     String nodeId = rs.getString("node_id");
                     String key    = convId + "::" + nodeId;
                     ConversationNode node = new ConversationNode(rs.getString("message"));
@@ -71,7 +73,7 @@ public class ConversationManager {
             try (PreparedStatement ps = conn.prepareStatement(edgeSql);
                  ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    String convId    = rs.getString("conversation_id");
+                    String convId    = rs.getString("conversation_id").toLowerCase();
                     String parentKey = convId + "::" + rs.getString("parent_node_id");
                     String childKey  = convId + "::" + rs.getString("child_node_id");
                     ConversationNode parent = nodeMap.get(parentKey);
@@ -81,6 +83,9 @@ public class ConversationManager {
                     }
                 }
             }
+
+            // DEBUG: verify conversation data loaded
+            System.out.println("DEBUG: conversation_nodes=" + nodeMap.size() + ", root IDs=" + roots.keySet());
 
             // 3) Build a ConversationTree for each conversation_id
             for (Map.Entry<String, List<ConversationNode>> e : roots.entrySet()) {
@@ -104,6 +109,9 @@ public class ConversationManager {
      * @return the tree, or null if no such conversation was loaded.
      */
     public ConversationTree getConversation(String conversationId) {
-        return conversations.get(conversationId);
+        if (conversationId == null) {
+            return null;
+        }
+        return conversations.get(conversationId.toLowerCase());
     }
 }
