@@ -13,7 +13,6 @@ item_id,name,value,weight,long_description,short_description,type,healing,damage
 12,Pants,30,5,"<b>Weak armor will increase your health.</b>","<b>armor.</b>",ARMOR,0,0,0,0,20,LEGS,false
 13,Stick,1,2,"<b>A sturdy wooden stick. Useful for crafting.</b>","<b>Stick.</b>",ITEM,0,0,0,0,0,0,false
 14,String,1,1,"<b>A length of string. Useful for crafting.</b>","<b>String.</b>",ITEM,0,0,0,0,0,0,false
-
 15,Pencil,5,1,"<b>A sharp pencil, useful for writing... or stabbing.</b>","<b>A pencil.</b>",WEAPON,0,0,20,0,0,0,false
 16,Spork of Doom,10,2,"<b>Forged in the fires of the dining hall dishwasher. Useful for soup or steak.</b>","<b>Spork of Doom.</b>",WEAPON,0,0,40,0,0,0,false
 17,Textbook ,15,6,"<b>The title is "UML Distilled". I have never read it.</b>","<b>Textbook.</b>",WEAPON,0,0,30,0,0,0,false
