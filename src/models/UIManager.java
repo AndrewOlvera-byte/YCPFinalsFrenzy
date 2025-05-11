@@ -61,27 +61,23 @@ public class UIManager {
     
     // Returns formatted string of player's inventory
     public String getPlayerInventoryString() {
-        StringBuilder inventoryString = new StringBuilder("Player Inventory:\n");
         Player p = engine.getPlayer();
-        // ← these two lines are the "easiest fix"
         if (p == null || p.getInventory() == null || p.getInventorySize() == 0) {
-            inventoryString.append("(no items)\n");
-            return inventoryString.toString();
+            return "";
         }
-
+        StringBuilder inventoryString = new StringBuilder();
         int size = p.getInventorySize();
         for (int i = 0; i < size; i++) {
-            inventoryString
-              .append(i + 1)
-              .append("\t")
-              .append(p.getItemName(i))
-              .append("\n");
+            inventoryString.append(p.getItemName(i));
+            if (i < size - 1) {
+                inventoryString.append(",");
+            }
         }
         return inventoryString.toString();
     }
     
     public String getCompanionInventoryString() {
-        StringBuilder inventoryString = new StringBuilder("Companion Inventory:\n");
+        StringBuilder inventoryString = new StringBuilder();
         Companion companion = engine.getPlayer().getPlayerCompanion();
         // ← these two lines are the "easiest fix"
         if (companion == null || companion.getInventory() == null || companion.getInventorySize() == 0) {
@@ -424,7 +420,6 @@ public class UIManager {
     public String getQuestOverlay() {
         List<Quest> qs = engine.getPlayer().getActiveQuests();
         StringBuilder sb = new StringBuilder();
-        sb.append("Active Quests:<br/>");
         if (qs.isEmpty()) {
             sb.append("(none)<br/>");
         } else {
@@ -441,6 +436,95 @@ public class UIManager {
                   .append(")<br/>");
             }
         }
+        return sb.toString();
+    }
+
+    // Helper to compute player health percentage for status bar
+    private int getPlayerHealthPercent() {
+        Player player = engine.getPlayer();
+        if (player == null) return 0;
+        int maxHp = player.getMaxHp();
+        if (maxHp <= 0) return 0;
+        return (int) ((player.getHp() * 100.0) / maxHp);
+    }
+
+    // Helper to compute player skill points percentage out of 3
+    private int getPlayerSkillPointsPercent() {
+        Player player = engine.getPlayer();
+        if (player == null) return 0;
+        int sp = player.getSkillPoints();
+        return (int) ((sp * 100.0) / 3);
+    }
+
+    // Generate JavaScript scene-data and renderEntities call
+    private String getSceneEntitiesData() {
+        StringBuilder sb = new StringBuilder();
+        Room currentRoom = engine.getRooms().get(engine.getCurrentRoomNum());
+        Player player = engine.getPlayer();
+
+        sb.append("<script>\n");
+        sb.append("const sceneData = {\n");
+        // Player data
+        sb.append("  player: {");
+        if (player != null) {
+            sb.append("name: '" + player.getName() + "',");
+            sb.append(" health: " + player.getHp() + ",");
+            sb.append(" maxHealth: " + player.getMaxHp() + ",");
+            sb.append(" skillPoints: " + player.getSkillPoints() + ",");
+            sb.append(" position: { left: 80, top: 40 }\n");
+        }
+        sb.append("  },\n");
+        // Enemies data
+        sb.append("  enemies: [\n");
+        for (int i = 0; i < currentRoom.getCharacterContainerSize(); i++) {
+            if (i > 0) sb.append(",\n");
+            sb.append("    {");
+            sb.append(" name: '" + currentRoom.getCharacterName(i) + "',");
+            sb.append(" health: " + currentRoom.getCharacterHealth(i) + ",");
+            sb.append(" maxHealth: " + currentRoom.getCharacter(i).getMaxHp() + ",");
+            sb.append(" position: { left: " + (20 + i*15) + ", top: 40 } }");
+        }
+        sb.append("\n  ],\n");
+        // Items data
+        sb.append("  items: [\n");
+        for (int i = 0; i < currentRoom.getInventorySize(); i++) {
+            if (i > 0) sb.append(",\n");
+            sb.append("    { name: '" + currentRoom.getItemName(i) + "', position: { left: " + (40 + i*10) + ", top: 60 } }");
+        }
+        sb.append("\n  ]\n");
+        sb.append("};\n");
+        // Render function
+        sb.append("function renderEntities() {\n");
+        // Clear and render player
+        sb.append("  const playerContainer = document.getElementById('player-container');\n");
+        sb.append("  playerContainer.innerHTML = '';\n");
+        sb.append("  if (sceneData.player && sceneData.player.name) {\n");
+        sb.append("    const p = sceneData.player;\n");
+        sb.append("    const pel = document.createElement('div'); pel.className = 'entity'; pel.style.left = p.position.left + '%'; pel.style.top = p.position.top + '%';\n");
+        sb.append("    const phb = document.createElement('div'); phb.className = 'entity-health-bar'; const php = Math.floor((p.health / p.maxHealth) * 100); phb.innerHTML = `<div class='entity-health-fill' style='width:${php}%'>${p.health}</div>`; pel.appendChild(phb);\n");
+        sb.append("    const pimg = document.createElement('img'); pimg.src = 'images/' + p.name + '.png'; pimg.alt = p.name; pimg.style.width = '350px'; pel.appendChild(pimg);\n");
+        sb.append("    playerContainer.appendChild(pel);\n");
+        sb.append("  }\n");
+        // Clear and render enemies
+        sb.append("  const enemiesContainer = document.getElementById('enemies-container');\n");
+        sb.append("  enemiesContainer.innerHTML = '';\n");
+        sb.append("  sceneData.enemies.forEach(enemy => {\n");
+        sb.append("    const el = document.createElement('div'); el.className = 'entity'; el.style.left = enemy.position.left + '%'; el.style.top = enemy.position.top + '%';\n");
+        sb.append("    const hb = document.createElement('div'); hb.className = 'entity-health-bar'; const hpp = Math.floor((enemy.health / enemy.maxHealth) * 100); hb.innerHTML = `<div class='entity-health-fill' style='width:${hpp}%'>${enemy.health}</div>`; el.appendChild(hb);\n");
+        sb.append("    const img = document.createElement('img'); img.src = 'images/' + enemy.name + '.png'; img.alt = enemy.name; img.style.width = '350px'; el.appendChild(img);\n");
+        sb.append("    enemiesContainer.appendChild(el);\n");
+        sb.append("  });\n");
+        // Clear and render items
+        sb.append("  const itemsContainer = document.getElementById('items-container');\n");
+        sb.append("  itemsContainer.innerHTML = '';\n");
+        sb.append("  sceneData.items.forEach(item => {\n");
+        sb.append("    const el = document.createElement('div'); el.className = 'entity'; el.style.left = item.position.left + '%'; el.style.top = item.position.top + '%';\n");
+        sb.append("    const img = document.createElement('img'); img.src = 'images/' + item.name + '.png'; img.alt = item.name; img.style.width = '280px'; el.appendChild(img);\n");
+        sb.append("    itemsContainer.appendChild(el);\n");
+        sb.append("  });\n");
+        sb.append("}\n");
+        sb.append("window.onload = renderEntities;\n");
+        sb.append("</script>");
         return sb.toString();
     }
 
@@ -464,6 +548,29 @@ public class UIManager {
             getRoomCompanionsOverlay(),
             getQuestOverlay()
         );
+        // Room connections
+        int north = engine.getMapOutput("North");
+        response.setNorthRoom(north != -1 ? engine.getRoomName(north) : null);
+        int east = engine.getMapOutput("East");
+        response.setEastRoom(east != -1 ? engine.getRoomName(east) : null);
+        int south = engine.getMapOutput("South");
+        response.setSouthRoom(south != -1 ? engine.getRoomName(south) : null);
+        int west = engine.getMapOutput("West");
+        response.setWestRoom(west != -1 ? engine.getRoomName(west) : null);
+        // After computing room connections and before player status
+        // Set the current room name for the UI header
+        response.setRoomName(engine.getCurrentRoomName());
+        // Player status
+        Player player = engine.getPlayer();
+        if (player != null) {
+            response.setPlayerCurrentHP(player.getHp());
+            response.setPlayerMaxHP(player.getMaxHp());
+            response.setPlayerHealthPercent(getPlayerHealthPercent());
+            response.setPlayerSkillPoints(player.getSkillPoints());
+            response.setPlayerSkillPointsPercent(getPlayerSkillPointsPercent());
+        }
+        // Inject scene data
+        response.setSceneEntitiesData(getSceneEntitiesData());
         return response;
     }
 }

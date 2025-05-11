@@ -118,7 +118,7 @@
             var userInput = $("#inputField").val();
             $.ajax({
                 type: "POST",
-                url: "/YourAppContext/ajax/dashboardAjaxServlet",  // Adjust context path as needed
+                url: "/YCPFinalsFrenzy/ajax/dashboardAjaxServlet",  // Adjust context path as needed
                 data: { input: userInput },
                 dataType: "json",
                 success: function(data, textStatus, jqXHR) {
@@ -127,9 +127,12 @@
                     $("#playerInventoryField").text(data.playerInventory);
                     $("#playerInfoField").text(data.playerInfo);
                     $("#charactersInRoomField").text(data.charactersInRoom);
-                    $("#roomConnectionsField").text(data.roomConnections);
                     $("#companionInRoomField").text(data.companionsInRoom);
+                    $("#roomConnectionsField").text(data.roomConnections);
                     $("#messageField").html(data.message);
+                    // Scroll to bottom after content update
+                    var container = document.querySelector('.scrollable-container'); 
+                    if (container) container.scrollTop = container.scrollHeight;
                     $("#questOverlayField").html(data.questOverlay);
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
@@ -137,7 +140,18 @@
                 }
             });
         });
+        // Trigger an initial load of game state on page load
+        $("#updateButton").click();
+        // Focus the input field for immediate user input
+        $("#inputField").focus();
     });
+    </script>
+    <script>
+      // wait for everything (HTML + injected scripts) to finish loading
+      window.addEventListener('load', function() {
+        var $c = document.querySelector('.scrollable-container');
+        if ($c) $c.scrollTop = $c.scrollHeight;
+      });
     </script>
 </head>
 <body>
