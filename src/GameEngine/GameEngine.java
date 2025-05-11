@@ -31,7 +31,6 @@ public class GameEngine {
     private CompanionManager companionManager;
     private CraftingManager craftingManager;
     private QuestManager questManager;
-    private QuestManager questManager;
 
     
     // CSV-fake loader
