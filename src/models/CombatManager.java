@@ -2,6 +2,10 @@ package models;
 
 
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
 import GameEngine.GameEngine;
 
 
@@ -14,6 +18,7 @@ public class CombatManager {
     
     // Method for the player attacking a character - needs the characterNum to attack and item being used to attack
     public String playerAttackChar(int itemNum, int characterNum) {
+    	try (Connection conn = DerbyDatabase.getConnection()) {
         if (characterNum == -1 && itemNum == -1) {
             return "\n<b>Attack who with what?</b>";
         }
@@ -25,6 +30,7 @@ public class CombatManager {
         }
         
         Room currentRoom   = engine.getRooms().get(engine.getCurrentRoomNum());
+        String npcName = currentRoom.getCharacterName(characterNum);
         double damageMulti = engine.getPlayer().getdamageMulti();
         double boost       = 0;
         int companionDamage = 0;
@@ -39,6 +45,11 @@ public class CombatManager {
         
         int    charHealth = currentRoom.getCharacterHealth(characterNum);
         double newHealth  = charHealth - attackDmg;
+        
+        PreparedStatement ps = conn.prepareStatement( "UPDATE NPC SET hp = ? WHERE name = ?");
+        ps.setInt(1, (int) newHealth);
+        ps.setString(2, npcName);
+        ps.executeUpdate();
         
         boolean aggressive = currentRoom.isCharAgressive(characterNum);
         
@@ -70,6 +81,9 @@ public class CombatManager {
             else {
                 return "\n" + "<b>" + currentRoom.getCharacterName(characterNum) + " has taken " + dmgString + " damage.</b>";
             }
+        }
+        } catch (SQLException ex) {
+            throw new RuntimeException("Failed to load rooms", ex);
         }
     }
     
