@@ -4,3 +4,9 @@ npc_id,name,hp,aggression,damage,long_description,short_description
 3,x,5,true,80,<b>Powerful man. Don't mess around!</b>,<b>That's Moe!</b>
 4,y,5,true,80,<b>Powerful man. Don't mess around!</b>,<b>That's Moe!</b>
 5,z,5,true,80,<b>Powerful man. Don't mess around!</b>,<b>That's Moe!</b>
+6,CivE,50,true,10,<b>placeholder</b>,<b>placeholder</b>
+7,Lost Business Student,20,true,10,<b>placeholder</b>,<b>placeholder</b>
+8,Babhake,500,true,500,<b>placeholder</b>,<b>placeholder</b>
+9,JDH Chicken,40,true,10,<b>placeholder</b>,<b>placeholder</b>
+10,Library Patron,30,true,10,<b>placeholder</b>,<b>placeholder</b>
+11,eoJ,35,true,12,<b>placeholder</b>,<b>placeholder</b>
