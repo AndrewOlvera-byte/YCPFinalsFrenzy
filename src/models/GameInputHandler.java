@@ -18,7 +18,7 @@ public class GameInputHandler {
         "apply", "drink", "reset", "initialize", "forward", "backward", "left", "right",
         "North", "N", "north", "n", "South", "south", "S", "s", "East", "east", "E", "e",
         "West", "W", "west", "w", "equip","unequip","choose", "shoo", "disassemble",
-        "combine", "give", "takec"
+        "combine", "give", "takec", "increase", "funky"
     ));
 
     private static final Set<String> PREPOSITIONS = new HashSet<>(Arrays.asList(
@@ -301,8 +301,55 @@ public class GameInputHandler {
                     }
                 }
                 break;
-            	   
 
+            case "funky":
+                if (noun == null || noun.trim().isEmpty()) {
+                    gameEngine.appendMessage(
+                        "\n<b>Invalid funky command. You must specify a room number. "
+                      + "Try: funky [number]</b>"
+                    );
+                } else {
+                    try {
+                        int roomNum = Integer.parseInt(noun) - 1; // Convert to 0-based index
+                        if (roomNum >= 0 && roomNum < gameEngine.getRooms().size()) {
+                            gameEngine.setCurrentRoomNum(roomNum);
+                            gameEngine.appendMessage(
+                                "\n<b>You have been teleported to room " + (roomNum + 1) + "!</b>"
+                            );
+                        } else {
+                            gameEngine.appendMessage(
+                                "\n<b>Invalid room number. Room must be between 1 and " 
+                              + gameEngine.getRooms().size() + ".</b>"
+                            );
+                        }
+                    } catch (NumberFormatException e) {
+                        gameEngine.appendMessage(
+                            "\n<b>Invalid room number. Please enter a number.</b>"
+                        );
+                    }
+                }
+                break;
+
+            case "increase":
+                if (noun == null || noun.trim().isEmpty()) {
+                    gameEngine.appendMessage(
+                        "\n<b>Invalid increase. You must specify what to increase. "
+                      + "Try: increase [attack|defense]</b>"
+                    );
+                } else if (noun.toLowerCase().equals("attack")) {
+                    gameEngine.appendMessage(
+                        gameEngine.increaseAttack()
+                    );
+                } else if (noun.toLowerCase().equals("defense")) {
+                    gameEngine.appendMessage(
+                        gameEngine.increaseDefense()
+                    );
+                } else {
+                    gameEngine.appendMessage(
+                        "\n<b>Invalid increase. You can only increase attack or defense.</b>"
+                    );
+                }
+                break;
 
             default:
                 gameEngine.appendMessage("<b>\nCommand not implemented.</b>");

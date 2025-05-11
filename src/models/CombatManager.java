@@ -45,7 +45,9 @@ public class CombatManager {
         if (newHealth <= 0) {
             String temp = currentRoom.getCharacterName(characterNum);
             currentRoom.handleCharacterDeath(characterNum);
-            return "\n<b>" + temp + " has been slain and dropped its inventory!</b>";
+            // Award skill point for defeating enemy
+            engine.getPlayer().setSkillPoints(engine.getPlayer().getSkillPoints() + 1);
+            return "\n<b>" + temp + " has been slain and dropped its inventory! You gained 1 skill point!</b>";
         }
         else {
             currentRoom.setCharacterHealth(characterNum, newHealth);
@@ -94,10 +96,10 @@ public class CombatManager {
         double totalDmg = rawDmg - defense - armor;
         if (totalDmg < 0) totalDmg = 0;
 
-        // 7) DEBUG: spit out all the numbers so you can confirm it’s working
+        // 7) DEBUG: spit out all the numbers so you can confirm it's working
 
 
-        // 8) Finally, subtract from the player’s HP
+        // 8) Finally, subtract from the player's HP
         int playerHp = engine.getPlayer().getHp();
         engine.getPlayer().setHp(playerHp - (int)Math.round(totalDmg));
         return (int)Math.round(totalDmg);

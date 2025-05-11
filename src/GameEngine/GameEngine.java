@@ -384,4 +384,26 @@ public class GameEngine {
         return craftingManager.combineItems(compA, compB);
     }
 
+    public String increaseAttack() {
+        if (player.useSkillPoints(3)) {
+            player.setAttackBoost(player.getAttackBoost() + 5);
+            return "\n<b>Successfully increased attack by 5 points! New attack boost: " 
+                 + player.getAttackBoost() + "</b>";
+        } else {
+            return "\n<b>Not enough skill points! You have " 
+                 + player.getSkillPoints() + " skill points.</b>";
+        }
+    }
+
+    public String increaseDefense() {
+        if (player.useSkillPoints(3)) {
+            player.setdefenseBoost(player.getdefenseBoost() + 5);
+            return "\n<b>Successfully increased defense by 5 points! New defense boost: " 
+                 + player.getdefenseBoost() + "</b>";
+        } else {
+            return "\n<b>Not enough skill points! You have " 
+                 + player.getSkillPoints() + " skill points.</b>";
+        }
+    }
+
 }
