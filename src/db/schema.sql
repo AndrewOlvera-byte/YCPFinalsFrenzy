@@ -27,6 +27,7 @@ CREATE TABLE PLAYER (
   defense_boost INT,
   last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(user_id)
+  level INT DEFAULT 1
 );
 
 -- 6) Equipment linkage

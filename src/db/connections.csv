@@ -64,6 +64,7 @@ from_room_id,direction,to_room_id
 31,West,9
 31,South,6
 31,East,1
+31,North,3
 32,North,22
 32,South,27
 32,East,47

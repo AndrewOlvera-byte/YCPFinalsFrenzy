@@ -65,11 +65,14 @@ public class RoomManager {
               "SELECT room_id, item_id FROM ROOM_INVENTORY");
             rs = ps.executeQuery();
             while (rs.next()) {
-                int roomIdx = rs.getInt("room_id") - 1;
+                int rawRoomId = rs.getInt("room_id");
+                Integer roomIdx = idToIndex.get(rawRoomId);
                 int itemId  = rs.getInt("item_id");
                 // fetch the ITEM row by itemId, build an Item object
                 Item it = loadItemById(conn, itemId);
-                engine.getRooms().get(roomIdx).addItem(it);
+                if (roomIdx != null) {
+                    engine.getRooms().get(roomIdx).addItem(it);
+                }
             }
 
             // 4) Load NPCs into rooms with their inventories
@@ -103,13 +106,13 @@ public class RoomManager {
                     rsNPC.getString("short_description")
                 );
 
-                int roomIdx = rsNPC.getInt("room_id") - 1;
-                
-                // Make sure the roomIdx is valid
-                if (roomIdx >= 0 && roomIdx < engine.getRooms().size()) {
+                // Map real room_id to engine list index using idToIndex to handle gaps
+                int rawRoomId = rsNPC.getInt("room_id");
+                Integer roomIdx = idToIndex.get(rawRoomId);
+                if (roomIdx != null) {
                     engine.getRooms().get(roomIdx).getCharacterContainer().add(npc);
                 } else {
-                    System.err.println("Warning: NPC " + npc.getName() + " references invalid room ID: " + (roomIdx + 1));
+                    System.err.println("Warning: NPC " + npc.getName() + " references invalid room ID: " + rawRoomId);
                 }
             }
 
@@ -126,14 +129,16 @@ public class RoomManager {
                 
                 // Load inventory for this companion
                 Inventory companionInventory = new Inventory(new ArrayList<>(), 100);
-                PreparedStatement psInv = conn.prepareStatement("SELECT item_id FROM COMPANION_INVENTORY WHERE companion_id = ?");
-                psInv.setInt(1, companionId);
-                ResultSet rsInv = psInv.executeQuery();
-                while (rsInv.next()) {
-                    Item companionItem = loadItemById(conn, rsInv.getInt("item_id"));
+                PreparedStatement psCompInv = conn.prepareStatement("SELECT item_id FROM COMPANION_INVENTORY WHERE companion_id = ?");
+                psCompInv.setInt(1, companionId);
+                ResultSet rsCompInv = psCompInv.executeQuery();
+                while (rsCompInv.next()) {
+                    Item companionItem = loadItemById(conn, rsCompInv.getInt("item_id"));
                     companionInventory.addItem(companionItem);
                 }
 
+                boolean isCompanion = rsCompanion.getBoolean("companion");
+                
                 Companion companion = new Companion(
                     rsCompanion.getString("name"),
                     rsCompanion.getInt("hp"),
@@ -143,17 +148,17 @@ public class RoomManager {
                     companionInventory, // Use populated inventory
                     rsCompanion.getString("long_description"),
                     rsCompanion.getString("short_description"),
-                    rsCompanion.getBoolean("companion")
+                    isCompanion
                 );
 
-                int roomIdx = rsCompanion.getInt("room_id") - 1;
-                
-                // Make sure the roomIdx is valid
-                if (roomIdx >= 0 && roomIdx < engine.getRooms().size()) {
+                // Map real room_id to engine list index using idToIndex to handle gaps
+                int rawRoomId = rsCompanion.getInt("room_id");
+                Integer roomIdx = idToIndex.get(rawRoomId);
+                if (roomIdx != null) {
                     engine.getRooms().get(roomIdx).getCompanionContainer().add(companion);
-                    System.out.println("Added companion " + companion.getName() + " to room " + (roomIdx + 1));
+                    System.out.println("Added companion " + companion.getName() + " to room " + rawRoomId);
                 } else {
-                    System.err.println("Warning: Companion " + companion.getName() + " references invalid room ID: " + (roomIdx + 1));
+                    System.err.println("Warning: Companion " + companion.getName() + " references invalid room ID: " + rawRoomId);
                 }
             }
             
@@ -168,11 +173,11 @@ public class RoomManager {
             ResultSet rsPlayerCompanions = psPlayerCompanions.executeQuery();
             
             while (rsPlayerCompanions.next()) {
-                int companionId = rsPlayerCompanions.getInt("companion_id");
+                int playerCompanionId = rsPlayerCompanions.getInt("companion_id");
                 int playerId = rsPlayerCompanions.getInt("player_id");
                 
                 // Log that we found a companion that's attached to a player but not in a room
-                System.out.println("Found player companion (ID: " + companionId + 
+                System.out.println("Found player companion (ID: " + playerCompanionId + 
                                   ") for player " + playerId + 
                                   " that isn't in a room - will be loaded with player data");
             }
