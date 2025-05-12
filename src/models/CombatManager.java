@@ -2,6 +2,10 @@ package models;
 
 
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
 import GameEngine.GameEngine;
 
 
@@ -14,6 +18,7 @@ public class CombatManager {
     
     // Method for the player attacking a character - needs the characterNum to attack and item being used to attack
     public String playerAttackChar(int itemNum, int characterNum) {
+    	try (Connection conn = DerbyDatabase.getConnection()) {
         if (characterNum == -1 && itemNum == -1) {
             return "\n<b>Attack who with what?</b>";
         }
@@ -25,6 +30,7 @@ public class CombatManager {
         }
         
         Room currentRoom   = engine.getRooms().get(engine.getCurrentRoomNum());
+        String npcName = currentRoom.getCharacterName(characterNum);
         double damageMulti = engine.getPlayer().getdamageMulti();
         double boost       = 0;
         int companionDamage = 0;
@@ -40,12 +46,21 @@ public class CombatManager {
         int    charHealth = currentRoom.getCharacterHealth(characterNum);
         double newHealth  = charHealth - attackDmg;
         
+        PreparedStatement ps = conn.prepareStatement( "UPDATE NPC SET hp = ? WHERE name = ?");
+        ps.setInt(1, (int) newHealth);
+        ps.setString(2, npcName);
+        ps.executeUpdate();
+        
         boolean aggressive = currentRoom.isCharAgressive(characterNum);
         
         if (newHealth <= 0) {
             String temp = currentRoom.getCharacterName(characterNum);
             currentRoom.handleCharacterDeath(characterNum);
-            return "\n<b>" + temp + " has been slain and dropped its inventory!</b>";
+            // Award skill point for defeating enemy
+            engine.getPlayer().setSkillPoints(engine.getPlayer().getSkillPoints() + 1);
+            // Notify quest system of kill
+            engine.fireEvent("KILL", temp, 1);
+            return "\n<b>" + temp + " has been slain and dropped its inventory! You gained 1 skill point!</b>";
         }
         else {
             currentRoom.setCharacterHealth(characterNum, newHealth);
@@ -66,6 +81,9 @@ public class CombatManager {
             else {
                 return "\n" + "<b>" + currentRoom.getCharacterName(characterNum) + " has taken " + dmgString + " damage.</b>";
             }
+        }
+        } catch (SQLException ex) {
+            throw new RuntimeException("Failed to load rooms", ex);
         }
     }
     
@@ -94,10 +112,10 @@ public class CombatManager {
         double totalDmg = rawDmg - defense - armor;
         if (totalDmg < 0) totalDmg = 0;
 
-        // 7) DEBUG: spit out all the numbers so you can confirm it’s working
+        // 7) DEBUG: spit out all the numbers so you can confirm it's working
 
 
-        // 8) Finally, subtract from the player’s HP
+        // 8) Finally, subtract from the player's HP
         int playerHp = engine.getPlayer().getHp();
         engine.getPlayer().setHp(playerHp - (int)Math.round(totalDmg));
         return (int)Math.round(totalDmg);

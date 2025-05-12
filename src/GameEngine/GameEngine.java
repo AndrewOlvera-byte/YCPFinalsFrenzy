@@ -3,7 +3,7 @@ package GameEngine;
 import java.util.*;
 import models.*;
 import models.Character;  // your NPC base
-import java.sql.SQLException;
+import java.sql.*;
 import models.CraftingManager;
 import java.sql.Connection;
 import java.sql.Statement;
@@ -54,6 +54,7 @@ public class GameEngine {
     private ConversationManager conversationManager;
     private CompanionManager companionManager;
     private CraftingManager craftingManager;
+    private QuestManager questManager;
 
     
     // CSV-fake loader
@@ -69,6 +70,10 @@ public class GameEngine {
         this.conversationManager = new ConversationManager(this);
         this.companionManager = new CompanionManager(this);
         this.craftingManager = new CraftingManager(this);
+        this.questManager = new QuestManager();
+        this.questManager.loadAll();
+        this.questManager = new QuestManager();
+        this.questManager.loadAll();
     }
 
     /** Called once to seed/initialize, then loadData. */
@@ -532,6 +537,7 @@ public class GameEngine {
             for (Room room : getRooms()) {
                 for (Character npc : room.getCharacterContainer()) {
                     ConversationTree tree = conversationManager.getConversation(npc.getName());
+                    System.out.println("DEBUG: NPC '" + npc.getName() + "' has conversationTree? " + (tree != null));
                     if (tree != null) {
                         if (npc instanceof NPC) {
                             ((NPC) npc).addConversationTree(tree);
@@ -581,6 +587,18 @@ public class GameEngine {
         roomManager.loadRooms();
         // 2) Conversations
         conversationManager.loadConversations();
+        // Attach conversation trees to NPCs when starting without player
+        for (Room room : getRooms()) {
+            for (Character npcChar : room.getCharacterContainer()) {
+                if (npcChar instanceof NPC) {
+                    NPC npc = (NPC) npcChar;
+                    ConversationTree tree = conversationManager.getConversation(npc.getName());
+                    if (tree != null) {
+                        npc.addConversationTree(tree);
+                    }
+                }
+            }
+        }
         this.currentRoomNum = 0;
         this.isRunning = true;
     }
@@ -708,7 +726,15 @@ public class GameEngine {
     
     // Movement commands - delegate to RoomManager
     public String getGo(String noun) {
-        return roomManager.getGo(noun);
+        // Move to the next room and capture message
+        String message = roomManager.getGo(noun);
+        // Auto-accept any ON_ENTER quests for this room
+        String roomName = getCurrentRoomName();
+        String qMsg = questManager.checkAndAccept(this, QuestDefinition.Trigger.ON_ENTER, roomName);
+        if (qMsg != null) {
+            message += qMsg;
+        }
+        return message;
     }
     
     public String getOnShuttle() {
@@ -815,12 +841,27 @@ public class GameEngine {
         if(companionNum >= 0) {
         	message = examineCompanion(noun);
         }
+        // Trigger any quests tied to examining this noun
+        String qMsg = questManager.checkAndAccept(this,
+                          QuestDefinition.Trigger.ON_EXAMINE,
+                          noun);
+        if (qMsg != null) {
+            message += qMsg;
+        }
         return message;
     }
     
     // NPC interaction methods - delegate to RoomManager
     public String talkToNPC(int characterNum) {
-        return roomManager.talkToNPC(characterNum);
+        // Delegate to roomManager then handle any ON_TALK quests
+        String msg = roomManager.talkToNPC(characterNum);
+        // Auto-accept any ON_TALK quests for this NPC
+        String npcName = rooms.get(currentRoomNum).getCharacterName(characterNum);
+        String qMsg = questManager.checkAndAccept(this, QuestDefinition.Trigger.ON_TALK, npcName);
+        if (qMsg != null) {
+            msg += qMsg;
+        }
+        return msg;
     }
     
     public String[] getResponseOptions(int characterNum) {
@@ -1166,6 +1207,63 @@ public class GameEngine {
     public boolean getRunning()
     {
     	return this.isRunning;
+    }
+
+    // Quest commands
+    /** Accept a quest and return a message */
+    public String acceptQuest(int questId) {
+        player.acceptQuest(questId, questManager);
+        if (!USE_FAKE_DB) {
+            try (Connection conn = DerbyDatabase.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(
+                    "INSERT INTO player_quests (player_id, quest_id, status, progress) VALUES (1, ?, ?, ?)"
+                 )) {
+                ps.setInt(1, questId);
+                ps.setString(2, Quest.Status.IN_PROGRESS.name());
+                ps.setInt(3, 0);
+                ps.executeUpdate();
+            } catch (SQLException e) {
+                throw new RuntimeException("Failed to persist accepted quest", e);
+            }
+        }
+        QuestDefinition def = questManager.get(questId);
+        return def != null
+            ? "\n<b>Quest accepted:</b> " + def.getName()
+            : "\n<b>No such quest:</b> " + questId;
+    }
+
+    /** Notify player of an event for quest progression */
+    public void fireEvent(String type, String name, int amount) {
+        player.onEvent(type, name, amount);
+    }
+
+    public String increaseAttack() {
+        if (player.useSkillPoints(3)) {
+            player.setAttackBoost(player.getAttackBoost() + 5);
+            return "\n<b>Successfully increased attack by 5 points! New attack boost: " 
+                 + player.getAttackBoost() + "</b>";
+        } else {
+            return "\n<b>Not enough skill points! You have " 
+                 + player.getSkillPoints() + " skill points.</b>";
+        }
+    }
+
+    public String increaseDefense() {
+        if (player.useSkillPoints(3)) {
+            player.setdefenseBoost(player.getdefenseBoost() + 5);
+            return "\n<b>Successfully increased defense by 5 points! New defense boost: " 
+                 + player.getdefenseBoost() + "</b>";
+        } else {
+            return "\n<b>Not enough skill points! You have " 
+                 + player.getSkillPoints() + " skill points.</b>";
+        }
+    }
+
+    /**
+     * Callback to RoomManager to get the list index for a given room_id.
+     */
+    public Integer getRoomIndex(int roomId) {
+        return roomManager.getRoomIndex(roomId);
     }
 
 }

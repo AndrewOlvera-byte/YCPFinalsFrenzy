@@ -196,6 +196,22 @@ CREATE TABLE PLAYER_COMPANION (
     FOREIGN KEY (companion_id)    REFERENCES COMPANION(companion_id)
 );
 
+-- 7) Quest definitions
+CREATE TABLE quest_definition (
+   quest_id            INT         PRIMARY KEY,
+   name                VARCHAR(100) NOT NULL,
+   description         VARCHAR(1000),
+   trigger             VARCHAR(20)  NOT NULL,
+   trigger_target      VARCHAR(100) NOT NULL,
+   target_type         VARCHAR(20)  NOT NULL,
+   target_item_id      INT,
+   target_npc_id       INT,
+   target_count        INT          NOT NULL,
+   reward_skill_points INT          NOT NULL,
+   FOREIGN KEY (target_item_id) REFERENCES ITEM(item_id),
+   FOREIGN KEY (target_npc_id)  REFERENCES NPC(npc_id)
+);
+
 Create Table COMPANION_INVENTORY (
 	companion_id INT,
 	item_id INT,
@@ -216,5 +232,15 @@ CREATE TABLE player_items (
   PRIMARY KEY (player_id, item_id),
   FOREIGN KEY (player_id)  REFERENCES PLAYER(player_id),
   FOREIGN KEY (item_id)    REFERENCES ITEM(item_id)
+);
+
+-- Persist each player's accepted and completed quests
+CREATE TABLE player_quests (
+  player_id INT         NOT NULL,
+  quest_id  INT         NOT NULL,
+  status    VARCHAR(20) NOT NULL,   -- 'IN_PROGRESS' or 'COMPLETE'
+  progress  INT         NOT NULL,   -- how many of the target have been done
+  PRIMARY KEY (player_id, quest_id),
+  FOREIGN KEY (player_id) REFERENCES PLAYER(player_id)
 );
 

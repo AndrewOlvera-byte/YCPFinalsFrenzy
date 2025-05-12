@@ -5,6 +5,20 @@ import models.ArmorSlot;
 
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
+import models.Quest;
+import models.QuestManager;
+import models.QuestDefinition;
+import java.util.List;
+import java.util.ArrayList;
+import models.Quest;
+import models.QuestManager;
+import models.QuestDefinition;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import models.DerbyDatabase;
 
 public class Player extends Character {
 	private int id;
@@ -16,6 +30,9 @@ public class Player extends Character {
     // --- new field: track equipped armor per slot ---
    private final Map<ArmorSlot, Armor> equippedArmor = new EnumMap<>(ArmorSlot.class);
    private Companion hasCompanion;
+   // Quest tracking
+   private final List<Quest> activeQuests   = new ArrayList<>();
+   private final List<Quest> completedQuests= new ArrayList<>();
    // private Room location;
    public Player(String name, int hp, int skillPoints, Inventory inventory, String longdescription, String shortdescription,double damageMulti,int attackBoost,int defenseBoost) {
        super(name, hp, inventory, longdescription, shortdescription);
@@ -190,5 +207,64 @@ public class Player extends Character {
     
     public void setRunningMessage(String runningMessage) {
         this.runningMessage = runningMessage;
+    /** Accept a quest by ID, via the QuestManager */
+    public void acceptQuest(int questId, QuestManager qm) {
+        QuestDefinition def = qm.get(questId);
+        if (def != null) {
+            activeQuests.add(new Quest(def));
+        }
+    }
+
+    /** Progress active quests on an event; complete and grant skill points */
+    public void onEvent(String type, String name, int amount) {
+        List<Quest> copy = new ArrayList<>(activeQuests);
+        for (Quest q : copy) {
+            q.advance(type, name, amount);
+            // Persist quest progress and status
+            try (Connection conn = DerbyDatabase.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(
+                     "UPDATE player_quests SET progress = ?, status = ? WHERE player_id = ? AND quest_id = ?"
+                 )) {
+                ps.setInt(1, q.getProgress());
+                ps.setString(2, q.getStatus().name());
+                ps.setInt(3, this.id);
+                ps.setInt(4, q.getDef().getId());
+                ps.executeUpdate();
+            } catch (SQLException e) {
+                throw new RuntimeException("Failed to update quest progress", e);
+            }
+            if (q.isComplete()) {
+                activeQuests.remove(q);
+                completedQuests.add(q);
+                // Award skill points upon quest completion
+                this.skillPoints += q.getDef().getRewardSkillPoints();
+            }
+        }
+    }
+
+    /** Returns all quests the player is currently undertaking */
+    public List<Quest> getActiveQuests() {
+        return activeQuests;
+    }
+
+    /** Returns all quests the player has completed */
+    public List<Quest> getCompletedQuests() {
+        return completedQuests;
+    }
+
+    public int getSkillPoints() {
+        return skillPoints;
+    }
+
+    public void setSkillPoints(int skillPoints) {
+        this.skillPoints = skillPoints;
+    }
+
+    public boolean useSkillPoints(int points) {
+        if (skillPoints >= points) {
+            skillPoints -= points;
+            return true;
+        }
+        return false;
     }
 }

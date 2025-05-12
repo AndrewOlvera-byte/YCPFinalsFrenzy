@@ -8,8 +8,31 @@ item_id,name,value,weight,long_description,short_description,type,healing,damage
 7,Paint Brush,20,30,"<b>Paint your enemies??</b>","<b>A paint brush.</b>",WEAPON,0,0,1,0,0,0,false
 8,Dagger,20,30,"<b>A trusty dagger that fits in your back pocket.</b>","<b>A dagger.</b>",WEAPON,0,0,40,0,0,0,false
 9,Gauntlets,30,5,"<b>Reliable Gauntlets will help you attack harder.</b>","<b>Gauntlets.</b>",ARMOR,0,0,0,20,0,ACCESSORY,false
-10,Armor,30,5,"<b>Weak armor will increase your health.</b>","<b>armor.</b>",ARMOR,0,0,0,0,20,TORSO,false
 11,Helmet,30,5,"<b>Weak armor will increase your health.</b>","<b>armor.</b>",ARMOR,0,0,0,0,20,HEAD,false
 12,Pants,30,5,"<b>Weak armor will increase your health.</b>","<b>armor.</b>",ARMOR,0,0,0,0,20,LEGS,false
 13,Stick,1,2,"<b>A sturdy wooden stick. Useful for crafting.</b>","<b>Stick.</b>",ITEM,0,0,0,0,0,0,false
 14,String,1,1,"<b>A length of string. Useful for crafting.</b>","<b>String.</b>",ITEM,0,0,0,0,0,0,false
+15,Pencil,5,1,"<b>A sharp pencil, useful for writing... or stabbing.</b>","<b>A pencil.</b>",WEAPON,0,0,20,0,0,0,false
+16,Spork of Doom,10,2,"<b>Forged in the fires of the dining hall dishwasher. Useful for soup or steak.</b>","<b>Spork of Doom.</b>",WEAPON,0,0,40,0,0,0,false
+17,Textbook ,15,6,"<b>The title is "UML Distilled". I have never read it.</b>","<b>Textbook.</b>",WEAPON,0,0,30,0,0,0,false
+18,3D Printer Arm,20,6,"<b>A repurposed printer arm with servo strength. Prints pain in real time.</b>","<b>3D printer arm.</b>",WEAPON,0,0,50,0,0,0,false
+19,Wire Lasso,10,3,"<b>Strands of live wire braided together. Shocking and stylish.</b>","<b>Wire lasso.</b>",WEAPON,0,0,60,0,0,0,false
+20,Capstone Cannon,30,10,"<b>Your final project turned into a portable, shoulder-mounted problem solver.</b>","<b>Capstone cannon.</b>",WEAPON,0,0,100,0,0,0,false
+21,Orb of Vengeance,15,4,"<b>It’s red, rubber, and full of trauma. Hits harder than your GPA drop after midterms.</b>","<b>Dodgeball orb.</b>",WEAPON,0,0,70,0,0,0,false
+22,Spork Supreme,12,2,"<b>Forged from rare alloys and blessed by the Lunch Lady. The final form of all utensils.</b>","<b>Spork Supreme X.</b>",WEAPON,0,0,90,0,0,0,false
+23,A reference to a sword,10,1,"<b>It is said this sword is the only weapon that can help you pass CS320. It answers any question the BABHAKE throws at you!</b>","<b>A list of pairs</b>",WEAPON,0,0,9999999,0,0,,false
+24,Coffee Mug Smash,10,2,"<b>A cracked ceramic mug from the campus café. Delivers scalding justice.</b>","<b>Coffee mug.</b>",WEAPON,0,0,20,0,0,0,false
+25,Textbook Club,20,5,"<b>Thick, overpriced, and finally useful for something.</b>","<b>Textbook club.</b>",WEAPON,0,0,25,0,0,0,false
+26,Fire Alarm Bludgeon,15,4,"<b>Ripped straight off the wall. Not campus-approved.</b>","<b>Alarm bludgeon.</b>",WEAPON,0,0,30,0,0,0,false
+27,Dining Tray Shieldbash,18,5,"<b>Once used for pizza. Now for punishment.</b>","<b>Tray bash.</b>",WEAPON,0,0,35,0,0,0,false
+28,Broom Handle Spear,10,3,"<b>From janitor closet to javelin. Surprisingly stabby.</b>","<b>Broom spear.</b>",WEAPON,0,0,40,0,0,0,false
+29,Laptop Charger Flail,8,2,"<b>The weight of a brick and the rage of a dead battery.</b>","<b>Charger flail.</b>",WEAPON,0,0,45,0,0,0,false
+30,Water Bottle Launcher,25,6,"<b>Spring-loaded hydration assault. Hits like a plastic meteor.</b>","<b>Bottle launcher.</b>",WEAPON,0,0,50,0,0,0,false
+31,Chair Leg Mace,30,7,"<b>Broken in a dorm brawl. Reforged for battle.</b>","<b>Chair mace.</b>",WEAPON,0,0,55,0,0,0,false
+32,Whiteboard Javelin,15,4,"<b>It squeaks. It shatters. It skewers dreams.</b>","<b>Board javelin.</b>",WEAPON,0,0,60,0,0,0,false
+33,Tripod Blaster,18,6,"<b>For every hour it took to set up, it repays in pain.</b>","<b>Tripod blaster.</b>",WEAPON,0,0,65,0,0,0,false
+34,Projector Core,35,8,"<b>Ripped from the ceiling. Still hot. Still deadly.</b>","<b>Projector core.</b>",WEAPON,0,0,70,0,0,0,false
+35,Recycling Bin Slammer,40,10,"<b>Overflowing with rage and discarded essays.</b>","<b>Bin slammer.</b>",WEAPON,0,0,75,0,0,0,false
+36,Metal Railing Pipe,45,9,"<b>Campus infrastructure repurposed into wrath incarnate.</b>","<b>Railing pipe.</b>",WEAPON,0,0,80,0,0,0,false
+37,Stolen Scooter Ram,35,7,"<b>Ride it straight into chaos. Campus police disapprove.</b>","<b>Scooter ram.</b>",WEAPON,0,0,90,0,0,0,false
+38,Fire Extinguisher Blast,50,12,"<b>Pull the pin, unleash frosty doom. Also puts out study fires.</b>","<b>Extinguisher.</b>",WEAPON,0,0,100,0,0,0,false

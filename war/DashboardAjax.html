@@ -110,6 +110,7 @@
         .action-button:hover {
             background-color: #3c9d6a;
         }
+        
     </style>
     <script type="text/javascript">
     $(document).ready(function() {
@@ -127,8 +128,9 @@
                     $("#playerInfoField").text(data.playerInfo);
                     $("#charactersInRoomField").text(data.charactersInRoom);
                     $("#roomConnectionsField").text(data.roomConnections);
-					$("#roomCompanionsField").text(data.roomConnections);
+                    $("#companionInRoomField").text(data.companionsInRoom);
                     $("#messageField").html(data.message);
+                    $("#questOverlayField").html(data.questOverlay);
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     $("#errorField").text("Error: " + textStatus + " - " + errorThrown);
@@ -148,11 +150,12 @@
             <div id="messageField" class="scrollable-container">
                 Messages:
             </div>
+            <div id="questOverlayField" class="formatted"></div>
             <pre id="roomInventoryField" class="formatted"></pre>
             <pre id="playerInventoryField" class="formatted"></pre>
             <pre id="playerInfoField" class="formatted"></pre>
             <pre id="charactersInRoomField" class="formatted"></pre>
-			<pre id="companionInRoomField" class="formatted"></pre>
+            <pre id="companionInRoomField" class="formatted"></pre>
             <pre id="roomConnectionsField" class="formatted"></pre>
         </div>
         
