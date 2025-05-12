@@ -62,6 +62,10 @@ public class dashboardServlet extends HttpServlet {
                 // Add player to game engine and record index in session
                 playerId = gameEngine.addPlayer(player);
                 session.setAttribute("player_id", playerId);
+                
+                // Also store the player's database ID for consistent reference
+                session.setAttribute("player_db_id", player.getId());
+                
                 session.setAttribute("selectedClass", player.getPlayerType().toUpperCase());
                 
                 // Set game engine's current room to match the player's room
@@ -77,6 +81,15 @@ public class dashboardServlet extends HttpServlet {
             Player player = gameEngine.getPlayerById(playerId);
             if (player != null && player.getCurrentRoomNum() >= 0) {
                 gameEngine.setCurrentRoomNum(player.getCurrentRoomNum());
+                
+                // Ensure we have the database ID stored in session
+                if (session.getAttribute("player_db_id") == null) {
+                    session.setAttribute("player_db_id", player.getId());
+                }
+                
+                // Force a save of the player state when arriving at dashboard
+                // This ensures equipment data is properly saved
+                gameEngine.saveAllPlayersState();
             }
         }
 
@@ -141,7 +154,17 @@ public class dashboardServlet extends HttpServlet {
             
             // Get the player (should be the last one added)
             int playerIndex = gameEngine.getPlayers().size() - 1;
+            Player newPlayer = gameEngine.getPlayerById(playerIndex);
+            
             session.setAttribute("player_id", playerIndex);
+            
+            // Also store the database ID for consistent reference
+            if (newPlayer != null) {
+                session.setAttribute("player_db_id", newPlayer.getId());
+            }
+            
+            // Save state before redirecting
+            gameEngine.saveAllPlayersState();
 
             resp.sendRedirect(req.getContextPath() + "/dashboard");
             return;
@@ -178,6 +201,9 @@ public class dashboardServlet extends HttpServlet {
             
             // Process input with player ID
             gameEngine.processInput(input, playerId);
+            
+            // Explicitly save game state after processing input
+            gameEngine.saveAllPlayersState();
             
             // Display response for this player
             Response updatedResponse = gameEngine.display(playerId);

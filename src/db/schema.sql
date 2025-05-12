@@ -207,3 +207,14 @@ Create Table COMPANION_INVENTORY (
 -- Note: The limit of 3 game saves per user will be implemented in the application code
 -- instead of using a database trigger
 
+-- New in v2: Additional table for persistent player items
+-- This table is used in addition to PLAYER_INVENTORY for backward compatibility
+-- but will eventually replace it in a future version
+CREATE TABLE player_items (
+  player_id  INT,
+  item_id    INT,
+  PRIMARY KEY (player_id, item_id),
+  FOREIGN KEY (player_id)  REFERENCES PLAYER(player_id),
+  FOREIGN KEY (item_id)    REFERENCES ITEM(item_id)
+);
+

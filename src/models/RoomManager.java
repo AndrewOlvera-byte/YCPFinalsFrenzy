@@ -59,14 +59,12 @@ public class RoomManager {
             while (rs.next()) {
                 int roomIdx = rs.getInt("room_id") - 1;
                 int itemId  = rs.getInt("item_id");
-                // fetch the ITEM row by itemId, build an Item object (similar to loadPlayer)
+                // fetch the ITEM row by itemId, build an Item object
                 Item it = loadItemById(conn, itemId);
                 engine.getRooms().get(roomIdx).addItem(it);
             }
 
-         // 4) Load NPCs into rooms
-         // Load NPCs into rooms using NPC_ROOM linking table
-         // Load NPCs with inventory items
+            // 4) Load NPCs into rooms with their inventories
             PreparedStatement psNPC = conn.prepareStatement(
                 "SELECT n.npc_id, n.name, n.hp, n.aggression, n.damage, n.long_description, n.short_description, nr.room_id " +
                 "FROM NPC n JOIN NPC_ROOM nr ON n.npc_id = nr.npc_id"
@@ -98,51 +96,83 @@ public class RoomManager {
                 );
 
                 int roomIdx = rsNPC.getInt("room_id") - 1;
-                engine.getRooms().get(roomIdx).getCharacterContainer().add(npc);
+                
+                // Make sure the roomIdx is valid
+                if (roomIdx >= 0 && roomIdx < engine.getRooms().size()) {
+                    engine.getRooms().get(roomIdx).getCharacterContainer().add(npc);
+                } else {
+                    System.err.println("Warning: NPC " + npc.getName() + " references invalid room ID: " + (roomIdx + 1));
+                }
             }
 
-            // 5) Load Companions into Room
+            // 5) Load Companions into rooms with their inventories
             PreparedStatement psCompanion = conn.prepareStatement(
-            		"     Select n.companion_id, n.name, n.hp, n.aggression, n.damage, n.long_description, n.short_description, n.companion, nr.room_id    " 
-            		+ "   from COMPANION n join COMPANION_ROOM nr ON n.companion_id = nr.companion_id "
-            		);
+                "SELECT c.companion_id, c.name, c.hp, c.aggression, c.damage, c.long_description, " +
+                "c.short_description, c.companion, cr.room_id " +
+                "FROM COMPANION c JOIN COMPANION_ROOM cr ON c.companion_id = cr.companion_id"
+            );
             ResultSet rsCompanion = psCompanion.executeQuery();
             
-            while(rsCompanion.next()) {
-            	int companionId = rsCompanion.getInt("companion_id");
-                Inventory companionInventory = new Inventory(new ArrayList<>(), 10);
+            while (rsCompanion.next()) {
+                int companionId = rsCompanion.getInt("companion_id");
+                
+                // Load inventory for this companion
+                Inventory companionInventory = new Inventory(new ArrayList<>(), 100);
                 PreparedStatement psInv = conn.prepareStatement("SELECT item_id FROM COMPANION_INVENTORY WHERE companion_id = ?");
                 psInv.setInt(1, companionId);
                 ResultSet rsInv = psInv.executeQuery();
                 while (rsInv.next()) {
-                    Item CompanionItem = loadItemById(conn, rsInv.getInt("item_id"));
-                    companionInventory.addItem(CompanionItem);
+                    Item companionItem = loadItemById(conn, rsInv.getInt("item_id"));
+                    companionInventory.addItem(companionItem);
                 }
+
+                Companion companion = new Companion(
+                    rsCompanion.getString("name"),
+                    rsCompanion.getInt("hp"),
+                    rsCompanion.getBoolean("aggression"),
+                    new String[]{}, // dialogue placeholder
+                    rsCompanion.getInt("damage"),
+                    companionInventory, // Use populated inventory
+                    rsCompanion.getString("long_description"),
+                    rsCompanion.getString("short_description"),
+                    rsCompanion.getBoolean("companion")
+                );
+
+                int roomIdx = rsCompanion.getInt("room_id") - 1;
                 
-            	boolean companion = false;
-            	
-            	Companion newCompanion = new Companion(
-            			rsCompanion.getString("name"),
-            			rsCompanion.getInt("hp"),
-            			rsCompanion.getBoolean("aggression"),
-            			new String[] {},
-            			rsCompanion.getInt("damage"),
-            			companionInventory,
-            			rsCompanion.getString("long_description"),
-            			rsCompanion.getString("short_description"),
-            			companion
-            			);
-            	
-            	int roomIdx = rsCompanion.getInt("room_id") - 1;
-            	engine.getRooms().get(roomIdx).getCompanionContainer().add(newCompanion);
+                // Make sure the roomIdx is valid
+                if (roomIdx >= 0 && roomIdx < engine.getRooms().size()) {
+                    engine.getRooms().get(roomIdx).getCompanionContainer().add(companion);
+                    System.out.println("Added companion " + companion.getName() + " to room " + (roomIdx + 1));
+                } else {
+                    System.err.println("Warning: Companion " + companion.getName() + " references invalid room ID: " + (roomIdx + 1));
+                }
             }
-
-
-            // 5) (optionally) load NPCs, NPC_INVENTORY, NPC_ROOM, etc.
-        } catch (SQLException ex) {
-            throw new RuntimeException("Failed to load rooms", ex);
+            
+            // 6) Load player companions that aren't in rooms
+            PreparedStatement psPlayerCompanions = conn.prepareStatement(
+                "SELECT c.companion_id, c.name, c.hp, c.aggression, c.damage, c.long_description, " +
+                "c.short_description, c.companion, pc.player_id " +
+                "FROM COMPANION c JOIN PLAYER_COMPANION pc ON c.companion_id = pc.companion_id " +
+                "LEFT JOIN COMPANION_ROOM cr ON c.companion_id = cr.companion_id " +
+                "WHERE cr.companion_id IS NULL"
+            );
+            ResultSet rsPlayerCompanions = psPlayerCompanions.executeQuery();
+            
+            while (rsPlayerCompanions.next()) {
+                int companionId = rsPlayerCompanions.getInt("companion_id");
+                int playerId = rsPlayerCompanions.getInt("player_id");
+                
+                // Log that we found a companion that's attached to a player but not in a room
+                System.out.println("Found player companion (ID: " + companionId + 
+                                  ") for player " + playerId + 
+                                  " that isn't in a room - will be loaded with player data");
+            }
+            
+            System.out.println("Loaded rooms from database: " + roomList.size() + " rooms");
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to load rooms from database", e);
         }
-        
     }
 
     // helper to pull a single item from the ITEM table
@@ -397,7 +427,7 @@ public class RoomManager {
     }
 
     /**
-     * Handle the “shuttle” command (requires the shuttle pass).
+     * Handle the "shuttle" command (requires the shuttle pass).
      */
     public String getOnShuttle() {
         String newMessage;

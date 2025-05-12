@@ -71,6 +71,40 @@ public class homeServlet extends HttpServlet {
                     gameEngine.startWithoutPlayer();
                 }
                 
+                // Ensure player equipment is properly loaded
+                try {
+                    java.sql.Connection conn = models.DerbyDatabase.getConnection();
+                    // Load player equipment
+                    models.GameStateManager.loadPlayerEquipment(conn, player);
+                    
+                    // Also load the latest player stats from game state to be safe
+                    String sql = "SELECT player_hp, damage_multi, attack_boost, defense_boost " +
+                                "FROM GAME_STATE WHERE player_id = ?";
+                    try (java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+                        ps.setInt(1, player.getId());
+                        try (java.sql.ResultSet rs = ps.executeQuery()) {
+                            if (rs.next()) {
+                                player.setHp(rs.getInt("player_hp"));
+                                player.setdamageMulti(rs.getDouble("damage_multi"));
+                                
+                                if (rs.getObject("attack_boost") != null) {
+                                    player.setAttackBoost(rs.getInt("attack_boost"));
+                                }
+                                if (rs.getObject("defense_boost") != null) {
+                                    player.setdefenseBoost(rs.getInt("defense_boost"));
+                                }
+                                
+                                System.out.println("homeServlet: updated player stats from GAME_STATE - HP: " + 
+                                                  player.getHp() + ", Attack: " + player.getAttackBoost());
+                            }
+                        }
+                    }
+                    
+                    conn.close();
+                } catch (java.sql.SQLException e) {
+                    e.printStackTrace();
+                }
+                
                 // Check if this player is already in the players ArrayList
                 int existingIndex = gameEngine.findPlayerIndexById(player.getId());
                 int playerIndex;
@@ -87,8 +121,14 @@ public class homeServlet extends HttpServlet {
                 // Set player_id in session to the index in the players ArrayList
                 session.setAttribute("player_id", playerIndex);
                 
+                // Also store the player's database ID for consistent reference
+                session.setAttribute("player_db_id", player.getId());
+                
                 // Store selected class in session based on player type
                 session.setAttribute("selectedClass", player.getPlayerType().toUpperCase());
+                
+                // Ensure player state is saved before redirecting
+                gameEngine.saveAllPlayersState();
                 
                 // Set persistent cookie for session recovery
                 Cookie userIdCookie = new Cookie("user_id", String.valueOf(userId));
@@ -149,6 +189,9 @@ public class homeServlet extends HttpServlet {
                 
                 // Set current room to 1 (0-indexed)
                 gameEngine.setCurrentRoomNum(0);
+                
+                // Ensure player state is saved before redirecting
+                gameEngine.saveAllPlayersState();
                 
                 // Store selected class in session
                 session.setAttribute("selectedClass", playerClass.toUpperCase());

@@ -33,12 +33,26 @@ public class PlayerManager {
                 
                 // 2) load inventory
                 Inventory inv = new Inventory(new ArrayList<>(), 30);
-                try (PreparedStatement ips = conn.prepareStatement(
-                         "SELECT item_id FROM PLAYER_INVENTORY WHERE player_id = 1"
-                     );
-                     ResultSet irs = ips.executeQuery()) {
-                    while (irs.next()) {
-                        inv.addItem(loadItem(conn, irs.getInt("item_id")));
+                
+                // Try to load from player_items (new schema) first
+                try {
+                    try (PreparedStatement ips = conn.prepareStatement(
+                             "SELECT item_id FROM player_items WHERE player_id = 1"
+                         );
+                         ResultSet irs = ips.executeQuery()) {
+                        while (irs.next()) {
+                            inv.addItem(loadItem(conn, irs.getInt("item_id")));
+                        }
+                    }
+                } catch (SQLException e) {
+                    // Try legacy table if player_items doesn't exist
+                    try (PreparedStatement ips = conn.prepareStatement(
+                             "SELECT item_id FROM PLAYER_INVENTORY WHERE player_id = 1"
+                         );
+                         ResultSet irs = ips.executeQuery()) {
+                        while (irs.next()) {
+                            inv.addItem(loadItem(conn, irs.getInt("item_id")));
+                        }
                     }
                 }
                 Player player;
@@ -96,12 +110,15 @@ public class PlayerManager {
                 	boolean companion      = rs.getBoolean("companion");
                 	
                 	try (PreparedStatement ips = conn.prepareStatement(
-                            "SELECT item_id FROM COMPANION_INVENTORY WHERE companion_id = 1"
+                            "SELECT item_id FROM COMPANION_INVENTORY WHERE companion_id = ?"
                         );
-                        ResultSet irs = ips.executeQuery()) {
-                       while (irs.next()) {
-                           inventory.addItem(loadItem(conn, irs.getInt("item_id")));
-                       }
+                        ) {
+                        ips.setInt(1, companionId);
+                        try (ResultSet irs = ips.executeQuery()) {
+                           while (irs.next()) {
+                               inventory.addItem(loadItem(conn, irs.getInt("item_id")));
+                           }
+                        }
                    }
                 	return new Companion(
                 	name, hp, aggression, dialogue, damage, inventory,
@@ -179,9 +196,10 @@ public class PlayerManager {
     private void loadEquippedArmor(Connection conn, Player player) throws SQLException {
         String sql = "SELECT pe.slot, i.item_id FROM PLAYER_EQUIPMENT pe " +
                      "JOIN ITEM i ON pe.armor_id = i.item_id " +
-                     "WHERE pe.player_id = 1";
+                     "WHERE pe.player_id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
+            ps.setInt(1, player.getId());
             while (rs.next()) {
                 ArmorSlot slot = ArmorSlot.valueOf(rs.getString("slot"));
                 int itemId = rs.getInt("item_id");
@@ -198,9 +216,10 @@ public class PlayerManager {
     private void loadPlayerCompanion(Connection conn, Player player) throws SQLException {
         String sql = "SELECT pc.companion_id FROM PLAYER_COMPANION pc " +
                      "JOIN COMPANION companion ON pc.companion_id = companion.companion_id " +
-                     "WHERE pc.player_id = 1";
+                     "WHERE pc.player_id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
+            ps.setInt(1, player.getId());
             if (rs.next()) {
                 int companionId = rs.getInt("companion_id");
                 Companion companion = loadCompanion(conn, companionId);

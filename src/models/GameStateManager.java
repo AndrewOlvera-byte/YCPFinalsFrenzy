@@ -4,6 +4,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import GameEngine.GameEngine;
 
 public class GameStateManager {
@@ -91,6 +92,30 @@ public class GameStateManager {
                 conn.setAutoCommit(false); // Begin transaction
                 
                 try {
+                    // First update the PLAYER table to keep HP and stats in sync
+                    String updatePlayerSql = 
+                        "UPDATE PLAYER SET " +
+                        "hp = ?, " +
+                        "damage_multi = ?, " +
+                        "attack_boost = ?, " +
+                        "defense_boost = ?, " +
+                        "last_updated = CURRENT_TIMESTAMP " +
+                        "WHERE player_id = ?";
+                    
+                    try (PreparedStatement psPlayer = conn.prepareStatement(updatePlayerSql)) {
+                        psPlayer.setInt(1, player.getHp());
+                        psPlayer.setDouble(2, player.getdamageMulti());
+                        psPlayer.setInt(3, player.getAttackBoost());
+                        psPlayer.setInt(4, player.getdefenseBoost());
+                        psPlayer.setInt(5, playerId);
+                        psPlayer.executeUpdate();
+                        
+                        System.out.println("Updated PLAYER table - HP: " + player.getHp() + 
+                                          ", Damage Multi: " + player.getdamageMulti() +
+                                          ", Attack Boost: " + player.getAttackBoost() +
+                                          ", Defense Boost: " + player.getdefenseBoost());
+                    }
+                    
                     if (exists) {
                         // Update existing state
                         String updateSql =
@@ -157,79 +182,153 @@ public class GameStateManager {
     
     // Helper method to load player's inventory from the database
     private static void loadPlayerInventory(Connection conn, Player player) throws SQLException {
-        String sql = "SELECT i.item_id, i.name, i.value, i.weight, i.long_description, " +
+        // First try to load from player_items (new schema)
+        String sqlNewSchema = "SELECT i.item_id, i.name, i.value, i.weight, i.long_description, " +
+                     "i.short_description, i.type, i.healing, i.damage_multi, i.attack_damage, " +
+                     "i.attack_boost, i.defense_boost, i.slot, i.disassemblable " +
+                     "FROM player_items pi " +
+                     "JOIN ITEM i ON pi.item_id = i.item_id " +
+                     "WHERE pi.player_id = ?";
+        
+        // Fallback to old schema if needed
+        String sqlOldSchema = "SELECT i.item_id, i.name, i.value, i.weight, i.long_description, " +
                      "i.short_description, i.type, i.healing, i.damage_multi, i.attack_damage, " +
                      "i.attack_boost, i.defense_boost, i.slot, i.disassemblable " +
                      "FROM PLAYER_INVENTORY pi " +
                      "JOIN ITEM i ON pi.item_id = i.item_id " +
-                     "WHERE pi.player_id = ?";
+                     "WHERE pi.player_id = ? " +
+                     "AND NOT EXISTS (SELECT 1 FROM player_items newpi WHERE newpi.player_id = pi.player_id AND newpi.item_id = pi.item_id)";
         
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, player.getId());
-            
-            try (ResultSet rs = stmt.executeQuery()) {
+        // Try the new schema first
+        boolean foundItems = false;
+        try (PreparedStatement ps = conn.prepareStatement(sqlNewSchema)) {
+            ps.setInt(1, player.getId());
+            try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    String name = rs.getString("name");
-                    int value = rs.getInt("value");
-                    int weight = rs.getInt("weight");
-                    String longDesc = rs.getString("long_description");
-                    String shortDesc = rs.getString("short_description");
-                    String type = rs.getString("type");
-                    int healing = rs.getInt("healing");
-                    double dmgMulti = rs.getDouble("damage_multi");
-                    int attackDmg = rs.getInt("attack_damage");
-                    int attackBoost = rs.getInt("attack_boost");
-                    int defenseBoost = rs.getInt("defense_boost");
-                    String slot = rs.getString("slot");
-                    boolean disassemblable = rs.getBoolean("disassemblable");
-                    
-                    // Using empty components array for now
-                    String[] components = new String[0];
-                    
-                    Item item;
-                    if ("WEAPON".equals(type)) {
-                        item = new Weapon(value, weight, name, components, attackDmg, longDesc, shortDesc);
-                    } else if ("ARMOR".equals(type)) {
-                        // Convert string values to the appropriate types
-                        ArmorSlot armorSlot = (slot != null && !slot.isEmpty()) ? ArmorSlot.valueOf(slot) : ArmorSlot.ACCESSORY;
-                        item = new Armor(value, weight, name, components, longDesc, shortDesc, 
-                                healing, attackBoost, defenseBoost, armorSlot);
-                    } else if ("UTILITY".equals(type)) {
-                        item = new Utility(value, weight, name, components, longDesc, shortDesc, healing, dmgMulti);
-                        // No need to set disassemblable, not supported in the Utility class
-                    } else {
-                        item = new Item(value, weight, name, components, longDesc, shortDesc);
-                    }
-                    
-                    // Add item to inventory
-                    player.getInventory().addItem(item);
+                    foundItems = true;
+                    loadItemFromResultSet(rs, player);
                 }
+            }
+        } catch (SQLException e) {
+            // Table might not exist yet, continue to try old schema
+            System.err.println("Warning: Could not load from player_items: " + e.getMessage());
+        }
+        
+        // If nothing found or error occurred, try the old schema
+        if (!foundItems) {
+            try (PreparedStatement ps = conn.prepareStatement(sqlOldSchema)) {
+                ps.setInt(1, player.getId());
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        loadItemFromResultSet(rs, player);
+                    }
+                }
+            } catch (SQLException e) {
+                // If old schema also fails, it's a real error
+                throw e;
             }
         }
     }
     
-    // Helper method to save player inventory to the database
-    private static void savePlayerInventory(Connection conn, Player player) throws SQLException {
-        // First, delete current inventory
-        try (PreparedStatement delete = conn.prepareStatement(
-                "DELETE FROM PLAYER_INVENTORY WHERE player_id = ?")) {
-            delete.setInt(1, player.getId());
-            delete.executeUpdate();
+    // Helper method to load an item from result set
+    private static void loadItemFromResultSet(ResultSet rs, Player player) throws SQLException {
+        // Get all item details from result set
+        String name = rs.getString("name");
+        int value = rs.getInt("value");
+        int weight = rs.getInt("weight");
+        String longDesc = rs.getString("long_description");
+        String shortDesc = rs.getString("short_description");
+        String type = rs.getString("type");
+        int healing = rs.getInt("healing");
+        double dmgMulti = rs.getDouble("damage_multi");
+        int attackDmg = rs.getInt("attack_damage");
+        int attackBoost = rs.getInt("attack_boost");
+        int defenseBoost = rs.getInt("defense_boost");
+        String slot = rs.getString("slot");
+        boolean disassemblable = rs.getBoolean("disassemblable");
+        
+        // Using empty components array - load separately if needed
+        String[] components = new String[0];
+        
+        // Create the appropriate item type
+        Item item;
+        if ("WEAPON".equals(type)) {
+            item = new Weapon(value, weight, name, components, attackDmg, longDesc, shortDesc);
+        } else if ("ARMOR".equals(type)) {
+            // Convert string values to the appropriate types
+            ArmorSlot armorSlot = (slot != null && !slot.isEmpty()) ? ArmorSlot.valueOf(slot) : ArmorSlot.ACCESSORY;
+            item = new Armor(value, weight, name, components, longDesc, shortDesc, 
+                    healing, attackBoost, defenseBoost, armorSlot);
+        } else if ("UTILITY".equals(type)) {
+            item = new Utility(value, weight, name, components, longDesc, shortDesc, healing, dmgMulti);
+            // No need to set disassemblable, not supported in the Utility class
+        } else {
+            item = new Item(value, weight, name, components, longDesc, shortDesc);
         }
         
-        // Then insert current items
-        String insertSql = "INSERT INTO PLAYER_INVENTORY (player_id, item_id) VALUES (?, ?)";
-        try (PreparedStatement insert = conn.prepareStatement(insertSql)) {
+        // Add item to inventory
+        player.getInventory().addItem(item);
+    }
+    
+    // Helper method to save player inventory to the database
+    private static void savePlayerInventory(Connection conn, Player player) throws SQLException {
+        // First, delete current inventory from both tables
+        try (PreparedStatement deleteNew = conn.prepareStatement(
+                "DELETE FROM player_items WHERE player_id = ?");
+             PreparedStatement deleteOld = conn.prepareStatement(
+                "DELETE FROM PLAYER_INVENTORY WHERE player_id = ?")) {
+            
+            deleteNew.setInt(1, player.getId());
+            deleteNew.executeUpdate();
+            
+            deleteOld.setInt(1, player.getId());
+            deleteOld.executeUpdate();
+        } catch (SQLException e) {
+            // The player_items table might not exist yet
+            // Just continue with old schema
+            try (PreparedStatement delete = conn.prepareStatement(
+                    "DELETE FROM PLAYER_INVENTORY WHERE player_id = ?")) {
+                delete.setInt(1, player.getId());
+                delete.executeUpdate();
+            }
+        }
+        
+        // Then insert current items into both tables
+        String insertNewSql = "INSERT INTO player_items (player_id, item_id) VALUES (?, ?)";
+        String insertOldSql = "INSERT INTO PLAYER_INVENTORY (player_id, item_id) VALUES (?, ?)";
+        
+        try (PreparedStatement insertNew = conn.prepareStatement(insertNewSql);
+             PreparedStatement insertOld = conn.prepareStatement(insertOldSql)) {
+            
             for (int i = 0; i < player.getInventorySize(); i++) {
                 Item item = player.getItem(i);
                 // Need to get the item ID from the database or create a new item
                 int itemId = getOrCreateItemId(conn, item);
                 
-                insert.setInt(1, player.getId());
-                insert.setInt(2, itemId);
-                insert.addBatch();
+                try {
+                    // Insert into new schema
+                    insertNew.setInt(1, player.getId());
+                    insertNew.setInt(2, itemId);
+                    insertNew.addBatch();
+                } catch (SQLException e) {
+                    // The player_items table might not exist yet
+                    System.err.println("Warning: Could not insert into player_items: " + e.getMessage());
+                }
+                
+                // Always insert into old schema for backward compatibility
+                insertOld.setInt(1, player.getId());
+                insertOld.setInt(2, itemId);
+                insertOld.addBatch();
             }
-            insert.executeBatch();
+            
+            try {
+                insertNew.executeBatch();
+            } catch (SQLException e) {
+                // Ignore if player_items doesn't exist
+                System.err.println("Warning: Batch insert to player_items failed: " + e.getMessage());
+            }
+            
+            insertOld.executeBatch();
         }
     }
     
@@ -290,7 +389,9 @@ public class GameStateManager {
     }
     
     // Helper method to load player's equipped armor
-    private static void loadPlayerEquipment(Connection conn, Player player) throws SQLException {
+    public static void loadPlayerEquipment(Connection conn, Player player) throws SQLException {
+        System.out.println("Loading equipment for player ID: " + player.getId());
+        
         String sql = "SELECT pe.slot, i.* " +
                      "FROM PLAYER_EQUIPMENT pe " +
                      "JOIN ITEM i ON pe.armor_id = i.item_id " +
@@ -299,8 +400,10 @@ public class GameStateManager {
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, player.getId());
             
+            int equipCount = 0;
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
+                    equipCount++;
                     String slot = rs.getString("slot");
                     String name = rs.getString("name");
                     int value = rs.getInt("value");
@@ -311,6 +414,8 @@ public class GameStateManager {
                     double attackBoost = rs.getDouble("attack_boost");
                     int defenseBoost = rs.getInt("defense_boost");
                     
+                    System.out.println("Loading equipped item: " + name + " in slot " + slot);
+                    
                     // Create armor and equip it
                     ArmorSlot armorSlot = ArmorSlot.valueOf(slot);
                     Armor armor = new Armor(value, weight, name, new String[0], longDesc, shortDesc, 
@@ -318,6 +423,7 @@ public class GameStateManager {
                     player.equip(armorSlot, armor);
                 }
             }
+            System.out.println("Loaded " + equipCount + " equipped items for player");
         }
     }
     
@@ -495,12 +601,36 @@ public class GameStateManager {
     public static void reinitializeRoomsFromCSV(GameEngine engine) {
         // Delete room-related data from database
         try (Connection conn = DerbyDatabase.getConnection()) {
-            // First delete the junction tables
+            // First, backup player companion inventories
+            Map<Integer, List<Integer>> playerCompanionItems = new HashMap<>();
+            
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "SELECT pc.player_id, pc.companion_id, ci.item_id " +
+                    "FROM PLAYER_COMPANION pc " +
+                    "JOIN COMPANION_INVENTORY ci ON pc.companion_id = ci.companion_id")) {
+                
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        int companionId = rs.getInt("companion_id");
+                        int itemId = rs.getInt("item_id");
+                        
+                        if (!playerCompanionItems.containsKey(companionId)) {
+                            playerCompanionItems.put(companionId, new ArrayList<>());
+                        }
+                        playerCompanionItems.get(companionId).add(itemId);
+                    }
+                }
+            }
+            
+            System.out.println("Backed up " + playerCompanionItems.size() + " player companion inventories");
+            
+            // Delete the junction tables
             try (Statement stmt = conn.createStatement()) {
                 stmt.executeUpdate("DELETE FROM ROOM_INVENTORY");
                 stmt.executeUpdate("DELETE FROM NPC_ROOM");
                 stmt.executeUpdate("DELETE FROM COMPANION_ROOM");
                 stmt.executeUpdate("DELETE FROM ROOM_CONNECTIONS");
+                stmt.executeUpdate("DELETE FROM COMPANION_INVENTORY");
             }
             
             // Then delete the main room table
@@ -510,6 +640,27 @@ public class GameStateManager {
             
             // Now reseed from CSV files
             DatabaseInitializer.seedRoomsFromCSV(conn);
+            
+            // Restore player companion inventories
+            if (!playerCompanionItems.isEmpty()) {
+                try (PreparedStatement insert = conn.prepareStatement(
+                        "INSERT INTO COMPANION_INVENTORY (companion_id, item_id) VALUES (?, ?)")) {
+                    
+                    for (Map.Entry<Integer, List<Integer>> entry : playerCompanionItems.entrySet()) {
+                        int companionId = entry.getKey();
+                        List<Integer> itemIds = entry.getValue();
+                        
+                        for (Integer itemId : itemIds) {
+                            insert.setInt(1, companionId);
+                            insert.setInt(2, itemId);
+                            insert.addBatch();
+                        }
+                    }
+                    
+                    int[] results = insert.executeBatch();
+                    System.out.println("Restored " + results.length + " companion inventory items");
+                }
+            }
             
             // Reload rooms from the freshly seeded database
             try {

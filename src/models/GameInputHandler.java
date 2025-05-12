@@ -325,7 +325,7 @@ public class GameInputHandler {
             playerCurrentUse.setRunningMessage(gameEngine.getRunningMessage());
             
             // Save state to database
-            GameStateManager.saveState(gameEngine);
+            gameEngine.saveAllPlayersState();
         }
         
         return true;

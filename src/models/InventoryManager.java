@@ -28,8 +28,16 @@ public class InventoryManager {
         }
         
         Room room = engine.getRooms().get(engine.getCurrentRoomNum());
+        if (itemNum >= room.getInventorySize()) {
+            return "\n<b>Invalid item selection.</b>";
+        }
+        
         Item item = room.getItem(itemNum);
         String itemName = item.getName();
+        
+        // Get player ID (supporting multiplayer)
+        Player player = engine.getPlayer();
+        int playerId = player.getId();
         
         // Check database first to see if the player already has this item
         try (Connection conn = DerbyDatabase.getConnection()) {
@@ -50,22 +58,36 @@ public class InventoryManager {
                 databaseItemId = itemNum + 1;
             }
             
+            // Check in new player_items table first
+            boolean alreadyInInventory = false;
             try (PreparedStatement check = conn.prepareStatement(
-                     "SELECT 1 FROM PLAYER_INVENTORY WHERE player_id = ? AND item_id = ?")) {
-                check.setInt(1, 1);
+                     "SELECT 1 FROM player_items WHERE player_id = ? AND item_id = ?")) {
+                check.setInt(1, playerId);
                 check.setInt(2, databaseItemId);
-                if (check.executeQuery().next()) {
-                    // Already in inventory, don't make any changes
-                    return "<b>\nYou already have a " + itemName + ".</b>";
+                alreadyInInventory = check.executeQuery().next();
+            }
+            
+            // If not found, check legacy PLAYER_INVENTORY table
+            if (!alreadyInInventory) {
+                try (PreparedStatement check = conn.prepareStatement(
+                         "SELECT 1 FROM PLAYER_INVENTORY WHERE player_id = ? AND item_id = ?")) {
+                    check.setInt(1, playerId);
+                    check.setInt(2, databaseItemId);
+                    alreadyInInventory = check.executeQuery().next();
                 }
+            }
+            
+            if (alreadyInInventory) {
+                // Already in inventory, don't make any changes
+                return "<b>\nYou already have a " + itemName + ".</b>";
             }
             
             // Only proceed with changes if the item is not already in inventory
             // In-memory move
             room.removeItem(itemNum);
-            engine.getPlayer().addItem(item);
+            player.addItem(item);
 
-            // DB update: remove from ROOM_INVENTORY, add to PLAYER_INVENTORY
+            // DB update: remove from ROOM_INVENTORY, add to player_items
             // 1) DELETE from ROOM_INVENTORY - check if it exists first
             boolean itemExistsInRoom = false;
             try (PreparedStatement checkRoom = conn.prepareStatement(
@@ -84,10 +106,19 @@ public class InventoryManager {
                 }
             }
             
-            // 2) INSERT into PLAYER_INVENTORY
+            // 2) INSERT into player_items (new schema)
             try (PreparedStatement ins = conn.prepareStatement(
-                     "INSERT INTO PLAYER_INVENTORY(player_id, item_id) VALUES(1, ?)")) {
-                ins.setInt(1, databaseItemId);
+                     "INSERT INTO player_items(player_id, item_id) VALUES(?, ?)")) {
+                ins.setInt(1, playerId);
+                ins.setInt(2, databaseItemId);
+                ins.executeUpdate();
+            }
+            
+            // 3) Also INSERT into PLAYER_INVENTORY for backward compatibility
+            try (PreparedStatement ins = conn.prepareStatement(
+                     "INSERT INTO PLAYER_INVENTORY(player_id, item_id) VALUES(?, ?)")) {
+                ins.setInt(1, playerId);
+                ins.setInt(2, databaseItemId);
                 ins.executeUpdate();
             }
 
@@ -104,8 +135,16 @@ public class InventoryManager {
         }
         
         Companion companion = engine.getPlayer().getPlayerCompanion();
+        if (companion == null || itemNum >= companion.getInventorySize()) {
+            return "\n<b>Invalid item selection.</b>";
+        }
+        
         Item item = companion.getItem(itemNum);
         String itemName = item.getName();
+        
+        // Get player id for multiplayer support
+        Player player = engine.getPlayer();
+        int playerId = player.getId();
         
         // Check database first to see if the player already has this item
         try (Connection conn = DerbyDatabase.getConnection()) {
@@ -126,23 +165,37 @@ public class InventoryManager {
                 databaseItemId = itemNum + 1;
             }
             
+            // Check in new player_items table first
+            boolean alreadyInInventory = false;
             try (PreparedStatement check = conn.prepareStatement(
-                     "SELECT 1 FROM PLAYER_INVENTORY WHERE player_id = ? AND item_id = ?")) {
-                check.setInt(1, 1);
+                     "SELECT 1 FROM player_items WHERE player_id = ? AND item_id = ?")) {
+                check.setInt(1, playerId);
                 check.setInt(2, databaseItemId);
-                if (check.executeQuery().next()) {
-                    // Already in inventory, don't make any changes
-                    return "<b>\nYou already have a " + itemName + ".</b>";
+                alreadyInInventory = check.executeQuery().next();
+            }
+            
+            // If not found, check legacy PLAYER_INVENTORY table
+            if (!alreadyInInventory) {
+                try (PreparedStatement check = conn.prepareStatement(
+                         "SELECT 1 FROM PLAYER_INVENTORY WHERE player_id = ? AND item_id = ?")) {
+                    check.setInt(1, playerId);
+                    check.setInt(2, databaseItemId);
+                    alreadyInInventory = check.executeQuery().next();
                 }
+            }
+            
+            if (alreadyInInventory) {
+                // Already in inventory, don't make any changes
+                return "<b>\nYou already have a " + itemName + ".</b>";
             }
             
             // Only proceed with changes if the item is not already in inventory
             // In-memory move
             companion.removeItem(itemNum);
-            engine.getPlayer().addItem(item);
+            player.addItem(item);
 
-            // DB update: remove from ROOM_INVENTORY, add to PLAYER_INVENTORY
-            // 1) DELETE from ROOM_INVENTORY - check if it exists first
+            // DB update: remove from COMPANION_INVENTORY, add to player_items
+            // 1) DELETE from COMPANION_INVENTORY - check if it exists first
             boolean itemExistsInCompanion = false;
             try (PreparedStatement checkRoom = conn.prepareStatement(
                      "SELECT 1 FROM COMPANION_INVENTORY WHERE companion_id = ? AND item_id = ?")) {
@@ -160,10 +213,19 @@ public class InventoryManager {
                 }
             }
             
-            // 2) INSERT into PLAYER_INVENTORY
+            // 2) INSERT into player_items (new schema)
             try (PreparedStatement ins = conn.prepareStatement(
-                     "INSERT INTO PLAYER_INVENTORY(player_id, item_id) VALUES(1, ?)")) {
-                ins.setInt(1, databaseItemId);
+                     "INSERT INTO player_items(player_id, item_id) VALUES(?, ?)")) {
+                ins.setInt(1, playerId);
+                ins.setInt(2, databaseItemId);
+                ins.executeUpdate();
+            }
+            
+            // 3) Also INSERT into PLAYER_INVENTORY for backward compatibility
+            try (PreparedStatement ins = conn.prepareStatement(
+                     "INSERT INTO PLAYER_INVENTORY(player_id, item_id) VALUES(?, ?)")) {
+                ins.setInt(1, playerId);
+                ins.setInt(2, databaseItemId);
                 ins.executeUpdate();
             }
 
@@ -176,17 +238,21 @@ public class InventoryManager {
 
     /** Drop an item from the player into the current room */
     public String dropItem(int itemNum) {
-        if (itemNum < 0 || itemNum >= engine.getPlayer().getInventorySize()) {
+        Player player = engine.getPlayer();
+        int playerId = player.getId();
+        
+        if (itemNum < 0 || itemNum >= player.getInventorySize()) {
             return "\n<b>Invalid item selection.</b>";
         }
+        
         // In-memory move
-        Item item = engine.getPlayer().getItem(itemNum);
+        Item item = player.getItem(itemNum);
         String itemName = item.getName();
-        engine.getPlayer().removeItem(itemNum);
+        player.removeItem(itemNum);
         Room room = engine.getRooms().get(engine.getCurrentRoomNum());
         room.addItem(item);
 
-        // DB update: remove from PLAYER_INVENTORY, add to ROOM_INVENTORY
+        // DB update: remove from player_items & PLAYER_INVENTORY, add to ROOM_INVENTORY
         try (Connection conn = DerbyDatabase.getConnection()) {
             // Get the actual item_id from the database
             int databaseItemId = -1;
@@ -205,52 +271,59 @@ public class InventoryManager {
                 databaseItemId = itemNum + 1;
             }
             
-            // 1) DELETE from PLAYER_INVENTORY
+            // 1) DELETE from player_items (new schema)
             try (PreparedStatement del = conn.prepareStatement(
-                     "DELETE FROM PLAYER_INVENTORY WHERE player_id = 1 AND item_id = ?"
-                 )) {
-                del.setInt(1, databaseItemId);
+                     "DELETE FROM player_items WHERE player_id = ? AND item_id = ?")) {
+                del.setInt(1, playerId);
+                del.setInt(2, databaseItemId);
                 del.executeUpdate();
             }
             
-            // 2) Check if the item already exists in the room's inventory
-            boolean itemExistsInRoom = false;
-            try (PreparedStatement checkRoom = conn.prepareStatement(
-                     "SELECT 1 FROM ROOM_INVENTORY WHERE room_id = ? AND item_id = ?")) {
-                checkRoom.setInt(1, engine.getCurrentRoomNum() + 1);
-                checkRoom.setInt(2, databaseItemId);
-                itemExistsInRoom = checkRoom.executeQuery().next();
+            // 2) DELETE from PLAYER_INVENTORY (old schema for backward compatibility)
+            try (PreparedStatement del = conn.prepareStatement(
+                     "DELETE FROM PLAYER_INVENTORY WHERE player_id = ? AND item_id = ?")) {
+                del.setInt(1, playerId);
+                del.setInt(2, databaseItemId);
+                del.executeUpdate();
             }
             
-            // Only insert if it doesn't already exist
-            if (!itemExistsInRoom) {
-                try (PreparedStatement ins = conn.prepareStatement(
-                         "INSERT INTO ROOM_INVENTORY(room_id, item_id) VALUES(?, ?)"
-                     )) {
-                    ins.setInt(1, engine.getCurrentRoomNum() + 1);
-                    ins.setInt(2, databaseItemId);
-                    ins.executeUpdate();
-                }
+            // 3) INSERT into ROOM_INVENTORY
+            try (PreparedStatement ins = conn.prepareStatement(
+                     "INSERT INTO ROOM_INVENTORY(room_id, item_id) VALUES(?, ?)")) {
+                ins.setInt(1, engine.getCurrentRoomNum() + 1);
+                ins.setInt(2, databaseItemId);
+                ins.executeUpdate();
             }
+            
         } catch (SQLException e) {
             throw new RuntimeException("Inventory DB update failed", e);
         }
 
-        return "\n<b>" + itemName + " was dropped.</b>";
+        return "<b>\n" + itemName + " was dropped.</b>";
     }
     
+    /** Give an item from player inventory to companion */
     public String giveItemToCompanion(int itemNum) {
         if (itemNum < 0 || itemNum >= engine.getPlayer().getInventorySize()) {
             return "\n<b>Invalid item selection.</b>";
         }
+        
+        // Check if there is a companion
+        if (engine.getPlayer().getPlayerCompanion() == null) {
+            return "\n<b>You don't have a companion to give items to.</b>";
+        }
+        
         // In-memory move
         Item item = engine.getPlayer().getItem(itemNum);
         String itemName = item.getName();
         engine.getPlayer().removeItem(itemNum);
         Companion companion = engine.getPlayer().getPlayerCompanion();
-        companion.getInventory().addItem(item);
+        companion.addItem(item);
+        
+        Player player = engine.getPlayer();
+        int playerId = player.getId();
 
-        // DB update: remove from PLAYER_INVENTORY, add to ROOM_INVENTORY
+        // DB update: remove from player tables, add to COMPANION_INVENTORY
         try (Connection conn = DerbyDatabase.getConnection()) {
             // Get the actual item_id from the database
             int databaseItemId = -1;
@@ -269,38 +342,38 @@ public class InventoryManager {
                 databaseItemId = itemNum + 1;
             }
             
-            // 1) DELETE from PLAYER_INVENTORY
+            // 1) DELETE from player_items (new schema)
             try (PreparedStatement del = conn.prepareStatement(
-                     "DELETE FROM PLAYER_INVENTORY WHERE player_id = 1 AND item_id = ?"
-                 )) {
-                del.setInt(1, databaseItemId);
+                     "DELETE FROM player_items WHERE player_id = ? AND item_id = ?")) {
+                del.setInt(1, playerId);
+                del.setInt(2, databaseItemId);
+                del.executeUpdate();
+            } catch (SQLException e) {
+                // Ignore if table doesn't exist
+                System.err.println("Warning: Could not delete from player_items: " + e.getMessage());
+            }
+            
+            // 2) DELETE from PLAYER_INVENTORY (old schema for backward compatibility)
+            try (PreparedStatement del = conn.prepareStatement(
+                     "DELETE FROM PLAYER_INVENTORY WHERE player_id = ? AND item_id = ?")) {
+                del.setInt(1, playerId);
+                del.setInt(2, databaseItemId);
                 del.executeUpdate();
             }
             
-            // 2) Check if the item already exists in the room's inventory
-            boolean itemExistsInRoom = false;
-            try (PreparedStatement checkRoom = conn.prepareStatement(
-                     "SELECT 1 FROM COMPANION_INVENTORY WHERE companion_id = ? AND item_id = ?")) {
-                checkRoom.setInt(1, 1);
-                checkRoom.setInt(2, databaseItemId);
-                itemExistsInRoom = checkRoom.executeQuery().next();
+            // 3) INSERT into COMPANION_INVENTORY
+            try (PreparedStatement ins = conn.prepareStatement(
+                     "INSERT INTO COMPANION_INVENTORY(companion_id, item_id) VALUES(?, ?)")) {
+                ins.setInt(1, 1); // Hardcoded companion ID
+                ins.setInt(2, databaseItemId);
+                ins.executeUpdate();
             }
             
-            // Only insert if it doesn't already exist
-            if (!itemExistsInRoom) {
-                try (PreparedStatement ins = conn.prepareStatement(
-                         "INSERT INTO COMPANION_INVENTORY(companion_id, item_id) VALUES(?, ?)"
-                     )) {
-                    ins.setInt(1, 1);
-                    ins.setInt(2, databaseItemId);
-                    ins.executeUpdate();
-                }
-            }
         } catch (SQLException e) {
             throw new RuntimeException("Inventory DB update failed", e);
         }
 
-        return "\n<b>" + itemName + " was given to " + companion.getName() + ".</b>";
+        return "<b>\n" + itemName + " was given to " + companion.getName() + ".</b>";
     }
 
     /** Find the index of an item in the current room by name */
@@ -356,20 +429,55 @@ public class InventoryManager {
         double multi = potion.getDamageMulti();
         int heal    = potion.getHealing();
 
-        // In-memory apply
-        engine.getPlayer().setHp(engine.getPlayer().getHp() + heal);
-        if (multi != 0) {
-            engine.getPlayer().setdamageMulti(multi + engine.getPlayer().getdamageMulti());
-        }
-        engine.getPlayer().removeItem(itemNum);
+        // Get player ID for multiplayer support
+        Player player = engine.getPlayer();
+        int playerId = player.getId();
 
-        // DB update: remove from PLAYER_INVENTORY
-        try (Connection conn = DerbyDatabase.getConnection();
-             PreparedStatement del = conn.prepareStatement(
-                 "DELETE FROM PLAYER_INVENTORY WHERE player_id = 1 AND item_id = ?"
-             )) {
-            del.setInt(1, itemNum + 1);
-            del.executeUpdate();
+        // In-memory apply
+        player.setHp(player.getHp() + heal);
+        if (multi != 0) {
+            player.setdamageMulti(multi + player.getdamageMulti());
+        }
+        player.removeItem(itemNum);
+
+        // Lookup item in database
+        int databaseItemId = -1;
+        try (Connection conn = DerbyDatabase.getConnection()) {
+            try (PreparedStatement psGetItemId = conn.prepareStatement(
+                     "SELECT item_id FROM ITEM WHERE name = ?")) {
+                psGetItemId.setString(1, raw.getName());
+                ResultSet rsItemId = psGetItemId.executeQuery();
+                if (rsItemId.next()) {
+                    databaseItemId = rsItemId.getInt("item_id");
+                }
+            }
+            
+            // If we couldn't find the item ID in the database, use the itemNum + 1 as fallback
+            if (databaseItemId == -1) {
+                databaseItemId = itemNum + 1;
+            }
+            
+            // Delete from both inventory tables
+            try {
+                // Delete from new schema table
+                try (PreparedStatement del = conn.prepareStatement(
+                     "DELETE FROM player_items WHERE player_id = ? AND item_id = ?")) {
+                    del.setInt(1, playerId);
+                    del.setInt(2, databaseItemId);
+                    del.executeUpdate();
+                }
+            } catch (SQLException e) {
+                // If table doesn't exist yet, log and continue
+                System.err.println("Warning: Could not delete from player_items: " + e.getMessage());
+            }
+            
+            // Delete from old schema table
+            try (PreparedStatement del = conn.prepareStatement(
+                 "DELETE FROM PLAYER_INVENTORY WHERE player_id = ? AND item_id = ?")) {
+                del.setInt(1, playerId);
+                del.setInt(2, databaseItemId);
+                del.executeUpdate();
+            }
         } catch (SQLException e) {
             throw new RuntimeException("Failed to update DB after using potion", e);
         }
@@ -407,22 +515,29 @@ public class InventoryManager {
         // 3) decide slot
         ArmorSlot slot = armor.slot();
 
+        // Get player ID for multiplayer support
+        Player player = engine.getPlayer();
+        int playerId = player.getId();
+
         // 4) in-memory: equip
-        engine.getPlayer().equip(slot, armor);
+        player.equip(slot, armor);
         // ─── ADDED: remove it from in-memory inventory ───
-        engine.getPlayer().removeItem(itemNum);
+        player.removeItem(itemNum);
 
         // 5) DB: delete old, insert new, **then** delete from inventory
         try (Connection conn = DerbyDatabase.getConnection();
              PreparedStatement del   = conn.prepareStatement(
-                 "DELETE FROM PLAYER_EQUIPMENT WHERE player_id = 1 AND slot = ?"
+                 "DELETE FROM PLAYER_EQUIPMENT WHERE player_id = ? AND slot = ?"
              );
              PreparedStatement ins   = conn.prepareStatement(
                  "INSERT INTO PLAYER_EQUIPMENT (player_id, slot, armor_id) VALUES (?,?,?)"
              );
-             // ─── ADDED: prep to delete from PLAYER_INVENTORY ───
-             PreparedStatement delInv= conn.prepareStatement(
-                 "DELETE FROM PLAYER_INVENTORY WHERE player_id = 1 AND item_id = ?"
+             // ─── Delete from both inventory tables ───
+             PreparedStatement delInvOld = conn.prepareStatement(
+                 "DELETE FROM PLAYER_INVENTORY WHERE player_id = ? AND item_id = ?"
+             );
+             PreparedStatement delInvNew = conn.prepareStatement(
+                 "DELETE FROM player_items WHERE player_id = ? AND item_id = ?"
              )
         ) {
             conn.setAutoCommit(false);
@@ -441,17 +556,32 @@ public class InventoryManager {
                 databaseItemId = itemNum + 1;
             }
 
-            del.setString(1, slot.name());
+            // Delete existing equipment in that slot
+            del.setInt(1, playerId);
+            del.setString(2, slot.name());
             del.executeUpdate();
 
-            ins.setInt   (1, 1);
+            // Insert new equipment
+            ins.setInt(1, playerId);
             ins.setString(2, slot.name());
-            ins.setInt   (3, databaseItemId);
+            ins.setInt(3, databaseItemId);
             ins.executeUpdate();
 
-            // ─── ADDED: finally remove from PLAYER_INVENTORY ───
-            delInv.setInt(1, databaseItemId);
-            delInv.executeUpdate();
+            // Delete from both inventory tables
+            try {
+                // Delete from new schema table
+                delInvNew.setInt(1, playerId);
+                delInvNew.setInt(2, databaseItemId);
+                delInvNew.executeUpdate();
+            } catch (SQLException e) {
+                // If table doesn't exist yet, log and continue
+                System.err.println("Warning: Could not delete from player_items: " + e.getMessage());
+            }
+            
+            // Always delete from old schema table
+            delInvOld.setInt(1, playerId);
+            delInvOld.setInt(2, databaseItemId);
+            delInvOld.executeUpdate();
 
             conn.commit();
         } catch (SQLException e) {
@@ -470,24 +600,31 @@ public class InventoryManager {
             return "\n<b>Invalid slot: " + slot + ".</b>";
         }
 
+        // Get player for multiplayer support
+        Player player = engine.getPlayer();
+        int playerId = player.getId();
+
         // 1) check there is something to unequip
-        Armor equipped = engine.getPlayer().getEquippedArmor(armorSlot);
+        Armor equipped = player.getEquippedArmor(armorSlot);
         if (equipped == null) {
             return "\n<b>No armor is equipped in the " 
                  + armorSlot.name().toLowerCase() + " slot.</b>";
         }
 
         // 2) in-memory: remove from equipment and add back to inventory
-        engine.getPlayer().unequip(armorSlot);
-        engine.getPlayer().addItem(equipped);
+        player.unequip(armorSlot);
+        player.addItem(equipped);
 
-        // 3) DB: delete from PLAYER_EQUIPMENT, insert back into PLAYER_INVENTORY
+        // 3) DB: delete from PLAYER_EQUIPMENT, insert back into both inventory tables
         try (Connection conn = DerbyDatabase.getConnection();
              PreparedStatement delEq  = conn.prepareStatement(
                  "DELETE FROM PLAYER_EQUIPMENT WHERE player_id = ? AND slot = ?"
              );
-             PreparedStatement insInv = conn.prepareStatement(
+             PreparedStatement insInvOld = conn.prepareStatement(
                  "INSERT INTO PLAYER_INVENTORY (player_id, item_id) VALUES (?,?)"
+             );
+             PreparedStatement insInvNew = conn.prepareStatement(
+                 "INSERT INTO player_items (player_id, item_id) VALUES (?,?)"
              )) {
             conn.setAutoCommit(false);
 
@@ -506,14 +643,24 @@ public class InventoryManager {
             }
 
             // delete from equipment table
-            delEq.setInt   (1, 1);
+            delEq.setInt(1, playerId);
             delEq.setString(2, armorSlot.name());
             delEq.executeUpdate();
 
-            // insert back into inventory
-            insInv.setInt(1, 1);
-            insInv.setInt(2, databaseItemId);
-            insInv.executeUpdate();
+            // Try to insert into new schema table first
+            try {
+                insInvNew.setInt(1, playerId);
+                insInvNew.setInt(2, databaseItemId);
+                insInvNew.executeUpdate();
+            } catch (SQLException e) {
+                // If table doesn't exist yet, log and continue
+                System.err.println("Warning: Could not insert into player_items: " + e.getMessage());
+            }
+
+            // Always insert into old schema for backward compatibility
+            insInvOld.setInt(1, playerId);
+            insInvOld.setInt(2, databaseItemId);
+            insInvOld.executeUpdate();
 
             conn.commit();
         } catch (SQLException e) {

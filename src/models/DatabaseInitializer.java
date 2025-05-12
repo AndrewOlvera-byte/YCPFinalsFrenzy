@@ -54,17 +54,25 @@ public class DatabaseInitializer {
      * @throws Exception If seeding fails
      */
     public static void seedRoomsFromCSV(Connection conn) throws Exception {
-        seedTable(conn, "rooms.csv",           "INSERT INTO ROOM VALUES (?, ?, ?, ?, ?)");
-        seedTable(conn, "connections.csv",     "INSERT INTO ROOM_CONNECTIONS VALUES (?, ?, ?)");
-        seedTable(conn, "npcs.csv",            "INSERT INTO NPC VALUES (?, ?, ?, ?, ?, ?, ?)");
-        seedTable(conn, "npc_room.csv",        "INSERT INTO NPC_ROOM VALUES (?, ?)");
-        seedTable(conn, "room_inventory.csv",  "INSERT INTO ROOM_INVENTORY VALUES (?, ?)");
-        seedTable(conn, "conversation_nodes.csv","INSERT INTO CONVERSATION_NODES VALUES (?, ?, ?, ?, ?, ?, ?)");
-        seedTable(conn, "conversation_edges.csv","INSERT INTO CONVERSATION_EDGES VALUES (?, ?, ?, ?)");
-        seedTable(conn, "companion.csv",       "INSERT INTO COMPANION VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        seedTable(conn, "companion_room.csv",  "INSERT INTO COMPANION_ROOM VALUES (?, ?)");
-        // Load NPC inventory after all other tables to avoid foreign key constraint issues
-        seedTable(conn, "npc_inventory.csv",   "INSERT INTO NPC_INVENTORY VALUES (?, ?)");
+        System.out.println("Seeding entity tables first (ROOM, NPC, COMPANION)...");
+        
+        // First seed the entity tables (need to exist before relationships)
+        seedTable(conn, "rooms.csv",                "INSERT INTO ROOM VALUES (?, ?, ?, ?, ?)");
+        seedTable(conn, "npcs.csv",                 "INSERT INTO NPC VALUES (?, ?, ?, ?, ?, ?, ?)");
+        seedTable(conn, "companion.csv",            "INSERT INTO COMPANION VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        seedTable(conn, "conversation_nodes.csv",   "INSERT INTO CONVERSATION_NODES VALUES (?, ?, ?, ?, ?, ?, ?)");
+        
+        System.out.println("Seeding relationship tables (connections, inventories, placements)...");
+        
+        // Then seed relationships between entities
+        seedTable(conn, "connections.csv",          "INSERT INTO ROOM_CONNECTIONS VALUES (?, ?, ?)");
+        seedTable(conn, "conversation_edges.csv",   "INSERT INTO CONVERSATION_EDGES VALUES (?, ?, ?, ?)");
+        seedTable(conn, "npc_room.csv",             "INSERT INTO NPC_ROOM VALUES (?, ?)");
+        seedTable(conn, "companion_room.csv",       "INSERT INTO COMPANION_ROOM VALUES (?, ?)");
+        seedTable(conn, "room_inventory.csv",       "INSERT INTO ROOM_INVENTORY VALUES (?, ?)");
+        seedTable(conn, "npc_inventory.csv",        "INSERT INTO NPC_INVENTORY VALUES (?, ?)");
+        
+        System.out.println("Room data seeded successfully");
     }
 
     /** Returns true if ROOM exists *and* has at least one row */
@@ -135,12 +143,15 @@ public class DatabaseInitializer {
     }
 
     private static void seedTable(Connection conn, String csvFile, String insertSql) throws Exception {
+        System.out.println("Seeding from " + csvFile + "...");
+        
         try (InputStream in = DatabaseInitializer.class.getResourceAsStream("/db/" + csvFile);
              BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
 
             // Read and parse header line to get column names
             String headerLine = reader.readLine();
             if (headerLine == null) {
+                System.out.println("Warning: CSV file " + csvFile + " is empty (has only a header)");
                 return; // no data
             }
             String[] headers = parseCSVLine(headerLine);
@@ -162,46 +173,91 @@ public class DatabaseInitializer {
             // Prepare statement
             try (PreparedStatement ps = conn.prepareStatement(insertSql)) {
                 String line;
+                int rowCount = 0;
+                int insertedCount = 0;
+                
+                // Enable batch mode
+                conn.setAutoCommit(false);
+                
                 while ((line = reader.readLine()) != null) {
+                    rowCount++;
                     String[] cols = parseCSVLine(line);
                     if (cols.length != headers.length) {
-                        throw new SQLException("Row has " + cols.length + " columns, expected " + 
-                            headers.length + " in " + csvFile);
+                        System.out.println("Warning: Row " + rowCount + " has " + cols.length + 
+                                " columns, expected " + headers.length + " in " + csvFile + ". Skipping row.");
+                        continue;
                     }
                     
-                    for (int i = 0; i < cols.length; i++) {
-                        String header = headers[i].trim();
-                        String val = cols[i].trim();
-                        // Unwrap quoted values
-                        if (val.startsWith("\"") && val.endsWith("\"")) {
-                            val = val.substring(1, val.length() - 1);
+                    try {
+                        for (int i = 0; i < cols.length; i++) {
+                            String header = headers[i].trim();
+                            String val = cols[i].trim();
+                            // Unwrap quoted values
+                            if (val.startsWith("\"") && val.endsWith("\"")) {
+                                val = val.substring(1, val.length() - 1);
+                            }
+                            if (val.isEmpty()) {
+                                ps.setNull(i + 1, Types.VARCHAR);
+                            }
+                            // Boolean fields (underscore or camelCase)
+                            else if (header.equalsIgnoreCase("is_root")) {
+                                ps.setBoolean(i + 1, Boolean.parseBoolean(val));
+                            } else if (header.equalsIgnoreCase("become_aggressive")
+                                    || header.equalsIgnoreCase("becomeAggressive")) {
+                                ps.setBoolean(i + 1, Boolean.parseBoolean(val));
+                            } else if (header.equalsIgnoreCase("drop_item")
+                                    || header.equalsIgnoreCase("dropItem")) {
+                                ps.setBoolean(i + 1, Boolean.parseBoolean(val));
+                            }
+                            // Integer field (underscore or camelCase)
+                            else if (header.equalsIgnoreCase("item_to_drop")
+                                    || header.equalsIgnoreCase("itemToDrop")) {
+                                ps.setInt(i + 1, Integer.parseInt(val));
+                            }
+                            // Default string binding
+                            else {
+                                ps.setString(i + 1, val);
+                            }
                         }
-                        if (val.isEmpty()) {
-                            ps.setNull(i + 1, Types.VARCHAR);
-                        }
-                        // Boolean fields (underscore or camelCase)
-                        else if (header.equalsIgnoreCase("is_root")) {
-                            ps.setBoolean(i + 1, Boolean.parseBoolean(val));
-                        } else if (header.equalsIgnoreCase("become_aggressive")
-                                || header.equalsIgnoreCase("becomeAggressive")) {
-                            ps.setBoolean(i + 1, Boolean.parseBoolean(val));
-                        } else if (header.equalsIgnoreCase("drop_item")
-                                || header.equalsIgnoreCase("dropItem")) {
-                            ps.setBoolean(i + 1, Boolean.parseBoolean(val));
-                        }
-                        // Integer field (underscore or camelCase)
-                        else if (header.equalsIgnoreCase("item_to_drop")
-                                || header.equalsIgnoreCase("itemToDrop")) {
-                            ps.setInt(i + 1, Integer.parseInt(val));
-                        }
-                        // Default string binding
-                        else {
-                            ps.setString(i + 1, val);
+                        
+                        // Execute individual inserts instead of batching to better handle errors
+                        ps.executeUpdate();
+                        insertedCount++;
+                        
+                    } catch (SQLException e) {
+                        // Check for duplicate key violation
+                        if (e.getSQLState() != null && (e.getSQLState().equals("23505") || 
+                            e.getMessage().contains("duplicate key value") || 
+                            e.getMessage().contains("unique constraint"))) {
+                            
+                            System.out.println("Warning: Row " + rowCount + " in " + csvFile + 
+                                " has duplicate key. Row skipped.");
+                                
+                            // Roll back just this transaction
+                            conn.rollback();
+                        } else {
+                            // Some other SQL error, propagate it
+                            throw e;
                         }
                     }
-                    ps.addBatch();
                 }
-                ps.executeBatch();
+                
+                // Commit all successful inserts
+                conn.commit();
+                
+                System.out.println("Inserted " + insertedCount + " out of " + rowCount + 
+                    " rows from " + csvFile);
+            } catch (Exception e) {
+                // Roll back on any error
+                try {
+                    conn.rollback();
+                } catch (SQLException ignored) {}
+                throw e;
+            } finally {
+                // Restore auto-commit
+                try {
+                    conn.setAutoCommit(true);
+                } catch (SQLException ignored) {}
             }
         }
     }
