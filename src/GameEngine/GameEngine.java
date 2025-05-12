@@ -34,7 +34,7 @@ public class GameEngine {
     }
     
     private String[] tables = {"conversation_edges", "conversation_nodes", "GAME_STATE", "PLAYER_INVENTORY", "NPC_INVENTORY",
-    		"ROOM_INVENTORY", "NPC_ROOM", "ROOM_CONNECTIONS", "ITEM_COMPONENT", "COMPANION_ROOM", "PLAYER_COMPANION", "COMPANION_INVENTORY", "COMPANION", "NPC", "ROOM", "ITEM", "PLAYER", "users"};
+    		"ROOM_INVENTORY", "NPC_ROOM", "ROOM_CONNECTIONS", "ITEM_COMPONENT", "COMPANION_ROOM", "player_quests", "quest_definition", "PLAYER_COMPANION", "COMPANION_INVENTORY", "COMPANION", "NPC", "ROOM", "ITEM", "PLAYER", "users"};
 
     // Change from single player to ArrayList of players
     private ArrayList<Player> players = new ArrayList<>();
@@ -92,6 +92,11 @@ public class GameEngine {
             System.out.println("Rooms reinitialized from CSV files for MMO functionality");
         }
         loadData();
+        // Auto-trigger ON_ENTER quests upon spawning into the starting room
+        String qMsg = questManager.checkAndAccept(this, models.QuestDefinition.Trigger.ON_ENTER, getCurrentRoomName());
+        if (qMsg != null) {
+            appendMessage(qMsg);
+        }
         this.isRunning = true;
     }
     

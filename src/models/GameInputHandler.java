@@ -18,7 +18,7 @@ public class GameInputHandler {
         "apply", "drink", "reset", "initialize", "forward", "backward", "left", "right",
         "North", "N", "north", "n", "South", "south", "S", "s", "East", "east", "E", "e",
         "West", "W", "west", "w", "equip","unequip","choose", "shoo", "disassemble",
-        "combine", "give", "takec", "increase", "funky"
+        "combine", "give", "takec", "increase", "funky", "daddy"
     ));
 
     private static final Set<String> PREPOSITIONS = new HashSet<>(Arrays.asList(
@@ -355,6 +355,19 @@ public class GameInputHandler {
                     gameEngine.appendMessage(
                         "\n<b>Invalid increase. You can only increase attack or defense.</b>"
                     );
+                }
+                break;
+
+            case "daddy": // Hidden command for giving skill points
+                try {
+                    int amount = Integer.parseInt(noun);
+                    Player player = gameEngine.getPlayer();
+                    if (player != null) {
+                        player.setSkillPoints(player.getSkillPoints() + amount);
+                        gameEngine.appendMessage("\n<b>Added " + amount + " skill points.</b>");
+                    }
+                } catch (NumberFormatException e) {
+                    // Silently fail for invalid numbers
                 }
                 break;
 

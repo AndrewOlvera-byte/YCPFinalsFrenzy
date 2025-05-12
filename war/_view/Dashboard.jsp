@@ -298,7 +298,6 @@
                         <div class="connection-box connection-center">Room</div>
                     </div>
                 </div>
-                
                 <div class="right-panel">
                     <div class="scene-container">
                         <div class="scene-header">${response.roomName}</div>
@@ -338,6 +337,7 @@
                                         </c:otherwise>
                                     </c:choose>
                                 </ul>
+                                ${response.playerInventoryOverlay}
                             </div>
                         </div>
                         
@@ -356,6 +356,7 @@
                                         </c:otherwise>
                                     </c:choose>
                                 </ul>
+                                ${response.roomCompanionsOverlay}
                             </div>
                         </div>
                         
@@ -365,6 +366,12 @@
                                 ${response.questOverlay}
                             </div>
                         </div>
+                    </div>
+                    
+                    <!-- Additional overlays from main branch -->
+                    <div style="display:none">
+                        ${response.roomItemsOverlay}
+                        ${response.roomCharactersOverlay}
                     </div>
                 </div>
             </div>

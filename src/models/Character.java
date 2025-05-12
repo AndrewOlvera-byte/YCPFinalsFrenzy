@@ -45,6 +45,10 @@ public class Character {
        return this.maxHp;
    }
    
+   public void setMaxHp(int maxHp) {     // New setter for max health
+       this.maxHp = maxHp;
+   }
+   
    public int getAttackDmg(int itemNum) {
 	    if (inventory.getSize() == 0) {
 	        // Default attack damage if inventory is empty

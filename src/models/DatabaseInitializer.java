@@ -51,15 +51,26 @@ public class DatabaseInitializer {
                 seedTable(conn, "npcs.csv",            "INSERT INTO NPC VALUES (?, ?, ?, ?, ?, ?, ?)");
                 seedTable(conn, "npc_room.csv",        "INSERT INTO NPC_ROOM VALUES (?, ?)");
                 seedTable(conn, "npc_inventory.csv",   "INSERT INTO NPC_INVENTORY VALUES (?, ?)");
+                
+                // These tables were added in main branch for player data
+                // For MMO functionality, we'll keep them optional
+                try {
+                    seedTable(conn, "player.csv",          "INSERT INTO PLAYER VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    seedTable(conn, "room_inventory.csv",  "INSERT INTO ROOM_INVENTORY VALUES (?, ?)");
+                    seedTable(conn, "player_inventory.csv","INSERT INTO PLAYER_INVENTORY VALUES (?, ?)");
+                    System.out.println("Initial player data seeded from CSVs");
+                } catch (Exception e) {
+                    System.out.println("Note: Player tables will start empty for MMO functionality: " + e.getMessage());
+                }
+                
                 seedTable(conn, "conversation_nodes.csv","INSERT INTO CONVERSATION_NODES VALUES (?, ?, ?, ?, ?, ?, ?)");
                 seedTable(conn, "conversation_edges.csv","INSERT INTO CONVERSATION_EDGES VALUES (?, ?, ?, ?)");
                 seedTable(conn, "companion.csv",       "INSERT INTO COMPANION VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 seedTable(conn, "companion_room.csv",  "INSERT INTO COMPANION_ROOM VALUES (?, ?)");
                 seedTable(conn, "companion_inventory.csv", "INSERT INTO COMPANION_INVENTORY VALUES (?, ?)");
                 
-                // Player, player_inventory, player_companion, player_quests and game_state tables are no longer seeded
-                // They will be populated by user actions in the MMO game
-                System.out.println("Player tables will start empty for MMO functionality");
+                // Database initialization complete
+                System.out.println("Database initialization complete");
             }
         } catch (Exception e) {
             throw new RuntimeException("DB initialization failed", e);
