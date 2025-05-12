@@ -378,12 +378,24 @@ public class UIManager {
     
     
     // Generate overlay of items in room with persistent positions.
+ 
+    // Generate overlay of items in room with persistent positions.
     public String getRoomItemsOverlay() {
         Room currentRoom = engine.getRooms().get(engine.getCurrentRoomNum());
         StringBuilder sb = new StringBuilder();
         Random rand = new Random();
         
-        for (int i = 0; i < currentRoom.getInventorySize(); i++) {
+        // Define grid parameters
+        int maxFloorItemsPerRow = 4; // Maximum items per row
+        int totalItems = currentRoom.getInventorySize();
+        
+        // Calculate number of rows needed
+        int rows = (int) Math.ceil((double) totalItems / maxFloorItemsPerRow);
+        
+        // 2D array to track grid occupancy
+        boolean[][] gridOccupied = new boolean[rows][maxFloorItemsPerRow];
+        
+        for (int i = 0; i < totalItems; i++) {
             String itemName = currentRoom.getItemName(i);
             double leftPercent, topPercent;
             
@@ -393,9 +405,25 @@ public class UIManager {
                 leftPercent = pos[0];
                 topPercent = pos[1];
             } else {
-                // Generate new random positions within the desired ranges.
-                leftPercent = 30 + rand.nextDouble() * 30;  // anywhere from 30% to 60%
-                topPercent = 65 + rand.nextDouble() * 15;     // between 65% and 80%
+                // Determine row and column placement
+                int row = i / maxFloorItemsPerRow;
+                int col = i % maxFloorItemsPerRow;
+                gridOccupied[row][col] = true;
+                
+                // Calculate base position with some randomness within grid cell
+                // Spread horizontally between 25% and 75% to leave room for characters
+                leftPercent = 25 + (col * 10) + (rand.nextDouble() * 5);
+                
+                // Position items vertically based on row
+                // First row (bottom/floor) around 80-82%
+                // Second row higher up, around 70-72%
+                // Subsequent rows continue upward
+                if (row == 0) {
+                    topPercent = 80 + (rand.nextDouble() * 2);
+                } else {
+                    topPercent = 70 - ((row - 1) * 7) + (rand.nextDouble() * 2);
+                }
+                
                 // Store the generated position for this item.
                 itemPositions.put(itemName, new double[]{leftPercent, topPercent});
             }
@@ -408,12 +436,11 @@ public class UIManager {
               .append(leftPercent)
               .append("%; top:")
               .append(topPercent)
-              .append("%; width:1in; height:auto; background-color: transparent;'/>\n");
+              .append("%; width:auto; max-height:1in; object-fit:contain; background-color: transparent;'/>\n");
         }
         
         return sb.toString();
-    }
-    
+    } 
     // Generate overlay of characters in room
  // Here are the modified methods from the UIManager class to implement health bars
 
@@ -521,7 +548,7 @@ public class UIManager {
                   case HEAD:
                   case TORSO:
                     // Single-piece overlay with player-specific styling
-                    String file = equipped.getName().replaceAll("\\s+","") + ".png";
+                    String file = equipped.getName().replaceAll("\\s+","") + "2.png";
                     sb.append("<img src='images/")
                       .append(file)
                       .append("' alt='").append(slot.name()).append("' ")
@@ -596,49 +623,56 @@ public class UIManager {
     public String getRoomCompanionsOverlay() {
         Room currentRoom = engine.getRooms().get(engine.getCurrentRoomNum());
         StringBuilder sb = new StringBuilder();
-        
+
+        // Calculate base left offset and increment
+        double baseLeftOffsetInches = 7.25; // starting horizontal position
+        double companionWidthInches = 1.5; // width of companion image
+        double companionSpacingInches = 1.0; // space between companions
+
         // 1. Render all companions with their own max health
         for (int i = 0; i < currentRoom.getCompanionContainerSize(); i++) {
             String compName = currentRoom.getCompanionName(i);
             Companion companion = currentRoom.getCompanion(i);
-            
+
             if (companion == null) continue;
-            
+
             int compHealth = companion.getHp();
             int compMaxHealth = companion.getMaxHp();
-            
+
             // Calculate health percentage for the bar using companion's own max health
             double healthPercentage = (double)compHealth / compMaxHealth;
             // Cap at 100% just in case
             healthPercentage = Math.min(healthPercentage, 1.0);
-            
-            double leftOffsetInches = 5;   // horizontal offset for each companion
-            
+
+            // Calculate left offset for this companion
+            double leftOffsetInches = baseLeftOffsetInches + (i * (companionWidthInches + companionSpacingInches));
+
             // Container div for health bar and character image
             sb.append("<div style='position:absolute; left:")
               .append(leftOffsetInches)
-              .append("in; top:40%; width:2.5in; text-align:center;'>");
-            
-            // Health bar with actual max health values - smaller size
-            sb.append("<div style='height:0.2in; width:80%; margin:0 auto; background-color:#ccc; border-radius:3px; margin-bottom:0.15in;'>\n")
-              .append("<div style='height:100%; width:")
+              .append("in; top:70%; width:").append(companionWidthInches)
+              .append("in; display:flex; flex-direction:column; align-items:center;'>");
+
+            // Health bar container with centered content
+            sb.append("<div style='width:80%; height:0.2in; background-color:#ccc; border-radius:3px; margin-bottom:0.15in; position:relative;'>\n")
+              .append("<div style='position:absolute; height:100%; width:")
               .append(healthPercentage * 100) // Width as percentage of the container
               .append("%; background-color:#2ecc71; border-radius:3px;'></div>\n")
-              .append("<div style='margin-top:-0.2in; text-align:center; color:black; font-size:0.9em; font-weight:bold;'>")
+              .append("<div style='position:absolute; width:100%; text-align:center; color:black; font-size:0.9em; font-weight:bold; z-index:1;'>")
               .append(compHealth)
               .append("/").append(compMaxHealth).append("</div>\n")
               .append("</div>\n");
-            
+
             // Character image
             sb.append("<img src='images/")
               .append(compName)
               .append(".png' alt='")
               .append(compName)
-              .append("' style='width:2.5in; height:auto; background-color: transparent;'/>");
-            
+              .append("' style='width:1.5in; height:auto; background-color: transparent;'/>");
+
             sb.append("</div>");
         }
-        
+
         return sb.toString();
     }
     // Generate overlay of active quests
