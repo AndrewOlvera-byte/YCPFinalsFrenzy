@@ -571,20 +571,8 @@ public class PlayerLoadManager {
     private void addStarterItems(Connection conn, int playerId, String playerClass) throws SQLException {
         List<Integer> starterItemIds = new ArrayList<>();
         
-        // Common items for all classes
-        starterItemIds.add(1); // Health potion
-        
-        // Class-specific starter items
-        if ("Warrior".equalsIgnoreCase(playerClass)) {
-            starterItemIds.add(2); // Basic sword
-            starterItemIds.add(5); // Simple armor
-        } else if ("Mage".equalsIgnoreCase(playerClass)) {
-            starterItemIds.add(3); // Magic staff
-            starterItemIds.add(7); // Mage robe
-        } else if ("Rogue".equalsIgnoreCase(playerClass)) {
-            starterItemIds.add(4); // Dagger
-            starterItemIds.add(6); // Leather armor
-        }
+        // Only add gold key (ID 5)
+        starterItemIds.add(5); // Gold Key
         
         // Add items to player inventory (using player_items AND PLAYER_INVENTORY for backward compatibility)
         String sqlNewTable = "INSERT INTO player_items (player_id, item_id) VALUES (?, ?)";
