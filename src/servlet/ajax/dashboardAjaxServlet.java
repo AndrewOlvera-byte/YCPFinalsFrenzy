@@ -137,9 +137,28 @@ public class dashboardAjaxServlet extends HttpServlet {
             throw new ServletException("Game Engine doesn't exist");
         }
         
+        // Check the action parameter for getState request (AJAX polling fallback)
+        String action = req.getParameter("action");
+        if ("getState".equals(action)) {
+            // Just get current state without processing any commands
+            System.out.println("AJAX polling fallback: getState called for player " + playerId);
+            Response currentState = gameEngine.display(playerId);
+            String jsonResponse = currentState.toJson();
+            
+            // Send JSON response
+            resp.setContentType("application/json");
+            resp.setCharacterEncoding("UTF-8");
+            try (PrintWriter out = resp.getWriter()) {
+                out.write(jsonResponse);
+            }
+            return;
+        }
+        
         // Process input & render with player_id
         String input = req.getParameter("input");
-        gameEngine.processInput(input, playerId);
+        if (input != null && !input.isEmpty()) {
+            gameEngine.processInput(input, playerId);
+        }
         
         Response updatedResponse = gameEngine.display(playerId);
         String jsonResponse = updatedResponse.toJson();

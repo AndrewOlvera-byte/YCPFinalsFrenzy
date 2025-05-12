@@ -4,37 +4,234 @@
 
 <html>
 <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YCP Finals Frenzy - Home</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main.css">
     <style>
-        .save-slots {
+        :root {
+            --bg-color: #121212;
+            --text-color: #f5f5f5;
+            --header-bg: #2e8b57;
+            --header-shadow: rgba(46,139,87,0.8);
+            --panel-bg: #1e1e1e;
+            --panel-border: #444444;
+            --container-bg: #2b2b2b;
+            --input-bg: #2b2b2b;
+            --button-bg: #2e8b57;
+            --button-color: white;
+            --accent-color: #3c9d6a;
+            --gradient-start: #2e8b57;
+            --gradient-end: #121212;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Hero Section */
+        .hero {
+            height: 100vh;
             display: flex;
-            justify-content: space-around;
-            margin: 50px auto;
-            max-width: 900px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            padding: 20px;
+        }
+        
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: radial-gradient(circle at 50% 50%, var(--gradient-start) 0%, var(--gradient-end) 70%);
+            opacity: 0.8;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .hero-logo {
+            width: 300px;
+            height: auto;
+            margin-bottom: 40px;
+            animation: float 6s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px rgba(46,139,87,0.8));
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .hero-title {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            background: linear-gradient(to right, #ffffff, #3c9d6a);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 5px 15px rgba(0,0,0,0.4);
+        }
+        
+        .hero-subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+            max-width: 600px;
+            line-height: 1.6;
+            color: #d0d0d0;
+        }
+        
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 50px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .action-button {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            background-color: var(--button-bg);
+            color: var(--button-color);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+        
+        .action-button:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        .action-button:hover:before {
+            left: 100%;
+        }
+        
+        .action-button:hover {
+            background-color: var(--accent-color);
+            transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(46,139,87,0.3);
+        }
+        
+        .action-button:active {
+            transform: translateY(1px);
+        }
+        
+        /* Save Slots Section */
+        .save-slots-section {
+            padding: 60px 20px;
+            background-color: var(--panel-bg);
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.2rem;
+            color: var(--header-bg);
+        }
+        
+        .save-slots {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
         }
         
         .save-slot {
-            border: 2px solid #ccc;
+            background-color: var(--container-bg);
             border-radius: 10px;
-            padding: 20px;
-            width: 250px;
-            text-align: center;
+            padding: 25px;
+            transition: all 0.3s ease;
             cursor: pointer;
-            transition: all 0.3s;
-            background-color: #333;
-            color: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            border: 1px solid #444;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .save-slot:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background-color: var(--header-bg);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .save-slot:hover:before {
+            transform: scaleY(1);
         }
         
         .save-slot:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 15px rgba(255,255,255,0.3);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
         }
         
         .save-slot h3 {
-            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            color: var(--header-bg);
         }
         
+        .save-slot p {
+            color: #b0b0b0;
+            font-size: 1rem;
+        }
+        
+        .save-slot.empty {
+            border-style: dashed;
+        }
+        
+        .save-slot.empty h3 {
+            color: #888;
+        }
+        
+        /* New Game Modal */
         .modal {
             display: none;
             position: fixed;
@@ -43,96 +240,207 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.7);
+            background-color: rgba(0,0,0,0.8);
+            overflow-y: auto;
+            backdrop-filter: blur(5px);
         }
         
         .modal-content {
-            background-color: #333;
-            color: white;
-            margin: 10% auto;
-            padding: 30px;
-            border-radius: 10px;
-            width: 60%;
+            background-color: var(--panel-bg);
+            margin: 5% auto;
+            padding: 40px;
+            border-radius: 15px;
             max-width: 600px;
+            width: 90%;
+            box-shadow: 0 10px 50px rgba(46,139,87,0.5);
+            border: 1px solid var(--header-bg);
+            position: relative;
+            animation: modalAppear 0.4s ease;
+        }
+        
+        @keyframes modalAppear {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
         
         .close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 30px;
             color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
             cursor: pointer;
+            transition: color 0.2s;
         }
         
         .close:hover {
-            color: white;
+            color: var(--header-bg);
+        }
+        
+        .modal-content h2 {
+            margin-bottom: 30px;
+            color: var(--header-bg);
+            text-align: center;
+            font-size: 2rem;
         }
         
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
         
         .form-group label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #ccc;
         }
         
-        .form-group input, .form-group select, .form-group textarea {
+        .form-group input, 
+        .form-group select, 
+        .form-group textarea {
             width: 100%;
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #666;
-            background-color: #444;
-            color: white;
+            padding: 12px 15px;
+            background-color: var(--input-bg);
+            border: 1px solid #555;
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--header-bg);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(46,139,87,0.3);
         }
         
         .class-buttons {
             display: flex;
-            justify-content: space-between;
+            gap: 15px;
+            margin-top: 10px;
         }
         
         .class-button {
-            padding: 10px;
-            border: 1px solid #666;
-            border-radius: 5px;
+            flex: 1;
+            border: 1px solid #555;
+            border-radius: 8px;
+            padding: 15px;
+            background-color: var(--container-bg);
             cursor: pointer;
-            width: 30%;
+            transition: all 0.3s;
             text-align: center;
         }
         
+        .class-button h4 {
+            margin-bottom: 10px;
+            color: #ccc;
+        }
+        
+        .class-button p {
+            font-size: 0.9rem;
+            color: #999;
+        }
+        
         .class-button.selected {
-            background-color: #555;
-            border-color: #999;
+            border-color: var(--header-bg);
+            background-color: rgba(46,139,87,0.2);
+        }
+        
+        .class-button.selected h4 {
+            color: var(--header-bg);
+        }
+        
+        .class-button:hover:not(.selected) {
+            background-color: rgba(255,255,255,0.05);
         }
         
         button[type="submit"] {
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
+            padding: 15px 0;
+            width: 100%;
+            background-color: var(--button-bg);
+            color: var(--button-color);
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: bold;
             cursor: pointer;
-            font-size: 16px;
+            transition: background-color 0.3s;
+            margin-top: 15px;
         }
         
         button[type="submit"]:hover {
-            background-color: #45a049;
+            background-color: var(--accent-color);
+        }
+        
+        /* Background floating elements */
+        #bg-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .hero-logo {
+                width: 200px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .action-button {
+                width: 100%;
+            }
+            
+            .class-buttons {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 
 <body>
-    <header>
-        <h1>Welcome to YCP Finals Frenzy</h1>
-        <h2>Choose a save slot to begin</h2>
-    </header>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <canvas id="bg-canvas"></canvas>
+        <div class="hero-content">
+            <img src="${pageContext.request.contextPath}/images/Logo.png" alt="YCP Finals Frenzy Logo" class="hero-logo">
+            <h1 class="hero-title">YCP Finals Frenzy</h1>
+            <p class="hero-subtitle">Survive the finals, defeat challenges, and navigate the campus to emerge victorious in this epic adventure game.</p>
+            <div class="action-buttons">
+                <button class="action-button" onclick="openNewGameModal()">Start New Game</button>
+                <button class="action-button" onclick="scrollToSaveSlots()">Continue Game</button>
+            </div>
+        </div>
+    </section>
     
-    <main>
+    <!-- Save Slots Section -->
+    <section class="save-slots-section" id="save-slots-section">
+        <h2 class="section-title">Your Save Slots</h2>
         <div class="save-slots">
             <c:forEach var="saveSlot" items="${saveSlots}" varStatus="loop">
                 <c:choose>
                     <c:when test="${empty saveSlot}">
-                        <div class="save-slot" onclick="openNewGameModal(${loop.index + 1})">
+                        <div class="save-slot empty" onclick="openNewGameModal(${loop.index + 1})">
                             <h3>Save Slot ${loop.index + 1}</h3>
                             <p>Empty - Create New Game</p>
                         </div>
@@ -146,54 +454,61 @@
                 </c:choose>
             </c:forEach>
         </div>
-        
-        <!-- New Game Modal -->
-        <div id="newGameModal" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeNewGameModal()">&times;</span>
-                <h2>Create New Character</h2>
-                <form id="newGameForm" method="post" action="${pageContext.request.contextPath}/home">
-                    <input type="hidden" name="action" value="createNewPlayer">
-                    <input type="hidden" name="slotNumber" id="slotNumber" value="1">
-                    
-                    <div class="form-group">
-                        <label for="playerName">Character Name:</label>
-                        <input type="text" id="playerName" name="playerName" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Choose a Class:</label>
-                        <div class="class-buttons">
-                            <div class="class-button" onclick="selectClass('Warrior')" id="class-Warrior">
-                                <h4>Warrior</h4>
-                                <p>High HP, Strong Attack</p>
-                            </div>
-                            <div class="class-button" onclick="selectClass('Mage')" id="class-Mage">
-                                <h4>Mage</h4>
-                                <p>High Damage Multiplier, More Skill Points</p>
-                            </div>
-                            <div class="class-button" onclick="selectClass('Rogue')" id="class-Rogue">
-                                <h4>Rogue</h4>
-                                <p>Balanced Attack and Defense</p>
-                            </div>
+    </section>
+    
+    <!-- New Game Modal -->
+    <div id="newGameModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeNewGameModal()">&times;</span>
+            <h2>Create New Character</h2>
+            <form id="newGameForm" method="post" action="${pageContext.request.contextPath}/home">
+                <input type="hidden" name="action" value="createNewPlayer">
+                <input type="hidden" name="slotNumber" id="slotNumber" value="1">
+                
+                <div class="form-group">
+                    <label for="playerName">Character Name</label>
+                    <input type="text" id="playerName" name="playerName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Choose a Class</label>
+                    <div class="class-buttons">
+                        <div class="class-button" onclick="selectClass('Warrior')" id="class-Warrior">
+                            <h4>Warrior</h4>
+                            <p>High HP, Strong Attack</p>
                         </div>
-                        <input type="hidden" id="playerClass" name="playerClass" value="Warrior">
+                        <div class="class-button" onclick="selectClass('Mage')" id="class-Mage">
+                            <h4>Mage</h4>
+                            <p>High Damage, More Skill Points</p>
+                        </div>
+                        <div class="class-button" onclick="selectClass('Rogue')" id="class-Rogue">
+                            <h4>Rogue</h4>
+                            <p>Balanced Attack and Defense</p>
+                        </div>
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="playerDescription">Character Description:</label>
-                        <textarea id="playerDescription" name="playerDescription" rows="4" required></textarea>
-                    </div>
-                    
-                    <button type="submit">Create Character</button>
-                </form>
-            </div>
+                    <input type="hidden" id="playerClass" name="playerClass" value="Warrior">
+                </div>
+                
+                <div class="form-group">
+                    <label for="playerDescription">Character Description</label>
+                    <textarea id="playerDescription" name="playerDescription" rows="4" required></textarea>
+                </div>
+                
+                <button type="submit">Create Character</button>
+            </form>
         </div>
-    </main>
+    </div>
     
     <script>
+        // Function to scroll to save slots section
+        function scrollToSaveSlots() {
+            document.getElementById('save-slots-section').scrollIntoView({ 
+                behavior: 'smooth' 
+            });
+        }
+        
         // Function to open new game modal
-        function openNewGameModal(slotNumber) {
+        function openNewGameModal(slotNumber = 1) {
             document.getElementById('newGameModal').style.display = 'block';
             document.getElementById('slotNumber').value = slotNumber;
             selectClass('Warrior'); // Default class
@@ -248,13 +563,203 @@
             form.submit();
         }
         
-        // Close modal if clicked outside
+        // Background animation effect - campus icons floating around
+        function initBackgroundAnimation() {
+            const canvas = document.getElementById('bg-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas dimensions
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            // Create floating campus icons
+            const icons = [];
+            const iconTypes = [
+                'book', 'pencil', 'laptop', 'coffee', 'gradcap', 'clock', 'calculator'
+            ];
+            
+            // Draw a simple icon
+            function drawIcon(ctx, type, x, y, size, angle) {
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(angle);
+                ctx.fillStyle = 'rgba(46, 139, 87, 0.2)';
+                ctx.strokeStyle = 'rgba(46, 139, 87, 0.4)';
+                ctx.lineWidth = 1;
+                
+                switch(type) {
+                    case 'book':
+                        // Book shape
+                        ctx.beginPath();
+                        ctx.rect(-size/2, -size/3, size, size/1.5);
+                        ctx.fill();
+                        ctx.stroke();
+                        // Pages
+                        ctx.beginPath();
+                        ctx.moveTo(-size/2 + 2, -size/3 + 2);
+                        ctx.lineTo(-size/2 + 2, size/6 - 2);
+                        ctx.stroke();
+                        break;
+                    case 'pencil':
+                        // Pencil shape
+                        ctx.beginPath();
+                        ctx.rect(-size/8, -size/2, size/4, size);
+                        ctx.fill();
+                        ctx.stroke();
+                        // Tip
+                        ctx.beginPath();
+                        ctx.moveTo(-size/8, size/2);
+                        ctx.lineTo(0, size/2 + size/8);
+                        ctx.lineTo(size/8, size/2);
+                        ctx.closePath();
+                        ctx.fill();
+                        ctx.stroke();
+                        break;
+                    case 'laptop':
+                        // Screen
+                        ctx.beginPath();
+                        ctx.rect(-size/2, -size/2, size, size/1.3);
+                        ctx.fill();
+                        ctx.stroke();
+                        // Keyboard
+                        ctx.beginPath();
+                        ctx.rect(-size/1.8, size/5, size/0.9, size/5);
+                        ctx.fill();
+                        ctx.stroke();
+                        break;
+                    case 'coffee':
+                        // Cup - using standard methods instead of roundRect
+                        ctx.beginPath();
+                        // Draw a rectangle for the cup
+                        ctx.rect(-size/3, -size/4, size/1.5, size/1.5);
+                        ctx.fill();
+                        ctx.stroke();
+                        // Handle
+                        ctx.beginPath();
+                        ctx.arc(size/3, 0, size/6, -Math.PI/2, Math.PI/2);
+                        ctx.stroke();
+                        break;
+                    case 'gradcap':
+                        // Cap
+                        ctx.beginPath();
+                        ctx.moveTo(-size/2, 0);
+                        ctx.lineTo(0, -size/3);
+                        ctx.lineTo(size/2, 0);
+                        ctx.lineTo(0, size/3);
+                        ctx.closePath();
+                        ctx.fill();
+                        ctx.stroke();
+                        // Tassel
+                        ctx.beginPath();
+                        ctx.moveTo(size/3, 0);
+                        ctx.lineTo(size/2, size/3);
+                        ctx.stroke();
+                        break;
+                    case 'clock':
+                        // Clock face
+                        ctx.beginPath();
+                        ctx.arc(0, 0, size/2, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.stroke();
+                        // Hands
+                        ctx.beginPath();
+                        ctx.moveTo(0, 0);
+                        ctx.lineTo(0, -size/3);
+                        ctx.moveTo(0, 0);
+                        ctx.lineTo(size/4, 0);
+                        ctx.stroke();
+                        break;
+                    case 'calculator':
+                        // Calculator body
+                        ctx.beginPath();
+                        ctx.rect(-size/3, -size/2, size/1.5, size);
+                        ctx.fill();
+                        ctx.stroke();
+                        // Screen
+                        ctx.beginPath();
+                        ctx.rect(-size/4, -size/2.5, size/2, size/5);
+                        ctx.strokeStyle = 'rgba(46, 139, 87, 0.7)';
+                        ctx.stroke();
+                        break;
+                }
+                
+                ctx.restore();
+            }
+            
+            // Create icon objects
+            function createIcon() {
+                const size = Math.random() * 40 + 20;
+                return {
+                    type: iconTypes[Math.floor(Math.random() * iconTypes.length)],
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: size,
+                    speed: Math.random() * 0.5 + 0.2,
+                    angle: Math.random() * Math.PI * 2,
+                    rotationSpeed: (Math.random() - 0.5) * 0.01,
+                    xDrift: Math.random() * 0.5 - 0.25,
+                    yDrift: Math.random() * 0.5 - 0.25
+                };
+            }
+            
+            // Create initial icons
+            for (let i = 0; i < 25; i++) {
+                icons.push(createIcon());
+            }
+            
+            // Animation loop
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                for (let icon of icons) {
+                    // Update position
+                    icon.y += icon.speed;
+                    icon.x += icon.xDrift;
+                    icon.angle += icon.rotationSpeed;
+                    
+                    // Reset if out of bounds
+                    if (icon.y > canvas.height + icon.size) {
+                        icon.y = -icon.size;
+                        icon.x = Math.random() * canvas.width;
+                    }
+                    
+                    if (icon.x < -icon.size) icon.x = canvas.width + icon.size;
+                    if (icon.x > canvas.width + icon.size) icon.x = -icon.size;
+                    
+                    // Draw the icon
+                    drawIcon(ctx, icon.type, icon.x, icon.y, icon.size, icon.angle);
+                }
+                
+                requestAnimationFrame(animate);
+            }
+            
+            animate();
+        }
+        
+        // Initialize background animation on load
+        window.onload = function() {
+            initBackgroundAnimation();
+            
+            // Check if we should display the create character modal (e.g., empty slot was clicked)
+            const urlParams = new URLSearchParams(window.location.search);
+            const newSlot = urlParams.get('newSlot');
+            if (newSlot) {
+                openNewGameModal(newSlot);
+            }
+        };
+        
+        // Close modal when clicking outside of it
         window.onclick = function(event) {
             const modal = document.getElementById('newGameModal');
-            if (event.target == modal) {
+            if (event.target === modal) {
                 closeNewGameModal();
             }
-        }
+        };
     </script>
 </body>
 </html>

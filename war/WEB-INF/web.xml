@@ -5,7 +5,18 @@
          version="2.5"
          xmlns="http://java.sun.com/xml/ns/javaee">
 
-  <!-- Context Listeners -->
+  <!-- WebSocket Configuration -->
+  <context-param>
+    <param-name>org.glassfish.tyrus.core.idleTimeout</param-name>
+    <param-value>300000</param-value>
+  </context-param>
+  
+  <!-- WebSocket Context Listener -->
+  <listener>
+    <listener-class>servlet.websocket.WebSocketContextListener</listener-class>
+  </listener>
+
+  <!-- Existing Context Listeners -->
   <listener>
     <listener-class>listeners.GameEngineContextListener</listener-class>
   </listener>
@@ -31,6 +42,12 @@
     <servlet-name>HomeAjaxServlet</servlet-name>
     <servlet-class>servlet.ajax.homeAjaxServlet</servlet-class>
   </servlet>
+  
+  <!-- Session Data Servlet for WebSocket -->
+  <servlet>
+    <servlet-name>SessionDataServlet</servlet-name>
+    <servlet-class>servlet.ajax.SessionDataServlet</servlet-class>
+  </servlet>
 
   <!-- Servlet mappings -->
   <servlet-mapping>
@@ -52,6 +69,12 @@
   <servlet-mapping>
     <servlet-name>HomeAjaxServlet</servlet-name>
     <url-pattern>/ajax/home</url-pattern>
+  </servlet-mapping>
+  
+  <!-- Session Data Servlet mapping -->
+  <servlet-mapping>
+    <servlet-name>SessionDataServlet</servlet-name>
+    <url-pattern>/ajax/getSessionData</url-pattern>
   </servlet-mapping>
 
   <welcome-file-list>
@@ -81,6 +104,10 @@
   	<servlet-name>RegisterAjaxServlet</servlet-name>
   	<servlet-class>servlet.ajax.registerAjaxServlet</servlet-class>
   </servlet>
+  <servlet>
+  	<servlet-name>LogoutServlet</servlet-name>
+  	<servlet-class>servlet.LogoutServlet</servlet-class>
+  </servlet>
   <servlet-mapping>
   	<servlet-name>RegisterServlet</servlet-name>
   	<url-pattern>/register</url-pattern>
@@ -88,6 +115,10 @@
   <servlet-mapping>
   	<servlet-name>RegisterAjaxServlet</servlet-name>
   	<url-pattern>/ajax/register</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>LogoutServlet</servlet-name>
+  	<url-pattern>/logout</url-pattern>
   </servlet-mapping>
   
   <!-- Session Configuration -->

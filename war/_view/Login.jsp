@@ -2,23 +2,234 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html>
-<head><title>Login</title></head>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <style>
+    :root {
+      --bg-color: #d0d0d0;
+      --text-color: #121212;
+      --header-bg: #2e8b57;
+      --header-shadow: rgba(46,139,87,0.8);
+      --panel-bg: #ffffff;
+      --panel-border: #999999;
+      --container-bg: #f0f0f0; 
+      --input-bg: #e0e0e0;
+      --button-bg: #2e8b57;
+      --button-color: white;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg-color);
+      color: var(--text-color);
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+    }
+    .split-container {
+      display: flex;
+      min-height: 100vh;
+    }
+    .login-left {
+      flex: 1;
+      background: var(--panel-bg);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 20px;
+      box-shadow: 2px 0 20px rgba(46,139,87,0.08);
+    }
+    .login-form {
+      width: 100%;
+      max-width: 350px;
+      background: var(--container-bg);
+      border-radius: 16px;
+      box-shadow: 0 2px 16px rgba(46,139,87,0.10);
+      padding: 32px 24px 24px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      border: 1px solid var(--panel-border);
+    }
+    .login-form h2 {
+      margin: 0 0 10px 0;
+      text-align: center;
+      color: var(--header-bg);
+      font-size: 2rem;
+    }
+    .login-form label {
+      font-weight: bold;
+      margin-bottom: 4px;
+      display: block;
+    }
+    .login-form input[type="text"],
+    .login-form input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid var(--panel-border);
+      background: var(--input-bg);
+      font-size: 1rem;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+      color: var(--text-color);
+    }
+    .login-form button {
+      padding: 12px 0;
+      background: var(--button-bg);
+      color: var(--button-color);
+      border: none;
+      border-radius: 6px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .login-form button:hover {
+      background: #3c9d6a;
+    }
+    .login-form .error {
+      color: #d32f2f;
+      text-align: center;
+      min-height: 24px;
+      font-size: 1rem;
+    }
+    .login-form .register-link {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 0.95rem;
+    }
+    .login-form .register-link a {
+      color: var(--header-bg);
+      text-decoration: none;
+      font-weight: bold;
+      transition: color 0.2s;
+    }
+    .login-form .register-link a:hover {
+      color: #3c9d6a;
+    }
+    .login-right {
+      flex: 1;
+      background: linear-gradient(135deg, #2e8b57 60%, #b0b0b0 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .login-logo {
+      width: 180px;
+      margin-bottom: 30px;
+      z-index: 2;
+      filter: drop-shadow(0 0 16px #fff8);
+    }
+    #login-anim-canvas {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+    @media (max-width: 900px) {
+      .split-container { flex-direction: column; }
+      .login-left, .login-right { min-height: 50vh; }
+      .login-logo { width: 120px; }
+    }
+    @media (max-width: 600px) {
+      .login-form { padding: 18px 8px; }
+      .login-logo { width: 90px; }
+    }
+  </style>
+</head>
 <body>
-  <h2>Login</h2>
-  <c:if test="${not empty errorMessage}">
-    <div style="color:red;">${errorMessage}</div>
-  </c:if>
-  <form method="post"
-        action="${pageContext.request.contextPath}/login">
-    <label>
-      Username or Email:
-      <input type="text" name="usernameOrEmail" />
-    </label><br/><br/>
-    <label>
-      Password:
-      <input type="password" name="password" />
-    </label><br/><br/>
-    <button type="submit">Login</button>
-  </form>
+  <div class="split-container">
+    <div class="login-left">
+      <form class="login-form" method="post" action="${pageContext.request.contextPath}/login">
+        <h2>Login</h2>
+        <div class="error">
+          <c:if test="${not empty errorMessage}">
+            ${errorMessage}
+          </c:if>
+        </div>
+        <label for="usernameOrEmail">Username or Email</label>
+        <input type="text" name="usernameOrEmail" id="usernameOrEmail" autocomplete="username" required />
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password" autocomplete="current-password" required />
+        <button type="submit">Login</button>
+        <div class="register-link">Don't have an account? <a href="${pageContext.request.contextPath}/register">Register</a></div>
+      </form>
+    </div>
+    <div class="login-right">
+      <img src="${pageContext.request.contextPath}/images/Logo.png" alt="YCP Finals Frenzy Logo" class="login-logo" />
+      <canvas id="login-anim-canvas"></canvas>
+    </div>
+  </div>
+  <script>
+    // Animated geometric shapes
+    const canvas = document.getElementById('login-anim-canvas');
+    const ctx = canvas.getContext('2d');
+    let shapes = [];
+    function resizeCanvas() {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    }
+    function randomColor() {
+      const colors = ['#fff', '#2e8b57', '#b0b0b0', '#3c9d6a', '#121212'];
+      return colors[Math.floor(Math.random() * colors.length)];
+    }
+    function createShape() {
+      const size = Math.random() * 30 + 20;
+      return {
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        dx: (Math.random() - 0.5) * 1.2,
+        dy: (Math.random() - 0.5) * 1.2,
+        size,
+        type: Math.random() > 0.5 ? 'circle' : 'rect',
+        color: randomColor(),
+        angle: Math.random() * Math.PI * 2
+      };
+    }
+    function drawShape(s) {
+      ctx.save();
+      ctx.globalAlpha = 0.7;
+      ctx.translate(s.x, s.y);
+      ctx.rotate(s.angle);
+      ctx.fillStyle = s.color;
+      if (s.type === 'circle') {
+        ctx.beginPath();
+        ctx.arc(0, 0, s.size / 2, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.fillRect(-s.size/2, -s.size/2, s.size, s.size);
+      }
+      ctx.restore();
+    }
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let s of shapes) {
+        s.x += s.dx;
+        s.y += s.dy;
+        s.angle += 0.01 * (s.type === 'rect' ? 1 : -1);
+        if (s.x < -50 || s.x > canvas.width + 50 || s.y < -50 || s.y > canvas.height + 50) {
+          Object.assign(s, createShape());
+          s.x = Math.random() > 0.5 ? -30 : canvas.width + 30;
+          s.y = Math.random() * canvas.height;
+        }
+        drawShape(s);
+      }
+      requestAnimationFrame(animate);
+    }
+    function initAnim() {
+      resizeCanvas();
+      shapes = Array.from({length: 18}, createShape);
+      animate();
+    }
+    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('resize', () => setTimeout(initAnim, 100));
+    setTimeout(initAnim, 100);
+  </script>
 </body>
 </html>

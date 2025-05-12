@@ -2,53 +2,279 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Register (AJAX)</title>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <style>
+    :root {
+      --bg-color: #d0d0d0;
+      --text-color: #121212;
+      --header-bg: #2e8b57;
+      --header-shadow: rgba(46,139,87,0.8);
+      --panel-bg: #ffffff;
+      --panel-border: #999999;
+      --container-bg: #f0f0f0; 
+      --input-bg: #e0e0e0;
+      --button-bg: #2e8b57;
+      --button-color: white;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg-color);
+      color: var(--text-color);
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+    }
+    .split-container {
+      display: flex;
+      min-height: 100vh;
+    }
+    .register-left {
+      flex: 1;
+      background: var(--panel-bg);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 20px;
+      box-shadow: 2px 0 20px rgba(46,139,87,0.08);
+    }
+    .register-form {
+      width: 100%;
+      max-width: 370px;
+      background: var(--container-bg);
+      border-radius: 16px;
+      box-shadow: 0 2px 16px rgba(46,139,87,0.10);
+      padding: 32px 24px 24px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      border: 1px solid var(--panel-border);
+    }
+    .register-form h2 {
+      margin: 0 0 10px 0;
+      text-align: center;
+      color: var(--header-bg);
+      font-size: 2rem;
+    }
+    .register-form label {
+      font-weight: bold;
+      margin-bottom: 4px;
+      display: block;
+    }
+    .register-form input[type="text"],
+    .register-form input[type="email"],
+    .register-form input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid var(--panel-border);
+      background: var(--input-bg);
+      font-size: 1rem;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+      color: var(--text-color);
+    }
+    .register-form button {
+      padding: 12px 0;
+      background: var(--button-bg);
+      color: var(--button-color);
+      border: none;
+      border-radius: 6px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .register-form button:hover {
+      background: #3c9d6a;
+    }
+    .register-form .error {
+      color: #d32f2f;
+      text-align: center;
+      min-height: 24px;
+      font-size: 1rem;
+    }
+    .register-form .login-link {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 0.95rem;
+    }
+    .register-form .login-link a {
+      color: var(--header-bg);
+      text-decoration: none;
+      font-weight: bold;
+      transition: color 0.2s;
+    }
+    .register-form .login-link a:hover {
+      color: #3c9d6a;
+    }
+    .register-right {
+      flex: 1;
+      background: linear-gradient(135deg, #2e8b57 60%, #b0b0b0 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .register-logo {
+      width: 180px;
+      margin-bottom: 30px;
+      z-index: 2;
+      filter: drop-shadow(0 0 16px #fff8);
+    }
+    #register-anim-canvas {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+    @media (max-width: 900px) {
+      .split-container { flex-direction: column; }
+      .register-left, .register-right { min-height: 50vh; }
+      .register-logo { width: 120px; }
+    }
+    @media (max-width: 600px) {
+      .register-form { padding: 18px 8px; }
+      .register-logo { width: 90px; }
+    }
+  </style>
 </head>
 <body>
-  <h2>Register (AJAX)</h2>
-  <div id="errorField" style="color:red;"></div>
-  <label>
-    Username:
-    <input type="text" id="username" />
-  </label><br/><br/>
-  <label>
-    Email:
-    <input type="email" id="email" />
-  </label><br/><br/>
-  <label>
-    Password:
-    <input type="password" id="password" />
-  </label><br/><br/>
-  <button id="registerButton">Sign Up</button>
-
+  <div class="split-container">
+    <div class="register-left">
+      <form class="register-form" onsubmit="return false;">
+        <h2>Register</h2>
+        <div class="error" id="errorField"></div>
+        <label for="username">Username</label>
+        <input type="text" id="username" autocomplete="username" required />
+        <label for="email">Email</label>
+        <input type="email" id="email" autocomplete="email" required />
+        <label for="password">Password</label>
+        <input type="password" id="password" autocomplete="new-password" required />
+        <label for="confirmPassword">Confirm Password</label>
+        <input type="password" id="confirmPassword" autocomplete="new-password" required />
+        <button id="registerButton" type="submit">Sign Up</button>
+        <div class="login-link">Already have an account? <a href="LoginAjax.html">Login</a></div>
+      </form>
+    </div>
+    <div class="register-right">
+      <img src="images/Logo.png" alt="YCP Finals Frenzy Logo" class="register-logo" />
+      <canvas id="register-anim-canvas"></canvas>
+    </div>
+  </div>
   <script>
+    // AJAX register logic with client-side validation
     $(function() {
       $('#registerButton').click(function() {
         $('#errorField').text('');
+        const password = $('#password').val();
+        const confirmPassword = $('#confirmPassword').val();
+        if (password !== confirmPassword) {
+          $('#errorField').text('Passwords do not match.');
+          return;
+        }
+        if (password.length < 6) {
+          $('#errorField').text('Password must be at least 6 characters.');
+          return;
+        }
         $.ajax({
           type: 'POST',
-          url: '/YourAppContext/ajax/registrationAjaxServlet',
+          url: '${pageContext.request.contextPath}/register',
           data: {
             username: $('#username').val(),
             email: $('#email').val(),
-            password: $('#password').val()
+            password: password
           },
           dataType: 'json',
           success: function(resp) {
             if (resp.errorMessage) {
               $('#errorField').text(resp.errorMessage);
             } else {
-              // on success, maybe redirect:
-              window.location.href = resp.redirectUrl || '/YourAppContext/login';
+              window.location.href = resp.redirectUrl || '${pageContext.request.contextPath}/login';
             }
           },
-          error: function() {
-            $('#errorField').text('An unexpected error occurred.');
+          error: function(xhr, status, error) {
+            $('#errorField').text('An unexpected error occurred. Please try again.');
+            console.error('Registration error:', error);
           }
         });
       });
+      // Enter key submits
+      $('.register-form').on('keypress', function(e) {
+        if (e.which === 13) {
+          $('#registerButton').click();
+        }
+      });
     });
+    // Animated network/particle effect
+    const canvas = document.getElementById('register-anim-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    function resizeCanvas() {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    }
+    function createParticle() {
+      return {
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        dx: (Math.random() - 0.5) * 1.1,
+        dy: (Math.random() - 0.5) * 1.1,
+        radius: Math.random() * 7 + 3,
+        color: 'rgba(46,139,87,0.7)'
+      };
+    }
+    function drawParticle(p) {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.shadowColor = '#2e8b57';
+      ctx.shadowBlur = 8;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+    function drawLines() {
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const a = particles[i], b = particles[j];
+          const dist = Math.hypot(a.x - b.x, a.y - b.y);
+          if (dist < 120) {
+            ctx.save();
+            ctx.globalAlpha = 0.18 + 0.22 * (1 - dist / 120);
+            ctx.strokeStyle = '#2e8b57';
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.stroke();
+            ctx.restore();
+          }
+        }
+      }
+    }
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let p of particles) {
+        p.x += p.dx;
+        p.y += p.dy;
+        if (p.x < -20 || p.x > canvas.width + 20) p.dx *= -1;
+        if (p.y < -20 || p.y > canvas.height + 20) p.dy *= -1;
+        drawParticle(p);
+      }
+      drawLines();
+      requestAnimationFrame(animate);
+    }
+    function initAnim() {
+      resizeCanvas();
+      particles = Array.from({length: 22}, createParticle);
+      animate();
+    }
+    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('resize', () => setTimeout(initAnim, 100));
+    setTimeout(initAnim, 100);
   </script>
 </body>
 </html>

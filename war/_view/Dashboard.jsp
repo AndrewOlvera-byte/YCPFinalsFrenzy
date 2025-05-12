@@ -255,6 +255,9 @@
 <body>
     <div class="header-bar">
         <img class="logo" src="${pageContext.request.contextPath}/images/Logo.png" alt="YCP Finals Frenzy Logo" />
+        <div style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%);">
+            <a href="${pageContext.request.contextPath}/logout" style="color: white; text-decoration: none; font-size: 14px;">Logout</a>
+        </div>
         <div class="theme-switch">
             <label for="theme-toggle">Light</label>
             <label class="switch">

@@ -2,31 +2,152 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YCP Finals Frenzy</title>
     <!-- Include jQuery from a CDN -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <style type="text/css">
+        :root {
+            /* Light theme variables */
+            --bg-color: #d0d0d0;
+            --text-color: #121212;
+            --header-bg: #2e8b57;
+            --header-shadow: rgba(46,139,87,0.8);
+            --panel-bg: #ffffff;
+            --panel-border: #999999;
+            --container-bg: #f0f0f0; 
+            --input-bg: #e0e0e0;
+            --button-bg: #2e8b57;
+            --button-color: white;
+        }
+        
+        [data-theme="dark"] {
+            /* Dark theme variables */
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --header-bg: #333333;
+            --header-shadow: rgba(0,0,0,0.8);
+            --panel-bg: #1e1e1e;
+            --panel-border: #444444;
+            --container-bg: #2b2b2b;
+            --input-bg: #2b2b2b;
+            --button-bg: #3c9d6a;
+            --button-color: #e0e0e0;
+        }
+        
+        /* Theme switch styles */
+        .theme-switch {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+        }
+        
+        .theme-switch label {
+            margin-right: 10px;
+            color: white;
+            font-size: 14px;
+        }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 26px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+        }
+        
+        input:checked + .slider {
+            background-color: #3c9d6a;
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(34px);
+        }
+        
         body {
             margin: 0;
             padding: 0;
-            background-color: #d0d0d0; /* Darker gray background */
+            background-color: var(--bg-color);
+            color: var(--text-color);
             font-family: Arial, sans-serif;
+            min-height: 100vh;
         }
         
         .header-bar {
-            background-color: #2e8b57; /* Green header */
+            background-color: var(--header-bg);
             color: white;
             padding: 15px 20px;
-            box-shadow: 0 0 20px rgba(46, 139, 87, 0.8); /* Lighting effect from header */
+            box-shadow: 0 0 20px var(--header-shadow);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 40px;
         }
         
         .header-bar h1 {
             margin: 0;
-            text-align: left;
+            text-align: center;
+            font-size: clamp(1.5rem, 3vw, 2rem);
+        }
+        
+        .header-bar .logo {
+            height: 90px;
+            width: auto;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
         }
         
         .content {
             padding: 20px;
+            display: flex;
+            flex-direction: column;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .dashboard-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        @media screen and (min-width: 768px) {
+            .dashboard-container {
+                flex-direction: row;
+                align-items: flex-start;
+            }
         }
         
         .label {
@@ -45,36 +166,46 @@
             white-space: pre-wrap;
             font-size: 16px;
             text-align: left;
-            background-color: #b0b0b0;
+            background-color: var(--container-bg);
             border-radius: 10px;
             padding: 15px;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid var(--panel-border);
         }
         
         .scrollable-container {
-    		width: 50%;
-    		height: 300px;
-    		overflow: auto;
-    		background-color: #b0b0b0;
-    		border-radius: 10px;
-    		padding: 15px;
-    		white-space: pre-wrap;
-    		border: 1px solid #999;
-    		text-align: left;
-    		font-size: 16px;
-    		margin-bottom: 10px;
-    		line-height: 1.8; 
-		}
-		
+            width: 100%;
+            height: 300px;
+            overflow: auto;
+            background-color: var(--container-bg);
+            border-radius: 10px;
+            padding: 15px;
+            white-space: pre-wrap;
+            border: 1px solid var(--panel-border);
+            text-align: left;
+            font-size: 16px;
+            margin-bottom: 20px;
+            line-height: 1.8;
+            box-sizing: border-box;
+            color: var(--text-color);
+            scrollbar-width: thin;
+            scrollbar-color: #3c9d6a transparent;
+        }
+        
         /* Input container style */
         .input-container {
-            width: 50%;
+            width: 100%;
             padding: 15px;
-            background-color: #b0b0b0; /* Darker gray for container */
+            background-color: var(--input-bg);
             border-radius: 10px;
             margin-top: 20px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
+            box-sizing: border-box;
+            border: 1px solid var(--panel-border);
         }
         
         /* Style for the input field */
@@ -82,11 +213,13 @@
             flex: 1;
             padding: 10px;
             font-size: 16px;
-            border: 1px solid #999;
+            border: 1px solid var(--panel-border);
             border-radius: 5px;
             box-sizing: border-box;
             margin-right: 10px;
             transition: box-shadow 0.3s ease;
+            background-color: var(--panel-bg);
+            color: var(--text-color);
         }
         
         /* Hover and focus effect for the input field */
@@ -97,20 +230,209 @@
         }
         
         /* Style for the button */
-        .action-button {
+        .action-button, .submit-button {
             padding: 10px 20px;
             font-size: 16px;
-            background-color: #2e8b57;
-            color: white;
+            background-color: var(--button-bg);
+            color: var(--button-color);
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            white-space: nowrap;
         }
         
-        .action-button:hover {
+        .action-button:hover, .submit-button:hover {
             background-color: #3c9d6a;
         }
+
+        /* Scene container for room image */
+        .scene-container {
+            width: 100%;
+            height: 350px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--panel-border);
+            border-radius: 10px;
+            background: var(--panel-bg);
+            box-sizing: border-box;
+            margin-bottom: 20px;
+        }
         
+        .scene-header {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translate(-50%, 0);
+            background: var(--panel-bg);
+            padding: 0 10px;
+            font-weight: bold;
+            font-size: 16px;
+            color: var(--text-color);
+            z-index: 1;
+        }
+        
+        .game-scene {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .room-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            object-position: center;
+        }
+        
+        .scene-entities {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .player-status-bars {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 10px;
+            box-sizing: border-box;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            gap: 10px;
+        }
+        
+        .health-bar, .skill-points-bar {
+            flex: 1;
+            height: 20px;
+            overflow: hidden;
+            background: #444;
+            position: relative;
+        }
+        
+        .health-bar-fill, .skill-points-bar-fill {
+            height: 100%;
+            background: #f44;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            transition: width 0.3s;
+        }
+        
+        .skill-points-bar-fill {
+            background: #44f;
+        }
+        
+        /* Layout containers */
+        #resultDiv {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .left-panel, .right-panel {
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        @media screen and (min-width: 768px) {
+            .left-panel {
+                flex: 1;
+                max-width: 400px;
+            }
+            
+            .right-panel {
+                flex: 2;
+            }
+        }
+        
+        /* Media queries for responsive design */
+        @media screen and (max-width: 768px) {
+            .content {
+                padding: 10px;
+            }
+            
+            .scrollable-container {
+                height: 250px;
+            }
+            
+            .scene-container {
+                height: 300px;
+            }
+        }
+        
+        @media screen and (max-width: 480px) {
+            .header-bar {
+                padding: 10px;
+                height: auto;
+            }
+            
+            .formatted, .scrollable-container {
+                padding: 10px;
+                font-size: 14px;
+            }
+            
+            .input-container {
+                padding: 10px;
+            }
+            
+            .input-field, .action-button {
+                font-size: 14px;
+            }
+            
+            .action-button {
+                padding: 8px 15px;
+            }
+            
+            .scene-container {
+                height: 250px;
+            }
+        }
+        
+        /* Connection status styles */
+        .connection-status {
+            position: fixed;
+            top: 60px;
+            right: 20px;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        .websocket-active {
+            background-color: #4caf50;
+            color: white;
+        }
+        
+        .ajax-fallback {
+            background-color: #ff9800;
+            color: white;
+        }
+        
+        /* Player typing indicator */
+        .typing-indicator {
+            display: none;
+            padding: 5px 10px;
+            background-color: rgba(0,0,0,0.1);
+            border-radius: 4px;
+            margin-top: 10px;
+            font-style: italic;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
     </style>
     <script type="text/javascript">
     $(document).ready(function() {
@@ -130,20 +452,80 @@
                     $("#companionInRoomField").text(data.companionsInRoom);
                     $("#roomConnectionsField").text(data.roomConnections);
                     $("#messageField").html(data.message);
+                    // Update room name and image if provided
+                    if (data.roomName) {
+                        $("#roomName").text(data.roomName);
+                    }
+                    if (data.roomImage) {
+                        $("#roomImage").attr("src", data.roomImage);
+                    }
+                    // Update health and skill bars if provided
+                    if (data.playerHealthPercent !== undefined) {
+                        $("#healthBar").css("width", data.playerHealthPercent + "%");
+                        $("#healthText").text(data.playerCurrentHP + "/" + data.playerMaxHP);
+                    }
+                    if (data.playerSkillPointsPercent !== undefined) {
+                        $("#skillBar").css("width", data.playerSkillPointsPercent + "%");
+                        $("#skillText").text(data.playerSkillPoints + "/3");
+                    }
                     // Scroll to bottom after content update
                     var container = document.querySelector('.scrollable-container'); 
                     if (container) container.scrollTop = container.scrollHeight;
                     $("#questOverlayField").html(data.questOverlay);
+                    // Process any scene entities data
+                    if (data.sceneEntitiesData) {
+                        try {
+                            eval(data.sceneEntitiesData);
+                        } catch (e) {
+                            console.error("Error processing scene entities:", e);
+                        }
+                    }
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     $("#errorField").text("Error: " + textStatus + " - " + errorThrown);
                 }
             });
+            
+            // Clear the input field after submission
+            $("#inputField").val("").focus();
         });
+        
+        // Handle Enter key press in input field
+        $("#inputField").keypress(function(e) {
+            if (e.which == 13) { // Enter key
+                $("#updateButton").click();
+                return false;
+            }
+        });
+        
         // Trigger an initial load of game state on page load
         $("#updateButton").click();
         // Focus the input field for immediate user input
         $("#inputField").focus();
+        
+        // Handle window resize to maintain layout
+        $(window).resize(function() {
+            var container = document.querySelector('.scrollable-container');
+            if (container) container.scrollTop = container.scrollHeight;
+        });
+        
+        // Theme toggle functionality
+        $("#theme-toggle").change(function() {
+            if (this.checked) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+            }
+        });
+        
+        // Check if user previously set a preference
+        const currentTheme = localStorage.getItem('theme');
+        if (currentTheme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            $("#theme-toggle").prop('checked', true);
+        }
     });
     </script>
     <script>
@@ -153,32 +535,432 @@
         if ($c) $c.scrollTop = $c.scrollHeight;
       });
     </script>
+    
+    <!-- WebSocket Implementation -->
+    <script>
+        // WebSocket connection
+        let socket;
+        let reconnectAttempts = 0;
+        const maxReconnectAttempts = 5;
+        let usingWebSocket = false;
+        let ajaxPollInterval;
+        let connectionStatusTimeout;
+        
+        function initWebSocket() {
+            try {
+                // Get protocol (ws or wss)
+                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                // Create WebSocket URL
+                const wsUrl = `${protocol}//${window.location.host}${window.location.pathname.split('/').slice(0, -1).join('/')}/gameSocket`;
+                
+                console.log("Attempting WebSocket connection to: " + wsUrl);
+                socket = new WebSocket(wsUrl);
+                
+                socket.onopen = function(event) {
+                    console.log("WebSocket connection established");
+                    reconnectAttempts = 0;
+                    usingWebSocket = true;
+                    
+                    // Clear any existing AJAX polling
+                    if (ajaxPollInterval) {
+                        clearInterval(ajaxPollInterval);
+                    }
+                    
+                    // Update connection status
+                    showConnectionStatus("Using WebSocket (real-time updates)", "websocket-active");
+                    
+                    // Authenticate with the server once we have session data
+                    getSessionDataAndAuthenticate();
+                };
+                
+                socket.onmessage = function(event) {
+                    try {
+                        const message = JSON.parse(event.data);
+                        
+                        switch(message.type) {
+                            case 'gameState':
+                                // Update the game display with the new state
+                                updateGameDisplay(message.data);
+                                break;
+                            case 'error':
+                                console.error("WebSocket error:", message.message);
+                                break;
+                            case 'playerTyping':
+                                handlePlayerTyping(message.playerName, message.isTyping);
+                                break;
+                            case 'pong':
+                                // Heartbeat response received
+                                console.log("Heartbeat acknowledged by server");
+                                break;
+                        }
+                    } catch (e) {
+                        console.error("Error processing WebSocket message:", e);
+                    }
+                };
+                
+                socket.onclose = function(event) {
+                    console.log("WebSocket connection closed with code: " + event.code);
+                    usingWebSocket = false;
+                    
+                    // Show connection status
+                    showConnectionStatus("WebSocket disconnected", "ajax-fallback");
+                    
+                    // Attempt to reconnect if not a clean close
+                    if (event.code !== 1000 && reconnectAttempts < maxReconnectAttempts) {
+                        reconnectAttempts++;
+                        const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000); // Exponential backoff
+                        console.log(`Attempting to reconnect in ${delay/1000} seconds...`);
+                        setTimeout(initWebSocket, delay);
+                    } else if (reconnectAttempts >= maxReconnectAttempts) {
+                        console.log("Maximum reconnection attempts reached. Falling back to AJAX polling.");
+                        startAjaxPolling();
+                    }
+                };
+                
+                socket.onerror = function(error) {
+                    console.error("WebSocket error:", error);
+                    usingWebSocket = false;
+                    
+                    // Show connection status
+                    showConnectionStatus("WebSocket error - falling back to AJAX", "ajax-fallback");
+                    
+                    // Fall back to AJAX polling on first error
+                    if (!ajaxPollInterval) {
+                        startAjaxPolling();
+                    }
+                };
+                
+                return true;
+            } catch (e) {
+                console.error("Failed to initialize WebSocket:", e);
+                startAjaxPolling();
+                return false;
+            }
+        }
+        
+        function startAjaxPolling() {
+            if (ajaxPollInterval) {
+                clearInterval(ajaxPollInterval);
+            }
+            
+            usingWebSocket = false;
+            console.log("*** FALLING BACK TO AJAX POLLING ***");
+            showConnectionStatus("Using AJAX polling (periodic updates)", "ajax-fallback");
+            
+            // Poll for updates every 3 seconds
+            ajaxPollInterval = setInterval(function() {
+                $.ajax({
+                    type: 'POST',
+                    url: 'ajax/dashboard',
+                    data: { action: 'getState' },
+                    dataType: 'json',
+                    success: function(response) {
+                        updateGameDisplay(response);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("AJAX polling error:", error);
+                        if (xhr.status === 401) {
+                            clearInterval(ajaxPollInterval);
+                            window.location.href = 'login';
+                        }
+                    }
+                });
+            }, 3000);
+        }
+        
+        function showConnectionStatus(message, className) {
+            // Remove existing status
+            $('.connection-status').remove();
+            
+            // Create new status element
+            const statusElement = $('<div class="connection-status ' + className + '">' + message + '</div>');
+            $('body').append(statusElement);
+            
+            // Clear existing timeout
+            if (connectionStatusTimeout) {
+                clearTimeout(connectionStatusTimeout);
+            }
+            
+            // Hide after 5 seconds
+            connectionStatusTimeout = setTimeout(function() {
+                statusElement.fadeOut(500, function() {
+                    $(this).remove();
+                });
+            }, 5000);
+        }
+        
+        function sendCommand(command) {
+            if (usingWebSocket && socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({
+                    type: 'command',
+                    command: command
+                }));
+                return true;
+            } else {
+                console.log("WebSocket not connected, using AJAX fallback");
+                return false;
+            }
+        }
+        
+        function updateGameDisplay(gameState) {
+            // Update the room description
+            if (gameState.message) {
+                $('#roomDescription').html(gameState.message);
+            }
+            
+            // Update room connections (exits)
+            if (gameState.roomConnections) {
+                $('#availableExits').html(gameState.roomConnections);
+            }
+            
+            // Update items in room
+            if (gameState.roomInventory) {
+                $('#itemsInRoom').html(gameState.roomInventory);
+            }
+            
+            // Update NPCs in room
+            if (gameState.charactersInRoom) {
+                $('#npcsInRoom').html(gameState.charactersInRoom);
+            }
+            
+            // Update player info
+            if (gameState.playerInfo) {
+                $('#playerStatus').html(gameState.playerInfo);
+            }
+            
+            // Update player inventory
+            if (gameState.playerInventory) {
+                $('#playerInventory').html(gameState.playerInventory);
+            }
+            
+            // Update room image if needed
+            if (gameState.roomImage) {
+                $('.room-image img').attr('src', gameState.roomImage);
+            }
+            
+            // Handle game over state
+            if (gameState.gameOver) {
+                handleGameOver(gameState);
+            }
+            
+            // Scroll the response container to the bottom
+            const container = document.querySelector('.scrollable-container');
+            if (container) {
+                container.scrollTop = container.scrollHeight;
+            }
+        }
+        
+        function handleGameOver(gameState) {
+            // Implement game over handling
+            // For example, show a game over modal or redirect
+            alert("Game Over!");
+        }
+        
+        function handlePlayerTyping(playerName, isTyping) {
+            const indicator = $('.typing-indicator');
+            
+            if (isTyping) {
+                indicator.text(playerName + ' is typing...');
+                indicator.fadeIn(300);
+            } else {
+                indicator.fadeOut(300);
+            }
+        }
+        
+        function getSessionDataAndAuthenticate() {
+            $.ajax({
+                type: 'POST',
+                url: 'ajax/getSessionData',
+                dataType: 'json',
+                success: function(response) {
+                    // Store in sessionStorage
+                    sessionStorage.setItem('player_id', response.player_id);
+                    sessionStorage.setItem('user_id', response.user_id);
+                    
+                    // Authenticate WebSocket connection
+                    if (usingWebSocket && socket && socket.readyState === WebSocket.OPEN) {
+                        socket.send(JSON.stringify({
+                            type: 'authenticate',
+                            playerId: response.player_id,
+                            userId: response.user_id
+                        }));
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Failed to get session data:", error);
+                    
+                    // If unauthorized, redirect to login
+                    if (xhr.status === 401) {
+                        window.location.href = 'login';
+                    }
+                }
+            });
+        }
+        
+        // Setup heartbeat to keep connection alive
+        function setupHeartbeat() {
+            setInterval(function() {
+                if (usingWebSocket && socket && socket.readyState === WebSocket.OPEN) {
+                    socket.send(JSON.stringify({
+                        type: 'ping'
+                    }));
+                }
+            }, 30000); // Every 30 seconds
+        }
+        
+        // Helper function to get cookie value
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+        
+        // Function to submit command via AJAX as fallback
+        function submitCommandViaAjax(command) {
+            $.ajax({
+                type: 'POST',
+                url: 'ajax/dashboard',
+                data: { input: command },
+                dataType: 'json',
+                success: function(response) {
+                    updateGameDisplay(response);
+                },
+                error: function(xhr, status, error) {
+                    console.error("AJAX error:", error);
+                    // Handle session expiration
+                    if (xhr.status === 401) {
+                        window.location.href = 'login';
+                    }
+                }
+            });
+        }
+        
+        // Initialize when page loads
+        $(document).ready(function() {
+            // Add typing indicator to the UI
+            $('.input-container').before('<div class="typing-indicator"></div>');
+            
+            // Initialize WebSocket connection
+            initWebSocket();
+            
+            // Setup heartbeat
+            setupHeartbeat();
+            
+            // Modify the form submit handler
+            $('#commandForm').submit(function(event) {
+                event.preventDefault();
+                const command = $('#commandInput').val();
+                
+                if (command) {
+                    // Try to send via WebSocket first
+                    if (sendCommand(command)) {
+                        // Clear input field if successfully sent
+                        $('#commandInput').val('');
+                    } else {
+                        // Fall back to AJAX if WebSocket fails
+                        submitCommandViaAjax(command);
+                        $('#commandInput').val('');
+                    }
+                }
+            });
+            
+            // Handle typing status
+            let typingTimeout;
+            $('#commandInput').on('input', function() {
+                // Clear previous timeout
+                clearTimeout(typingTimeout);
+                
+                // Send typing status if using WebSocket
+                if (usingWebSocket && socket && socket.readyState === WebSocket.OPEN) {
+                    socket.send(JSON.stringify({
+                        type: 'typing',
+                        isTyping: true
+                    }));
+                }
+                
+                // Set timeout to clear typing status after 2 seconds of inactivity
+                typingTimeout = setTimeout(function() {
+                    if (usingWebSocket && socket && socket.readyState === WebSocket.OPEN) {
+                        socket.send(JSON.stringify({
+                            type: 'typing',
+                            isTyping: false
+                        }));
+                    }
+                }, 2000);
+            });
+        });
+    </script>
 </head>
 <body>
     <div class="header-bar">
         <h1>YCP Finals Frenzy</h1>
+        <div class="theme-switch">
+            <label for="theme-toggle">Light</label>
+            <label class="switch">
+                <input type="checkbox" id="theme-toggle">
+                <span class="slider"></span>
+            </label>
+            <label for="theme-toggle">Dark</label>
+        </div>
     </div>
     
     <div class="content">
-        <div id="resultDiv">
-            <div id="messageField" class="scrollable-container">
-                Messages:
+        <div class="dashboard-container">
+            <div class="left-panel">
+                <div id="messageField" class="scrollable-container">
+                    Messages:
+                </div>
+                <div class="input-container">
+                    <input id="inputField" type="text" class="input-field" placeholder="Input" autofocus />
+                    <button id="updateButton" class="action-button">Submit</button>
+                </div>
             </div>
-            <div id="questOverlayField" class="formatted"></div>
-            <pre id="roomInventoryField" class="formatted"></pre>
-            <pre id="playerInventoryField" class="formatted"></pre>
-            <pre id="playerInfoField" class="formatted"></pre>
-            <pre id="charactersInRoomField" class="formatted"></pre>
-            <pre id="companionInRoomField" class="formatted"></pre>
-            <pre id="roomConnectionsField" class="formatted"></pre>
-        </div>
-        
-        <div class="input-container">
-            <input id="inputField" type="text" class="input-field" placeholder="Input" />
-            <button id="updateButton" class="action-button">Update</button>
+            
+            <div class="right-panel">
+                <div class="scene-container">
+                    <div id="roomName" class="scene-header">Current Room</div>
+                    <div class="game-scene">
+                        <img id="roomImage" class="room-image" src="" alt="Room" />
+                        <div class="scene-entities">
+                            <div id="player-container"></div>
+                            <div id="items-container"></div>
+                            <div id="enemies-container"></div>
+                        </div>
+                        <div class="player-status-bars">
+                            <div class="health-bar">
+                                <div id="healthBar" class="health-bar-fill" style="width:100%"></div>
+                                <div id="healthText" class="health-bar-text" style="position:absolute; top:0; left:50%; transform:translateX(-50%); width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:white; font-size:12px; font-weight:bold;">HP</div>
+                            </div>
+                            <div class="skill-points-bar">
+                                <div id="skillBar" class="skill-points-bar-fill" style="width:100%"></div>
+                                <div id="skillText" class="skill-points-bar-text" style="position:absolute; top:0; left:50%; transform:translateX(-50%); width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:white; font-size:12px; font-weight:bold;">SP</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="resultDiv">
+                    <div id="questOverlayField" class="formatted"></div>
+                    <pre id="roomInventoryField" class="formatted"></pre>
+                    <pre id="playerInventoryField" class="formatted"></pre>
+                    <pre id="playerInfoField" class="formatted"></pre>
+                    <pre id="charactersInRoomField" class="formatted"></pre>
+                    <pre id="companionInRoomField" class="formatted"></pre>
+                    <pre id="roomConnectionsField" class="formatted"></pre>
+                </div>
+            </div>
         </div>
         
         <div id="errorField" class="error"></div>
     </div>
+    
+    <!-- Add connection status container -->
+    <div id="connection-status-container"></div>
+    
+    <!-- Make sure command form has the correct ID -->
+    <form id="commandForm" class="input-container">
+        <input type="text" id="commandInput" name="input" class="input-field" placeholder="Enter command...">
+        <button type="submit" class="submit-button">Submit</button>
+    </form>
 </body>
 </html>

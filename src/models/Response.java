@@ -1,5 +1,7 @@
 package models;
 
+import java.util.Map;
+
 // Object to resemble a JSON object because Java 8 doesn't support it.
 // Attributes can be called in the JSP/HTML using ${response.attribute} to make putting
 // the dynamic text content in the frontend as simple as possible.
@@ -163,7 +165,6 @@ public class Response {
             + "\"companionInventory\":\""   + escapeJson(companionInventory)	  + "\","
             + "\"charactersInRoom\":\""     + escapeJson(charactersInRoom)        + "\","
             + "\"companionsInRoom\":\""    + escapeJson(companionsInRoom)        + "\","
-            + "\"companionsInRoom\":\""    + escapeJson(companionsInRoom)        + "\","
             + "\"playerInfo\":\""           + escapeJson(playerInfo)              + "\","
             + "\"roomConnections\":\""      + escapeJson(roomConnections)         + "\","
             + "\"message\":\""              + escapeJson(message)                 + "\","
@@ -174,14 +175,54 @@ public class Response {
             + "\"roomCharactersOverlay\":\""+ escapeJson(roomCharactersOverlay)   + "\","
             + "\"roomCompanionsOverlay\":\""+ escapeJson(roomCompanionsOverlay) + "\","
             + "\"questOverlay\":\""         + escapeJson(questOverlay)             + "\","
-            + "\"questOverlay\":\""         + escapeJson(questOverlay)             + "\","
             + "\"gameOver\":"               + gameOver                             + ","
             + "\"gameOverImage\":\""        + escapeJson(gameOverImage)           + "\""
             + "}";
     }
+    
+    /**
+     * Static utility method to convert a Map to a JSON string
+     * @param map The Map to convert to JSON
+     * @return A JSON string representation of the map
+     */
+    public static String toJson(Map<String, Object> map) {
+        if (map == null) {
+            return "{}";
+        }
+        
+        StringBuilder json = new StringBuilder("{");
+        boolean first = true;
+        
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            if (!first) {
+                json.append(",");
+            }
+            
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            
+            json.append("\"").append(key).append("\":");
+            
+            if (value == null) {
+                json.append("null");
+            } else if (value instanceof String) {
+                json.append("\"").append(escapeJson((String)value)).append("\"");
+            } else if (value instanceof Number || value instanceof Boolean) {
+                json.append(value.toString());
+            } else {
+                // For complex objects, just use toString()
+                json.append("\"").append(escapeJson(value.toString())).append("\"");
+            }
+            
+            first = false;
+        }
+        
+        json.append("}");
+        return json.toString();
+    }
 
     /** Helper to escape double quotes in JSON strings */
-    private String escapeJson(String s) {
+    private static String escapeJson(String s) {
         return (s == null) ? "" : s.replace("\"", "\\\"");
     }
 }

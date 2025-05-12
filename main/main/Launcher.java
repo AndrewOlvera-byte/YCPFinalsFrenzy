@@ -80,6 +80,12 @@ public class Launcher {
 	}
 
 	protected void onCreateWebAppContext(WebAppContext webapp) {
-		// Does nothing by default, subclasses may override
+		// Disable scanning of module-info.class files to prevent ASM errors
+		webapp.setAttribute("org.eclipse.jetty.annotations.AnnotationConfiguration.CONTAINER_JAR_PATTERN", 
+				".*javax.servlet-api-.*\\.jar$|.*taglibs.*\\.jar$|.*jstl.*\\.jar$");
+		
+		// Add pattern to exclude module-info.class from being scanned
+		webapp.setAttribute("org.eclipse.jetty.webapp.MetaInfConfiguration.jarPatternsToExclude", 
+				".*module-info\\.class.*");
 	}
 }

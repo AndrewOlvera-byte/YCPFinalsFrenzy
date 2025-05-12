@@ -73,12 +73,48 @@ public class PlayerLoadManager {
      * @return The loaded Player object with an empty companion
      */
     public Player loadPlayer(int playerId) {
+        return loadPlayer(playerId, null);
+    }
+    
+    /**
+     * Load a player by ID with optional user ID validation
+     * @param playerId The player ID to load
+     * @param requestedByUserId Optional user ID for validation (can be null to skip validation)
+     * @return The loaded Player or null if not found or validation fails
+     */
+    public Player loadPlayer(int playerId, Integer requestedByUserId) {
         Player player = null;
         
         try (Connection conn = db.getConnection()) {
             // Log the load attempt
-            System.out.println("Loading player with ID: " + playerId);
+            System.out.println("Loading player with ID: " + playerId + 
+                (requestedByUserId != null ? " requested by user: " + requestedByUserId : ""));
             
+            // First check if this player belongs to the requesting user
+            if (requestedByUserId != null) {
+                String checkOwnership = "SELECT user_id FROM PLAYER WHERE player_id = ?";
+                try (PreparedStatement checkStmt = conn.prepareStatement(checkOwnership)) {
+                    checkStmt.setInt(1, playerId);
+                    
+                    try (ResultSet rs = checkStmt.executeQuery()) {
+                        if (rs.next()) {
+                            int actualOwnerId = rs.getInt("user_id");
+                            if (actualOwnerId != requestedByUserId) {
+                                System.out.println("WARNING: Player " + playerId + 
+                                    " belongs to user " + actualOwnerId + 
+                                    " but was requested by user " + requestedByUserId);
+                                return null; // Owner validation failed
+                            }
+                        } else {
+                            // Player not found
+                            System.out.println("WARNING: Player " + playerId + " not found in database");
+                            return null;
+                        }
+                    }
+                }
+            }
+            
+            // Continue with existing code to load player stats
             // Check for player stats in GAME_STATE first as it's more up-to-date
             boolean hasGameState = false;
             String gameStateSql = "SELECT gs.player_hp, gs.damage_multi, gs.attack_boost, gs.defense_boost, gs.current_room " +
@@ -646,17 +682,23 @@ public class PlayerLoadManager {
         
         try (Connection conn = db.getConnection()) {
             // First try to get the most recently saved game state for this user
-            String sql = "SELECT player_id FROM GAME_STATE WHERE user_id = ? " +
-                         "ORDER BY last_saved DESC FETCH FIRST 1 ROWS ONLY";
+            String sql = "SELECT gs.player_id FROM GAME_STATE gs " +
+                         "JOIN PLAYER p ON gs.player_id = p.player_id " +
+                         "WHERE gs.user_id = ? AND p.user_id = ? " +
+                         "ORDER BY gs.last_saved DESC FETCH FIRST 1 ROWS ONLY";
             
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, userId);
+                stmt.setInt(2, userId);
                 
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
                         int playerId = rs.getInt("player_id");
-                        // Load this player using existing method
-                        player = loadPlayer(playerId);
+                        // Load this player using method with user validation
+                        player = loadPlayer(playerId, userId);
+                        if (player != null) {
+                            System.out.println("Loaded most recent saved game for user " + userId + ", player " + playerId);
+                        }
                     } else {
                         // No saved game, check if user has any player created
                         sql = "SELECT player_id FROM PLAYER WHERE user_id = ? " +
@@ -668,8 +710,13 @@ public class PlayerLoadManager {
                             try (ResultSet rs2 = stmt2.executeQuery()) {
                                 if (rs2.next()) {
                                     int playerId = rs2.getInt("player_id");
-                                    // Load this player
-                                    player = loadPlayer(playerId);
+                                    // Load this player with user validation
+                                    player = loadPlayer(playerId, userId);
+                                    if (player != null) {
+                                        System.out.println("Loaded most recent player for user " + userId + ", player " + playerId);
+                                    }
+                                } else {
+                                    System.out.println("No players found for user " + userId);
                                 }
                             }
                         }

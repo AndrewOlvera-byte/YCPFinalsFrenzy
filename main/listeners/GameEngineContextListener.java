@@ -8,6 +8,7 @@ import javax.servlet.annotation.WebListener;
 import GameEngine.GameEngine;
 import models.DatabaseInitializer;
 import models.AuthHandler;
+import models.DerbyDatabase;
 
 @WebListener
 public class GameEngineContextListener implements ServletContextListener {
@@ -20,7 +21,11 @@ public class GameEngineContextListener implements ServletContextListener {
         ServletContext ctx = sce.getServletContext();
 
         // 1) Initialize Derby schema if you like:
-        DatabaseInitializer.initialize();  // create tables if missing
+        try {
+            DatabaseInitializer.initialize();  // create tables if missing
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to initialize database", e);
+        }
 
         // 2) Create and start your global engine
         engine = new GameEngine();
@@ -44,5 +49,6 @@ public class GameEngineContextListener implements ServletContextListener {
         if (engine != null) {
             engine.reset();   // if you have a tear-down method
         }
+        DerbyDatabase.shutdown();
     }
 }

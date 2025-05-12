@@ -11,5 +11,12 @@
 	</classpathentry>
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/CS320_Jetty9"/>
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/CS320_Derby"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/javax.websocket-api-1.1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/tyrus-client-1.13.1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/tyrus-container-servlet-1.13.1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/tyrus-core-1.13.1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/tyrus-server-1.13.1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/tyrus-spi-1.13.1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/gson-2.8.5.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

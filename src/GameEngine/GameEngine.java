@@ -644,7 +644,19 @@ public class GameEngine {
         int existingIndex = findPlayerIndexById(player.getId());
         
         if (existingIndex >= 0) {
-            // Player already exists, update it instead of adding new
+            Player existingPlayer = players.get(existingIndex);
+            
+            // Verify player ownership - don't update if user IDs don't match
+            if (existingPlayer.getUserId() != player.getUserId()) {
+                System.out.println("WARNING: Attempt to update player " + player.getId() + 
+                    " belonging to user " + existingPlayer.getUserId() + 
+                    " with data from user " + player.getUserId());
+                
+                // Return existing index but don't update the player
+                return existingIndex;
+            }
+            
+            // Player already exists and ownership verified, update it instead of adding new
             players.set(existingIndex, player);
             return existingIndex;
         } else {

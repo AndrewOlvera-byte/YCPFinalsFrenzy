@@ -79,6 +79,34 @@ public class dashboardServlet extends HttpServlet {
         } else {
             // Ensure currentRoomNum in GameEngine matches player's room
             Player player = gameEngine.getPlayerById(playerId);
+            
+            // If player not found or verification fails, attempt to recover
+            if (player == null || player.getUserId() != userId) {
+                // Player validation failed - clean up the session and attempt to load the correct one
+                System.out.println("Player validation failed: session player_id " + playerId + 
+                    " doesn't match user " + userId);
+                
+                // Clear invalid player_id from session
+                session.removeAttribute("player_id");
+                session.removeAttribute("player_db_id");
+                
+                // Try to load the proper player for this user
+                PlayerLoadManager playerLoadManager = new PlayerLoadManager();
+                Player correctPlayer = playerLoadManager.getDefaultPlayerForUser(userId);
+                
+                if (correctPlayer != null) {
+                    // Add correct player to game engine
+                    playerId = gameEngine.addPlayer(correctPlayer);
+                    session.setAttribute("player_id", playerId);
+                    session.setAttribute("player_db_id", correctPlayer.getId());
+                    player = correctPlayer;
+                } else {
+                    // No player found for this user, redirect to home to create one
+                    resp.sendRedirect(req.getContextPath() + "/home");
+                    return;
+                }
+            }
+            
             if (player != null && player.getCurrentRoomNum() >= 0) {
                 gameEngine.setCurrentRoomNum(player.getCurrentRoomNum());
                 
