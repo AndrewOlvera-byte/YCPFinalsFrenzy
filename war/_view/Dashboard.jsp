@@ -223,9 +223,10 @@
                     <img src="${response.roomImage}"
                          alt="Current Room Image" />
                    
+                    ${response.playerInventoryOverlay}
                     ${response.roomItemsOverlay}
                     ${response.roomCharactersOverlay}
-					${response.roomCompanionsOverlay}
+                    ${response.roomCompanionsOverlay}
                 </div>
             </div>
         </div>

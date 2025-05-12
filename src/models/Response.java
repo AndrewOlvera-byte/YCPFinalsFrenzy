@@ -18,6 +18,7 @@ public class Response {
     private String  roomCharactersOverlay;
     private String roomCompanionsOverlay;
     private String questOverlay = "";
+    private String playerInventoryOverlay = "";
 
     // New fields for player inventory row
     private String[] playerInventoryItems;
@@ -47,12 +48,13 @@ public class Response {
                     String roomItemsOverlay,
                     String roomCharactersOverlay,
                     String roomCompanionsOverlay,
-                    String questOverlay)
+                    String questOverlay,
+                    String playerInventoryOverlay)
     {
         this.roomInventory         = roomInventory;
         this.playerInventory       = playerInventory;
-        this.playerCompanion 	   = playerCompanion;
-        this.companionInventory	   = companionInventory;
+        this.playerCompanion       = playerCompanion;
+        this.companionInventory    = companionInventory;
         this.charactersInRoom      = charactersInRoom;
         this.companionsInRoom      = companionsInRoom;
         this.playerInfo            = playerInfo;
@@ -65,6 +67,7 @@ public class Response {
         this.roomCharactersOverlay = roomCharactersOverlay;
         this.roomCompanionsOverlay = roomCompanionsOverlay;
         this.questOverlay          = questOverlay;
+        this.playerInventoryOverlay = playerInventoryOverlay;
 
         // Parse player inventory items
         parsePlayerInventoryItems();
@@ -121,6 +124,7 @@ public class Response {
     public String  getQuestOverlay()          { return questOverlay; }
     public boolean isGameOver()               { return gameOver; }
     public String  getGameOverImage()         { return gameOverImage; }
+    public String getPlayerInventoryOverlay() { return playerInventoryOverlay; }
 
     // ─── Setters ──────────────────────────────────────────────────────────────
     public void setRoomInventory(String s)         { this.roomInventory = s; }
@@ -144,6 +148,7 @@ public class Response {
     public void setQuestOverlay(String s)          { this.questOverlay = s; }
     public void setGameOver(boolean b)             { this.gameOver = b; }
     public void setGameOverImage(String s)         { this.gameOverImage = s; }
+    public void setPlayerInventoryOverlay(String s) { this.playerInventoryOverlay = s; }
 
     // ─── Convert to a JSON‐style string ───────────────────────────────────────
     public String toJson() {
@@ -176,6 +181,7 @@ public class Response {
             + "\"roomCharactersOverlay\":\""+ escapeJson(roomCharactersOverlay)   + "\","
             + "\"roomCompanionsOverlay\":\""+ escapeJson(roomCompanionsOverlay)   + "\","
             + "\"questOverlay\":\""         + escapeJson(questOverlay)            + "\","
+            + "\"playerInventoryOverlay\":\""+ escapeJson(playerInventoryOverlay)  + "\","
             + "\"gameOver\":"               + gameOver                            + ","
             + "\"gameOverImage\":\""        + escapeJson(gameOverImage)           + "\","
             + "\"playerInventoryItems\":"   + itemsJson.toString()                + ","

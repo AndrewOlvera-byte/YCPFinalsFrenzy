@@ -699,6 +699,44 @@ public class UIManager {
         return sb.toString();
     }
 
+    // Generate overlay of player's inventory items at the top of the room image
+    public String getPlayerInventoryOverlay() {
+        Player player = engine.getPlayer();
+        StringBuilder sb = new StringBuilder();
+        
+        // Add grey background strip at the top
+        sb.append("<div style='position:absolute; left:0; top:0; width:100%; height:1in; background-color:rgba(128, 128, 128, 0.7); z-index:1;'></div>\n");
+        
+        if (player == null || player.getInventory() == null || player.getInventorySize() == 0) {
+            return sb.toString(); // Return the background strip even if no items
+        }
+        
+        int totalItems = player.getInventorySize();
+        double itemWidth = 0.8; // Reduced width of each item in inches
+        double spacing = 0.2; // Spacing between items in inches
+        double totalWidth = (itemWidth + spacing) * totalItems - spacing; // Total width of all items
+        double startLeft = (10 - totalWidth) / 2; // Center the items horizontally (assuming 10in width)
+        
+        for (int i = 0; i < totalItems; i++) {
+            String itemName = player.getItemName(i);
+            double leftPosition = startLeft + (i * (itemWidth + spacing));
+            
+            sb.append("<img src='images/")
+              .append(itemName)
+              .append(".png' alt='")
+              .append(itemName)
+              .append("' style='position:absolute; left:")
+              .append(leftPosition)
+              .append("in; top:0.1in; width:")
+              .append(itemWidth)
+              .append("in; height:")
+              .append(itemWidth)
+              .append("in; object-fit:contain; background-color: transparent; z-index:2;'/>\n");
+        }
+        
+        return sb.toString();
+    }
+
     // Main display method to construct Response object
     public Response display() {
         Response response = new Response(
@@ -717,7 +755,8 @@ public class UIManager {
             getRoomItemsOverlay(),
             getRoomCharactersOverlay(),
             getRoomCompanionsOverlay(),
-            getQuestOverlay()
+            getQuestOverlay(),
+            getPlayerInventoryOverlay()  // Add the new overlay
         );
         return response;
     }
