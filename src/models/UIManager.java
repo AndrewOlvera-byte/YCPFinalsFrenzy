@@ -17,15 +17,157 @@ public class UIManager {
     public UIManager(GameEngine engine) {
         this.engine = engine;
         this.itemPositions = new HashMap<>();
+        initArmorStyleSettings();
     }
     
- // Style settings per armor slot
-    private static final Map<ArmorSlot, String> armorSlotStyles = new HashMap<>();
-    static {
-        armorSlotStyles.put(ArmorSlot.HEAD,      "top:0%; left:20%; width:1in;");
-        armorSlotStyles.put(ArmorSlot.TORSO,     "top:25%; left:10%; width:2.2in;");
-        armorSlotStyles.put(ArmorSlot.LEGS,      "top:55%; left:15%; width:2in;");
-        armorSlotStyles.put(ArmorSlot.ACCESSORY, "top:30%; left:0%; width:2.5in;");
+    // Define a nested class to hold armor style parameters
+    private static class ArmorStyle {
+        String topPercent;
+        String leftPercent;
+        String width;
+        String height;
+        
+        // Extra style parameters for two-piece armor (legs and gauntlets)
+        String leftPieceTop;
+        String leftPieceLeft;
+        String leftPieceWidth;
+        String leftPieceHeight;
+        
+        String rightPieceTop;
+        String rightPieceLeft;
+        String rightPieceWidth;
+        String rightPieceHeight;
+        
+        // Constructor for single-piece armor (head, torso)
+        public ArmorStyle(String top, String left, String width, String height) {
+            this.topPercent = top;
+            this.leftPercent = left;
+            this.width = width;
+            this.height = height;
+            
+            // Default values for two-piece components (not used for single-piece armor)
+            this.leftPieceTop = top;
+            this.leftPieceLeft = left;
+            this.leftPieceWidth = width;
+            this.leftPieceHeight = height;
+            this.rightPieceTop = top;
+            this.rightPieceLeft = left;
+            this.rightPieceWidth = width;
+            this.rightPieceHeight = height;
+        }
+        
+        // Constructor for two-piece armor (legs, gauntlets)
+        public ArmorStyle(String top, String left, String width, String height,
+                         String leftPieceTop, String leftPieceLeft, String leftPieceWidth, String leftPieceHeight,
+                         String rightPieceTop, String rightPieceLeft, String rightPieceWidth, String rightPieceHeight) {
+            this.topPercent = top;
+            this.leftPercent = left;
+            this.width = width;
+            this.height = height;
+            
+            // Two-piece component styles
+            this.leftPieceTop = leftPieceTop;
+            this.leftPieceLeft = leftPieceLeft;
+            this.leftPieceWidth = leftPieceWidth;
+            this.leftPieceHeight = leftPieceHeight;
+            
+            this.rightPieceTop = rightPieceTop;
+            this.rightPieceLeft = rightPieceLeft;
+            this.rightPieceWidth = rightPieceWidth;
+            this.rightPieceHeight = rightPieceHeight;
+        }
+        
+        public String getStyleString() {
+            return "top:" + topPercent + "; left:" + leftPercent + 
+                   "; width:" + width + "; height:" + height + ";";
+        }
+        
+        public String getLeftPieceStyleString() {
+            return "top:" + leftPieceTop + "; left:" + leftPieceLeft + 
+                   "; width:" + leftPieceWidth + "; height:" + leftPieceHeight + ";";
+        }
+        
+        public String getRightPieceStyleString() {
+            return "top:" + rightPieceTop + "; left:" + rightPieceLeft + 
+                   "; width:" + rightPieceWidth + "; height:" + rightPieceHeight + ";";
+        }
+    }
+    
+    // Maps for player-specific armor styles
+    private static final Map<String, Map<ArmorSlot, ArmorStyle>> playerArmorStyles = new HashMap<>();
+    
+    // Initialize armor style settings for different players
+    private void initArmorStyleSettings() {
+        // Cooper's armor settings
+        Map<ArmorSlot, ArmorStyle> cooperStyles = new HashMap<>();
+        cooperStyles.put(ArmorSlot.HEAD, new ArmorStyle("-4%", "-10.3%", "3in", "auto"));
+        cooperStyles.put(ArmorSlot.TORSO, new ArmorStyle("0%", "-2%", "2.6in", "auto"));
+        
+        // Cooper's leg armor (two-piece) - main, left leg, right leg
+        cooperStyles.put(ArmorSlot.LEGS, new ArmorStyle(
+            "-3%", "0%", "2.6in", "auto",                // Base style (not directly used)
+            "-3%", "0%", "2.6in", "auto",                // Left leg specific styling
+            "-5.4%", "-6%", "2.7in", "auto"              // Right leg specific styling
+        ));
+        
+        // Cooper's gauntlet armor (two-piece) - main, left gauntlet, right gauntlet
+        cooperStyles.put(ArmorSlot.ACCESSORY, new ArmorStyle(
+            "-1%", "1%", "2.6in", "auto",                // Base style (not directly used)
+            "-1%", "1%", "2.6in", "auto",                // Left gauntlet specific styling
+            "-1%", "-6%", "2.6in", "auto"                // Right gauntlet specific styling
+        ));
+        playerArmorStyles.put("Cooper", cooperStyles);
+        
+        // Chuck's armor settings (medium character)
+        Map<ArmorSlot, ArmorStyle> chuckStyles = new HashMap<>();
+        chuckStyles.put(ArmorSlot.HEAD, new ArmorStyle("-6%", "-12%", "3.2in", "auto"));
+        chuckStyles.put(ArmorSlot.TORSO, new ArmorStyle("-2%", "-3%", "2.8in", "auto"));
+        
+        // Chuck's leg armor (two-piece) - main, left leg, right leg
+        chuckStyles.put(ArmorSlot.LEGS, new ArmorStyle(
+            "-5%", "-1%", "2.7in", "auto",               // Base style (not directly used)
+            "-5%", "-1%", "2.7in", "auto",               // Left leg specific styling
+            "-7%", "-7%", "2.8in", "auto"                // Right leg specific styling
+        ));
+        
+        // Chuck's gauntlet armor (two-piece) - main, left gauntlet, right gauntlet
+        chuckStyles.put(ArmorSlot.ACCESSORY, new ArmorStyle(
+            "-3%", "0%", "2.7in", "auto",                // Base style (not directly used)
+            "-3%", "0%", "2.7in", "auto",                // Left gauntlet specific styling
+            "-3%", "-7%", "2.7in", "auto"                // Right gauntlet specific styling
+        ));
+        playerArmorStyles.put("Chuck", chuckStyles);
+        
+        // Tank's armor settings (largest character)
+        Map<ArmorSlot, ArmorStyle> tankStyles = new HashMap<>();
+        tankStyles.put(ArmorSlot.HEAD, new ArmorStyle("-2%", "-14%", "3.5in", "auto"));
+        tankStyles.put(ArmorSlot.TORSO, new ArmorStyle("-4%", "-4%", "3.0in", "auto"));
+        
+        // Tank's leg armor (two-piece) - main, left leg, right leg
+        tankStyles.put(ArmorSlot.LEGS, new ArmorStyle(
+            "-7%", "-2%", "3.0in", "auto",               // Base style (not directly used)
+            "-7%", "-2%", "3.0in", "auto",               // Left leg specific styling
+            "-9%", "-8%", "3.1in", "auto"                // Right leg specific styling
+        ));
+        
+        // Tank's gauntlet armor (two-piece) - main, left gauntlet, right gauntlet
+        tankStyles.put(ArmorSlot.ACCESSORY, new ArmorStyle(
+            "-5%", "-1%", "2.8in", "auto",               // Base style (not directly used)
+            "-5%", "-1%", "2.8in", "auto",               // Left gauntlet specific styling
+            "-5%", "-8%", "2.9in", "auto"                // Right gauntlet specific styling
+        ));
+        playerArmorStyles.put("Tank", tankStyles);
+    }
+    
+    // Get the appropriate armor style for the current player and slot
+    private ArmorStyle getArmorStyle(String playerName, ArmorSlot slot) {
+        // Default to Cooper's style if player not found or not specified
+        if (playerName == null || !playerArmorStyles.containsKey(playerName)) {
+            playerName = "Cooper";
+        }
+        
+        Map<ArmorSlot, ArmorStyle> playerStyles = playerArmorStyles.get(playerName);
+        return playerStyles.getOrDefault(slot, new ArmorStyle("0%", "0%", "2.5in", "auto"));
     }
 
     // Returns help text for player
@@ -273,32 +415,55 @@ public class UIManager {
     }
     
     // Generate overlay of characters in room
+ // Here are the modified methods from the UIManager class to implement health bars
+
+ // Modified method for character overlay with health bars
+ // Modified method for character overlay with health bars
     public String getRoomCharactersOverlay() {
         Room currentRoom = engine.getRooms().get(engine.getCurrentRoomNum());
         StringBuilder sb = new StringBuilder();
+        
+        // Get player's max health using getMaxHp() method
+        Player player = engine.getPlayer();
+        int maxHealth = 100; // Default fallback
+        if (player != null) {
+            // Use the getMaxHp() method instead of current hp
+            maxHealth = player.getMaxHp();
+        }
         
         // 1. Render all NPCs first
         for (int i = 0; i < currentRoom.getCharacterContainerSize(); i++) {
             String charName = currentRoom.getCharacterName(i);
             int charHealth = currentRoom.getCharacterHealth(i);
-
-            int fullHearts = charHealth / 50;
-            boolean showHalfHeart = (charHealth % 50) > 0;
-
+            
+            // Get character object to access its maxHp
+            Character character = currentRoom.getCharacter(i);
+            int charMaxHealth = maxHealth; // Default to player's max if can't get the character
+            
+            if (character != null) {
+                charMaxHealth = character.getMaxHp();
+            }
+            
+            // Calculate health percentage for the bar using character's own max health
+            double healthPercentage = (double)charHealth / charMaxHealth;
+            // Cap at 100% just in case
+            healthPercentage = Math.min(healthPercentage, 1.0);
+            
             double leftOffsetInches = i * 2;
 
             sb.append("<div style='position:absolute; left:")
               .append(leftOffsetInches)
               .append("in; top:40%; width:2.5in; text-align:center;'>\n");
 
-            sb.append("<div style='height:0.5in;'>\n");
-            for (int h = 0; h < fullHearts; h++) {
-                sb.append("<img src='images/heart.png' alt='heart' style='width:0.25in; height:auto; display:inline-block;'/>\n");
-            }
-            if (showHalfHeart) {
-                sb.append("<img src='images/halfheart.png' alt='half heart' style='width:0.25in; height:auto; display:inline-block;'/>\n");
-            }
-            sb.append("</div>\n");
+            // Health bar with actual max health values - smaller size
+            sb.append("<div style='height:0.2in; width:80%; margin:0 auto; background-color:#ccc; border-radius:3px; margin-bottom:0.15in;'>\n")
+              .append("<div style='height:100%; width:")
+              .append(healthPercentage * 100) // Width as percentage of the container
+              .append("%; background-color:#2ecc71; border-radius:3px;'></div>\n")
+              .append("<div style='margin-top:-0.2in; text-align:center; color:black; font-size:0.9em; font-weight:bold;'>")
+              .append(charHealth)
+              .append("/").append(charMaxHealth).append("</div>\n")
+              .append("</div>\n");
 
             sb.append("<img src='images/")
               .append(charName)
@@ -309,12 +474,13 @@ public class UIManager {
             sb.append("</div>\n");
         }
 
-     // 2. Render the Player separately on the far right
-        Player player = engine.getPlayer();
+        // 2. Render the Player separately on the far right
         if (player != null) {
             int playerHealth = player.getHp();
-            int fullHearts = playerHealth / 50;
-            boolean showHalfHeart = (playerHealth % 50) > 0;
+            int playerMaxHealth = player.getMaxHp();
+            // Calculate health percentage for the bar using player's own max health
+            double healthPercentage = (double)playerHealth / playerMaxHealth;
+            String playerName = player.getName();
 
             double leftOffsetInches = 8; // Far right
             double topOffset = 40;
@@ -325,87 +491,143 @@ public class UIManager {
               .append(topOffset)
               .append("%; width:2.5in; text-align:center;'>\n");
 
-            // Hearts
-            sb.append("<div style='height:0.5in;'>\n");
-            for (int h = 0; h < fullHearts; h++) {
-                sb.append("<img src='images/heart.png' alt='heart' style='width:0.25in; height:auto; display:inline-block;'/>\n");
-            }
-            if (showHalfHeart) {
-                sb.append("<img src='images/halfheart.png' alt='half heart' style='width:0.25in; height:auto; display:inline-block;'/>\n");
-            }
-            sb.append("</div>\n");
+            // Health bar using player's max health - smaller size
+            sb.append("<div style='height:0.2in; width:80%; margin:0 auto; background-color:#ccc; border-radius:3px; margin-bottom:0.15in;'>\n")
+              .append("<div style='height:100%; width:")
+              .append(healthPercentage * 100) // Width as percentage of the container
+              .append("%; background-color:#2ecc71; border-radius:3px;'></div>\n")
+              .append("<div style='margin-top:-0.2in; text-align:center; color:black; font-size:0.9em; font-weight:bold;'>")
+              .append(playerHealth)
+              .append("/").append(playerMaxHealth).append("</div>\n")
+              .append("</div>\n");
 
             // Base player image
             sb.append("<div style='position: relative; display: inline-block;'>\n");
             sb.append("<img src='images/")
-              .append(player.getName())
+              .append(playerName)
               .append(".png' alt='")
-              .append(player.getName())
+              .append(playerName)
               .append("' style='width:2.5in; height:auto; background-color: transparent;'/>\n");
 
-            // Equipped armor overlays (must exist in /images)
+            // Equipped armor overlays with player-specific styling
             for (ArmorSlot slot : ArmorSlot.values()) {
                 Armor equipped = player.getEquippedArmor(slot);
-                if (equipped != null) {
-                    String imageName = equipped.getName().replaceAll("\\s+", "") + ".png";
-                    String slotClass = slot.name().toLowerCase(); // e.g., head, legs, accessory
+                if (equipped == null) continue;
+                
+                // Get player-specific armor style for this slot
+                ArmorStyle style = getArmorStyle(playerName, slot);
 
-                    String customStyle = armorSlotStyles.getOrDefault(slot, "top:0; left:0; width:2.5in;");
-
+                switch (slot) {
+                  case HEAD:
+                  case TORSO:
+                    // Single-piece overlay with player-specific styling
+                    String file = equipped.getName().replaceAll("\\s+","") + ".png";
                     sb.append("<img src='images/")
-                      .append(imageName)
-                      .append("' alt='")
-                      .append(slot.name())
-                      .append("' style='position:absolute; ")
-                      .append(customStyle)
-                      .append(" height:auto; background-color: transparent;'/>\n");
+                      .append(file)
+                      .append("' alt='").append(slot.name()).append("' ")
+                      .append("style='position:absolute; ")
+                      .append(style.getStyleString())
+                      .append(" background-color:transparent;'/>");
+                    break;
 
+                  case LEGS:
+                    // Two-piece pants with player-specific styling for each leg
+                    sb.append("<img src='images/leftleg.png' alt='left leg' ")
+                      .append("style='position:absolute; ")
+                      .append(style.getLeftPieceStyleString())
+                      .append(" background-color:transparent;'/>");
+                      
+                    sb.append("<img src='images/rightleg.png' alt='right leg' ")
+                      .append("style='position:absolute; ")
+                      .append(style.getRightPieceStyleString())
+                      .append(" background-color:transparent;'/>");
+                    break;
+
+                  case ACCESSORY:
+                    // Two-piece gauntlets with player-specific styling for each gauntlet
+                    sb.append("<img src='images/leftgauntlet.png' alt='left gauntlet' ")
+                      .append("style='position:absolute; ")
+                      .append(style.getLeftPieceStyleString())
+                      .append(" background-color:transparent;'/>");
+                      
+                    sb.append("<img src='images/rightgauntlet.png' alt='right gauntlet' ")
+                      .append("style='position:absolute; ")
+                      .append(style.getRightPieceStyleString())
+                      .append(" background-color:transparent;'/>");
+                    break;
                 }
             }
 
             sb.append("</div>\n</div>\n");
         }
 
-
         return sb.toString();
     }
+ // Modified method for companion overlay with health bars
 
+    // Method to allow adjusting single-piece armor styles at runtime
+    public void updateArmorStyle(String playerName, ArmorSlot slot, String top, String left, String width, String height) {
+        if (!playerArmorStyles.containsKey(playerName)) {
+            playerArmorStyles.put(playerName, new HashMap<>());
+        }
+        
+        playerArmorStyles.get(playerName).put(slot, new ArmorStyle(top, left, width, height));
+    }
     
+    // Method to allow adjusting two-piece armor styles at runtime
+    public void updateTwoPieceArmorStyle(String playerName, ArmorSlot slot, 
+                                        String leftPieceTop, String leftPieceLeft, String leftPieceWidth, String leftPieceHeight,
+                                        String rightPieceTop, String rightPieceLeft, String rightPieceWidth, String rightPieceHeight) {
+        if (!playerArmorStyles.containsKey(playerName)) {
+            playerArmorStyles.put(playerName, new HashMap<>());
+        }
+        
+        // Use dummy values for the base style since it's not directly used for two-piece armor
+        playerArmorStyles.get(playerName).put(
+            slot, 
+            new ArmorStyle(
+                "0%", "0%", "auto", "auto",  // Base style (dummy values)
+                leftPieceTop, leftPieceLeft, leftPieceWidth, leftPieceHeight,  // Left piece
+                rightPieceTop, rightPieceLeft, rightPieceWidth, rightPieceHeight  // Right piece
+            )
+        );
+    }
     
     public String getRoomCompanionsOverlay() {
         Room currentRoom = engine.getRooms().get(engine.getCurrentRoomNum());
         StringBuilder sb = new StringBuilder();
         
-        // Arrange characters side by side
+        // 1. Render all companions with their own max health
         for (int i = 0; i < currentRoom.getCompanionContainerSize(); i++) {
             String compName = currentRoom.getCompanionName(i);
-            int compHealth = currentRoom.getCompanionHealth(i);
+            Companion companion = currentRoom.getCompanion(i);
             
-            // Calculate number of full hearts and check for a half heart
-            int fullHearts = compHealth / 50;
-            boolean showHalfHeart = (compHealth % 50) > 0;
+            if (companion == null) continue;
+            
+            int compHealth = companion.getHp();
+            int compMaxHealth = companion.getMaxHp();
+            
+            // Calculate health percentage for the bar using companion's own max health
+            double healthPercentage = (double)compHealth / compMaxHealth;
+            // Cap at 100% just in case
+            healthPercentage = Math.min(healthPercentage, 1.0);
             
             double leftOffsetInches = 5;   // horizontal offset for each companion
             
-            // Container div for hearts and character image
+            // Container div for health bar and character image
             sb.append("<div style='position:absolute; left:")
               .append(leftOffsetInches)
-              .append("in; top:40%; width:1.5in; text-align:center;'>");
+              .append("in; top:40%; width:2.5in; text-align:center;'>");
             
-            // Row of hearts above the character image
-            sb.append("<div style='height:0.5in;'>");
-            
-            // Append full hearts
-            for (int h = 0; h < fullHearts; h++) {
-                sb.append("<img src='images/heart.png' alt='heart' style='width:0.25in; height:auto; display:inline-block;'/>");
-            }
-            
-            // Append a half heart if needed
-            if (showHalfHeart) {
-                sb.append("<img src='images/halfheart.png' alt='half heart' style='width:0.25in; height:auto; display:inline-block;'/>");
-            }
-            
-            sb.append("</div>");
+            // Health bar with actual max health values - smaller size
+            sb.append("<div style='height:0.2in; width:80%; margin:0 auto; background-color:#ccc; border-radius:3px; margin-bottom:0.15in;'>\n")
+              .append("<div style='height:100%; width:")
+              .append(healthPercentage * 100) // Width as percentage of the container
+              .append("%; background-color:#2ecc71; border-radius:3px;'></div>\n")
+              .append("<div style='margin-top:-0.2in; text-align:center; color:black; font-size:0.9em; font-weight:bold;'>")
+              .append(compHealth)
+              .append("/").append(compMaxHealth).append("</div>\n")
+              .append("</div>\n");
             
             // Character image
             sb.append("<img src='images/")
@@ -419,7 +641,6 @@ public class UIManager {
         
         return sb.toString();
     }
-
     // Generate overlay of active quests
     public String getQuestOverlay() {
         List<Quest> qs = engine.getPlayer().getActiveQuests();
