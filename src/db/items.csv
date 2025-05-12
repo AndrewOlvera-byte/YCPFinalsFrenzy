@@ -20,7 +20,7 @@ item_id,name,value,weight,long_description,short_description,type,healing,damage
 20,Capstone Cannon,30,10,"<b>Your final project turned into a portable, shoulder-mounted problem solver.</b>","<b>Capstone cannon.</b>",WEAPON,0,0,100,0,0,0,false
 21,Orb of Vengeance,15,4,"<b>It’s red, rubber, and full of trauma. Hits harder than your GPA drop after midterms.</b>","<b>Dodgeball orb.</b>",WEAPON,0,0,70,0,0,0,false
 22,Spork Supreme,12,2,"<b>Forged from rare alloys and blessed by the Lunch Lady. The final form of all utensils.</b>","<b>Spork Supreme X.</b>",WEAPON,0,0,90,0,0,0,false
-23,A reference to a sword,10,1,"<b>It is said this sword is the only weapon that can help you pass CS320. It answers any question the BABHAKE throws at you!</b>","<b>A list of pairs</b>",WEAPON,0,0,9999999,0,0,,false
+23,A reference to a sword,10,1,"<b>It is said this sword is the only weapon that can help you pass CS320. It answers any question the BABHAKE throws at you!</b>","<b>A list of pairs</b>",WEAPON,0,0,9999999,0,0,,true
 24,Coffee Mug Smash,10,2,"<b>A cracked ceramic mug from the campus café. Delivers scalding justice.</b>","<b>Coffee mug.</b>",WEAPON,0,0,20,0,0,0,false
 25,Textbook Club,20,5,"<b>Thick, overpriced, and finally useful for something.</b>","<b>Textbook club.</b>",WEAPON,0,0,25,0,0,0,false
 26,Fire Alarm Bludgeon,15,4,"<b>Ripped straight off the wall. Not campus-approved.</b>","<b>Alarm bludgeon.</b>",WEAPON,0,0,30,0,0,0,false
@@ -46,3 +46,6 @@ item_id,name,value,weight,long_description,short_description,type,healing,damage
 46,Campus Smoothie,3,1,"<b>It’s green. It’s weird. It works.</b>","<b>Smoothie.</b>",UTILITY,22,0,0,0,0,0,false
 47,Leftover Fries,4,1,"<b>Soggy but full of memories... and carbs.</b>","<b>Fries.</b>",UTILITY,12,0,0,0,0,0,false
 48,Finals Week Donut,6,1,"<b>Covered in frosting and desperation. A sugary morale boost.</b>","<b>Donut.</b>",UTILITY,28,0,0,0,0,0,false
+49,Pear, 0, 0, "<b> Pair of Author Books</b>", "<b>Author Books</b>", ITEM, 0, 0, 0, 0, 0, 0, false
+50,Apostrophe Book , 0, 0, "<b>Monty Python's Holy Grail! Try to SQL Query that!</b>", "<b>Monty Python's Holy Grail!</b>", ITEM, 0, 0, 0, 0, 0, 0, false
+51,ListCraftingRecipe, 0, 0, "<b>Used to craft a strong weapon</b>", "<b>Useful for crafting!</b>", ITEM, 0, 0, 0, 0, 0, 0, false
