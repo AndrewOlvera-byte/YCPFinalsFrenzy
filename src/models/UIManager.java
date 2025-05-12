@@ -378,7 +378,7 @@ public class UIManager {
     
     
     // Generate overlay of items in room with persistent positions.
- 
+    
     // Generate overlay of items in room with persistent positions.
     public String getRoomItemsOverlay() {
         Room currentRoom = engine.getRooms().get(engine.getCurrentRoomNum());
@@ -440,7 +440,7 @@ public class UIManager {
         }
         
         return sb.toString();
-    } 
+    }
     // Generate overlay of characters in room
  // Here are the modified methods from the UIManager class to implement health bars
 
@@ -462,7 +462,7 @@ public class UIManager {
         for (int i = 0; i < currentRoom.getCharacterContainerSize(); i++) {
             String charName = currentRoom.getCharacterName(i);
             int charHealth = currentRoom.getCharacterHealth(i);
-            
+
             // Get character object to access its maxHp
             Character character = currentRoom.getCharacter(i);
             int charMaxHealth = maxHealth; // Default to player's max if can't get the character
@@ -475,7 +475,7 @@ public class UIManager {
             double healthPercentage = (double)charHealth / charMaxHealth;
             // Cap at 100% just in case
             healthPercentage = Math.min(healthPercentage, 1.0);
-            
+
             double leftOffsetInches = i * 2;
 
             sb.append("<div style='position:absolute; left:")
@@ -501,7 +501,7 @@ public class UIManager {
             sb.append("</div>\n");
         }
 
-        // 2. Render the Player separately on the far right
+     // 2. Render the Player separately on the far right
         if (player != null) {
             int playerHealth = player.getHp();
             int playerMaxHealth = player.getMaxHp();
@@ -540,7 +540,7 @@ public class UIManager {
             for (ArmorSlot slot : ArmorSlot.values()) {
                 Armor equipped = player.getEquippedArmor(slot);
                 if (equipped == null) continue;
-                
+
                 // Get player-specific armor style for this slot
                 ArmorStyle style = getArmorStyle(playerName, slot);
 
@@ -623,7 +623,7 @@ public class UIManager {
     public String getRoomCompanionsOverlay() {
         Room currentRoom = engine.getRooms().get(engine.getCurrentRoomNum());
         StringBuilder sb = new StringBuilder();
-
+        
         // Calculate base left offset and increment
         double baseLeftOffsetInches = 7.25; // starting horizontal position
         double companionWidthInches = 1.5; // width of companion image
@@ -662,17 +662,17 @@ public class UIManager {
               .append(compHealth)
               .append("/").append(compMaxHealth).append("</div>\n")
               .append("</div>\n");
-
+            
             // Character image
             sb.append("<img src='images/")
               .append(compName)
               .append(".png' alt='")
               .append(compName)
               .append("' style='width:1.5in; height:auto; background-color: transparent;'/>");
-
+            
             sb.append("</div>");
         }
-
+        
         return sb.toString();
     }
     // Generate overlay of active quests
