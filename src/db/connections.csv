@@ -1,12 +1,13 @@
 from_room_id,direction,to_room_id
 1,West,4
-1,North,31
+1,South,31
 3,South,31
 4,East,1
 4,West,9
 5,South,9
 5,West,10
-5,North,4
+5,East,4
+5,North,29
 6,South,31
 6,North,25
 6,East,45

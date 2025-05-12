@@ -305,26 +305,26 @@ public class GameInputHandler {
             case "funky":
                 if (noun == null || noun.trim().isEmpty()) {
                     gameEngine.appendMessage(
-                        "\n<b>Invalid funky command. You must specify a room number. "
-                      + "Try: funky [number]</b>"
+                        "\n<b>Invalid funky command. You must specify a room ID. "
+                      + "Try: funky [roomID]</b>"
                     );
                 } else {
                     try {
-                        int roomNum = Integer.parseInt(noun) - 1; // Convert to 0-based index
-                        if (roomNum >= 0 && roomNum < gameEngine.getRooms().size()) {
-                            gameEngine.setCurrentRoomNum(roomNum);
+                        int targetId = Integer.parseInt(noun);
+                        Integer idx = gameEngine.getRoomIndex(targetId);
+                        if (idx != null) {
+                            gameEngine.setCurrentRoomNum(idx);
                             gameEngine.appendMessage(
-                                "\n<b>You have been teleported to room " + (roomNum + 1) + "!</b>"
+                                "\n<b>You have been teleported to room " + targetId + "!</b>"
                             );
                         } else {
                             gameEngine.appendMessage(
-                                "\n<b>Invalid room number. Room must be between 1 and " 
-                              + gameEngine.getRooms().size() + ".</b>"
+                                "\n<b>Invalid room ID. No such room: " + targetId + ".</b>"
                             );
                         }
                     } catch (NumberFormatException e) {
                         gameEngine.appendMessage(
-                            "\n<b>Invalid room number. Please enter a number.</b>"
+                            "\n<b>Invalid room ID. Please enter a valid number.</b>"
                         );
                     }
                 }

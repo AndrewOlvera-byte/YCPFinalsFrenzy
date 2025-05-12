@@ -10,6 +10,7 @@ import models.DerbyDatabase;
 
 public class RoomManager {
     private GameEngine engine;
+    private Map<Integer, Integer> idToIndex;  // map real room_id to list index
 
     public RoomManager(GameEngine engine) {
         this.engine = engine;
@@ -19,14 +20,16 @@ public class RoomManager {
 
     public void loadRooms() {
         try (Connection conn = DerbyDatabase.getConnection()) {
-            // 1) Load ROOM base rows
+            // 1) Load ROOM base rows and map real IDs to indices
             PreparedStatement ps = conn.prepareStatement(
               "SELECT room_id, room_name, required_key, long_description, short_description " +
               "FROM ROOM ORDER BY room_id");
             ResultSet rs = ps.executeQuery();
             List<Room> roomList = new ArrayList<>();
+            this.idToIndex = new HashMap<>();
             while (rs.next()) {
-                roomList.add(new Room(
+                int roomId = rs.getInt("room_id");
+                Room room = new Room(
                     rs.getString("room_name"),
                     new Inventory(new ArrayList<>(), 300),
                     new Connections(),
@@ -35,21 +38,26 @@ public class RoomManager {
                     rs.getString("long_description"),
                     rs.getString("short_description"),
                     new ArrayList<>()
-                ));
+                );
+                roomList.add(room);
+                this.idToIndex.put(roomId, roomList.size() - 1);
             }
             engine.getRooms().clear();
             engine.getRooms().addAll(roomList);
 
-            // 2) Load ROOM_CONNECTIONS
+            // 2) Load ROOM_CONNECTIONS using real-ID mapping
             ps = conn.prepareStatement(
               "SELECT from_room_id, direction, to_room_id FROM ROOM_CONNECTIONS");
             rs = ps.executeQuery();
             while (rs.next()) {
-                int from = rs.getInt("from_room_id") - 1; // zero-based index
+                int fromRaw = rs.getInt("from_room_id");
                 String dir = rs.getString("direction");
-                int to   = rs.getInt("to_room_id") - 1;
-                Connections con = engine.getRooms().get(from).getConnections();
-                con.setConnection(dir, to);
+                int toRaw   = rs.getInt("to_room_id");
+                Integer fromIdx = idToIndex.get(fromRaw);
+                Integer toIdx   = idToIndex.get(toRaw);
+                if (fromIdx != null && toIdx != null) {
+                    engine.getRooms().get(fromIdx).getConnections().setConnection(dir, toIdx);
+                }
             }
 
             // 3) Load ROOM_INVENTORY
@@ -413,5 +421,13 @@ public class RoomManager {
             newMessage = "\n<b>You do not have the Shuttle Pass.</b>";
         }
         return newMessage;
+    }
+
+    /**
+     * Get the zero-based index in the rooms list for a given room_id.
+     * Returns null if the ID is not found.
+     */
+    public Integer getRoomIndex(int roomId) {
+        return this.idToIndex == null ? null : this.idToIndex.get(roomId);
     }
 }

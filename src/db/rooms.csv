@@ -1,10 +1,10 @@
 room_id,room_name,required_key,long_description,short_description
-1,Manors Road,,"<b>You are standing in front of the Slums- I mean the Manors.</b>","<b>You look out at the road out front of the Manors.</b>"
+1,ManorSouthEntrance,,"<b>You are standing in front of the Slums- I mean the Manors.</b>","<b>You look out at the road out front of the Manors.</b>"
 3,Johnson Dining Hall,,"<b>You are standing inside the dining hall. The smell of rotten food floods your nostrils.</b>","<b>You glance around the Dining Hall.</b>"
 4,Tennis Courts,,"<b>You are standing in the tennis courts which are in ruins.</b>","<b>You glance around the cracked courts.</b>"
 5,Humanities Entrance,,"PLACEHOLDER","PLACEHOLDER"
 6,The Fountain,,"<b>You are standing by a fountain that never runs. Like never. Like you would've thought that for all the money they spent on it, it would run, but it doesn't. Ain't that something?</b>","<b>You glance at the forgotten fountain.</b>"
-7,Business Entrance,Gold key,"<b>You are inside the deserted Business Building.</b>","<b>You glance around the once full classrooms.</b>"
+7,Business Entrance,,"<b>You are inside the deserted Business Building.</b>","<b>You glance around the once full classrooms.</b>"
 8,Library,,"<b>You quietly stand in the lobby of the Library. To your left are some doors leading downstairs.</b>","<b>You glance around the full desks trying not to make a sound.</b>"
 9,The Rock,,"<b>You are inspired by previous success when seeing the Spartain Rock between Johnson and Humanities.</b>","<b>You glance at the rock.</b>"
 10,Brick Path,,"<b>You stand on a brick path between Humanities and the Library.</b>","<b>You glance around and see a fountain in the distance.</b>"

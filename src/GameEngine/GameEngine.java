@@ -476,4 +476,11 @@ public class GameEngine {
         }
     }
 
+    /**
+     * Callback to RoomManager to get the list index for a given room_id.
+     */
+    public Integer getRoomIndex(int roomId) {
+        return roomManager.getRoomIndex(roomId);
+    }
+
 }
