@@ -36,13 +36,15 @@ public class DatabaseInitializer {
                 seedTable(conn, "items.csv",           "INSERT INTO ITEM VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 seedTable(conn, "item_components.csv", "INSERT INTO ITEM_COMPONENT VALUES (?, ?)");
                 
-                // Seed quest definitions if there's a quests.csv file
+                // Comment out quest definitions seeding due to column mismatch
+                /*
                 try {
-                    seedTable(conn, "quests.csv", "INSERT INTO quest_definition(quest_id, name, description, target_type, target_name, target_count, reward_skill_points, trigger_type, trigger_target) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    seedTable(conn, "quests.csv", "INSERT INTO quest_definition(quest_id, name, description, trigger, trigger_target, target_type, target_count, reward_skill_points) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
                     System.out.println("Quests data seeded from quests.csv");
                 } catch (Exception e) {
                     System.out.println("Warning: Could not seed quests data: " + e.getMessage());
                 }
+                */
                 
                 // Then seed room-related tables
                 seedRoomsFromCSV(conn);
@@ -51,9 +53,15 @@ public class DatabaseInitializer {
                 seedTable(conn, "npcs.csv",            "INSERT INTO NPC VALUES (?, ?, ?, ?, ?, ?, ?)");
                 seedTable(conn, "npc_room.csv",        "INSERT INTO NPC_ROOM VALUES (?, ?)");
                 seedTable(conn, "npc_inventory.csv",   "INSERT INTO NPC_INVENTORY VALUES (?, ?)");
-                seedTable(conn, "player.csv",          "INSERT INTO PLAYER VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                
+                // Comment out player-related seeding - these should start empty as mentioned in the comment below
+                // seedTable(conn, "player.csv",          "INSERT INTO PLAYER VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                
                 seedTable(conn, "room_inventory.csv",  "INSERT INTO ROOM_INVENTORY VALUES (?, ?)");
-                seedTable(conn, "player_inventory.csv","INSERT INTO PLAYER_INVENTORY VALUES (?, ?)");
+                
+                // Comment out other player-related tables
+                // seedTable(conn, "player_inventory.csv","INSERT INTO PLAYER_INVENTORY VALUES (?, ?)");
+                
                 seedTable(conn, "conversation_nodes.csv","INSERT INTO CONVERSATION_NODES VALUES (?, ?, ?, ?, ?, ?, ?)");
                 seedTable(conn, "conversation_edges.csv","INSERT INTO CONVERSATION_EDGES VALUES (?, ?, ?, ?)");
                 seedTable(conn, "companion.csv",       "INSERT INTO COMPANION VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");

@@ -26,7 +26,7 @@ CREATE TABLE PLAYER (
   attack_boost INT,
   defense_boost INT,
   last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(user_id)
+  FOREIGN KEY (user_id) REFERENCES users(user_id),
   level INT DEFAULT 1
 );
 
