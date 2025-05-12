@@ -228,8 +228,9 @@ public class Player extends Character {
     }
 
     public void setSkillPoints(int skillPoints) {
+        int difference = skillPoints - this.skillPoints; // Calculate the change in skill points
         this.skillPoints = skillPoints;
-        this.availableSkillPoints = skillPoints; // Update available points too
+        this.availableSkillPoints += difference; // Only add the difference to available points
         while (checkAndHandleLevelUp()) {
             // Keep checking for multiple level ups if enough points
         }
