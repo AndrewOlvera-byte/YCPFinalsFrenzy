@@ -11,7 +11,7 @@ public class GameEngine {
     private static final boolean USE_FAKE_DB = false;
     
     private String[] tables = {"conversation_edges", "conversation_nodes", "GAME_STATE", "PLAYER_INVENTORY", "NPC_INVENTORY",
-    		"ROOM_INVENTORY", "NPC_ROOM", "ROOM_CONNECTIONS", "ITEM_COMPONENT", "COMPANION_ROOM", "PLAYER_COMPANION", "COMPANION_INVENTORY", "COMPANION", "NPC", "ROOM", "ITEM", "PLAYER"};
+    		"ROOM_INVENTORY", "NPC_ROOM", "ROOM_CONNECTIONS", "ITEM_COMPONENT", "COMPANION_ROOM", "player_quests", "quest_definition", "PLAYER_COMPANION", "COMPANION_INVENTORY", "COMPANION", "NPC", "ROOM", "ITEM", "PLAYER"};
 
     private Player player;
     private boolean isRunning = false;

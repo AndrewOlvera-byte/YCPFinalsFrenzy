@@ -8,6 +8,7 @@ item_id,name,value,weight,long_description,short_description,type,healing,damage
 7,Paint Brush,20,30,"<b>Paint your enemies??</b>","<b>A paint brush.</b>",WEAPON,0,0,1,0,0,0,false
 8,Dagger,20,30,"<b>A trusty dagger that fits in your back pocket.</b>","<b>A dagger.</b>",WEAPON,0,0,40,0,0,0,false
 9,Gauntlets,30,5,"<b>Reliable Gauntlets will help you attack harder.</b>","<b>Gauntlets.</b>",ARMOR,0,0,0,20,0,ACCESSORY,false
+10,Armor,30,5,"<b>Weak armor will increase your health.</b>","<b>armor.</b>",ARMOR,0,0,0,0,20,TORSO,false
 11,Helmet,30,5,"<b>Weak armor will increase your health.</b>","<b>armor.</b>",ARMOR,0,0,0,0,20,HEAD,false
 12,Pants,30,5,"<b>Weak armor will increase your health.</b>","<b>armor.</b>",ARMOR,0,0,0,0,20,LEGS,false
 13,Stick,1,2,"<b>A sturdy wooden stick. Useful for crafting.</b>","<b>Stick.</b>",ITEM,0,0,0,0,0,0,false

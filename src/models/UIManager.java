@@ -185,6 +185,9 @@ public class UIManager {
         help.append("<b>\nCombine two items without naming the result. (ex. combine string and stick)</b>\n");
         help.append("<b>\nEquip a piece of armor. (ex. equip helmet)</b>\n");
         help.append("<b>\nTo unequip a piece of armor. (ex. unequip head)</b>\n");
+        help.append("<b>\nTo grab an item from companion inventory. (ex. takec item)</b>\n");
+        help.append("<b>\nTo Give item to companion. (ex. give item)</b>\n");
+        help.append("<b>\nDev Command Funky to teleport. (ex. funky roomNum)</b>\n");
         return help.toString();
     }
     
