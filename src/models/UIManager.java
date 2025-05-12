@@ -704,19 +704,46 @@ public class UIManager {
         Player player = engine.getPlayer();
         StringBuilder sb = new StringBuilder();
         
-        // Add grey background strip at the top
-        sb.append("<div style='position:absolute; left:0; top:0; width:100%; height:1in; background-color:rgba(128, 128, 128, 0.7); z-index:1;'></div>\n");
+        // Add grey background strip at the top - increased height to 2in
+        sb.append("<div style='position:absolute; left:0; top:0; width:100%; height:2in; background-color:rgba(128, 128, 128, 0.7); z-index:1;'></div>\n");
+        
+        // Add level bar at the very top
+        if (player != null) {
+            int currentSkillPoints = player.getSkillPoints();
+            int availableSkillPoints = player.getAvailableSkillPoints();
+            int requiredPoints = player.getRequiredSkillPointsForNextLevel();
+            double progressPercentage = (double)currentSkillPoints / requiredPoints * 100;
+            
+            // Level indicator with available skill points
+            sb.append("<div style='position:absolute; left:50%; transform:translateX(-50%); top:0.2in; color:white; font-weight:bold; font-size:0.8em; text-align:center; z-index:2;'>")
+              .append("Level ").append(player.getLevel())
+              .append(" (").append(availableSkillPoints).append(" SP Available)")
+              .append("</div>\n");
+            
+            // Level progress bar container - moved down
+            sb.append("<div style='position:absolute; left:10%; top:0.5in; width:80%; height:0.2in; background-color:#444; border-radius:3px; z-index:2;'>\n")
+              // Progress bar fill
+              .append("<div style='height:100%; width:")
+              .append(Math.min(progressPercentage, 100)) // Cap at 100%
+              .append("%; background-color:#4CAF50; border-radius:3px;'></div>\n")
+              // Progress text
+              .append("<div style='position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); color:white; font-size:0.7em;'>")
+              .append(currentSkillPoints).append("/").append(requiredPoints)
+              .append(" Total SP</div>\n")
+              .append("</div>\n");
+        }
         
         if (player == null || player.getInventory() == null || player.getInventorySize() == 0) {
-            return sb.toString(); // Return the background strip even if no items
+            return sb.toString(); // Return the background strip and level bar even if no items
         }
         
         int totalItems = player.getInventorySize();
-        double itemWidth = 0.8; // Reduced width of each item in inches
+        double itemWidth = 0.8; // Width of each item in inches
         double spacing = 0.2; // Spacing between items in inches
         double totalWidth = (itemWidth + spacing) * totalItems - spacing; // Total width of all items
         double startLeft = (10 - totalWidth) / 2; // Center the items horizontally (assuming 10in width)
         
+        // Moved items down to 1.1in from top to give more space
         for (int i = 0; i < totalItems; i++) {
             String itemName = player.getItemName(i);
             double leftPosition = startLeft + (i * (itemWidth + spacing));
@@ -727,7 +754,7 @@ public class UIManager {
               .append(itemName)
               .append("' style='position:absolute; left:")
               .append(leftPosition)
-              .append("in; top:0.1in; width:")
+              .append("in; top:1.1in; width:") // Moved down to make more space
               .append(itemWidth)
               .append("in; height:")
               .append(itemWidth)

@@ -10,7 +10,8 @@ CREATE TABLE PLAYER (
   short_description VARCHAR(500),
   player_type VARCHAR(20),
   attack_boost INT,
-  defense_boost INT
+  defense_boost INT,
+  level INT DEFAULT 1
 );
 -- 6) Equipment linkage
 CREATE TABLE ITEM (

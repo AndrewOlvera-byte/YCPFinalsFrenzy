@@ -18,7 +18,7 @@ public class PlayerManager {
     public void loadPlayer() {
         try (Connection conn = DerbyDatabase.getConnection()) {
             // 1) load main record (we assume ID=1)
-            String sql = "SELECT name, hp, skill_points, damage_multi, long_description, short_description,player_type,attack_boost,defense_boost "
+            String sql = "SELECT name, hp, skill_points, damage_multi, long_description, short_description, player_type, attack_boost, defense_boost, level "
                        + "FROM PLAYER WHERE player_id = 1";
             try (PreparedStatement ps = conn.prepareStatement(sql);
                  ResultSet rs = ps.executeQuery()) {
@@ -32,6 +32,7 @@ public class PlayerManager {
                 String ldesc = rs.getString("long_description");
                 String sdesc = rs.getString("short_description");
                 String Class = rs.getString("player_type");
+                int level   = rs.getInt("level");
                 
                 
                 // 2) load inventory
@@ -62,6 +63,7 @@ public class PlayerManager {
                 loadEquippedArmor(conn, player);  // 🔁 Load from DB
                 loadPlayerCompanion(conn,player);
                 player.setId(1);
+                player.setLevel(level);
                 loadPlayerQuests(conn, player);
                 engine.setPlayer(player);         // ✅ Set player after fully loaded
 
@@ -220,7 +222,7 @@ public class PlayerManager {
     public void loadPlayerByType(String cls) throws SQLException {
         String sql = "SELECT player_id, name, hp, skill_points, damage_multi,"
                    + " long_description, short_description,"
-                   + " attack_boost, defense_boost"
+                   + " attack_boost, defense_boost, level"
                    + " FROM PLAYER WHERE player_type = ?";
         try (Connection conn = DerbyDatabase.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -243,6 +245,7 @@ public class PlayerManager {
                     rs.getInt("defense_boost")
                 );
                 p.setId(playerId);
+                p.setLevel(rs.getInt("level"));
                 // Restore quests for this player
                 loadPlayerQuests(conn, p);
                 engine.setPlayer(p);
