@@ -23,9 +23,11 @@ import models.DerbyDatabase;
 public class Player extends Character {
 	private int id;
     private int skillPoints;
+    private int availableSkillPoints; // New field for points available to spend
     private double damageMulti;
     private int attackBoost;
     private int defenseBoost;
+    private int level = 1;
     // --- new field: track equipped armor per slot ---
    private final Map<ArmorSlot, Armor> equippedArmor = new EnumMap<>(ArmorSlot.class);
    private Companion hasCompanion;
@@ -36,10 +38,12 @@ public class Player extends Character {
    public Player(String name, int hp, int skillPoints, Inventory inventory, String longdescription, String shortdescription,double damageMulti,int attackBoost,int defenseBoost) {
        super(name, hp, inventory, longdescription, shortdescription);
        this.skillPoints = skillPoints;
+       this.availableSkillPoints = skillPoints; // Initialize available points
        this.damageMulti = damageMulti;
        this.attackBoost = attackBoost;
        this.defenseBoost = defenseBoost;
        this.hasCompanion = null;
+       this.level = 1;
    }
    public void move(String direction) {
        System.out.println(name + " moves " + direction + " to a new location.");
@@ -219,13 +223,49 @@ public class Player extends Character {
         return skillPoints;
     }
 
+    public int getAvailableSkillPoints() {
+        return availableSkillPoints;
+    }
+
     public void setSkillPoints(int skillPoints) {
+        int difference = skillPoints - this.skillPoints; // Calculate the change in skill points
         this.skillPoints = skillPoints;
+        this.availableSkillPoints += difference; // Only add the difference to available points
+        while (checkAndHandleLevelUp()) {
+            // Keep checking for multiple level ups if enough points
+        }
     }
 
     public boolean useSkillPoints(int points) {
-        if (skillPoints >= points) {
-            skillPoints -= points;
+        if (availableSkillPoints >= points) {
+            availableSkillPoints -= points; // Only reduce available points
+            return true;
+        }
+        return false;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
+    }
+
+    public int getRequiredSkillPointsForNextLevel() {
+        // Exponential increase: 10, 20, 50, 125, 312, etc.
+        return (int)(10 * Math.pow(2.5, level - 1));
+    }
+
+    public boolean checkAndHandleLevelUp() {
+        int requiredPoints = getRequiredSkillPointsForNextLevel();
+        if (skillPoints >= requiredPoints) {
+            skillPoints -= requiredPoints;
+            availableSkillPoints = skillPoints; // Reset available points after level up
+            level++;
+            // Bonus for leveling up: increase max HP by 10
+            setMaxHp(getMaxHp() + 10);
+            setHp(getMaxHp());
             return true;
         }
         return false;
