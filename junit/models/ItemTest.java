@@ -22,7 +22,8 @@ class ItemTest {
     @Test
     void testDescriptionSwitch() {
         assertEquals("A powerful sword", item.getDescription());
-        assertEquals("Sword", item.getDescription()); // Second call switches to short description
+        item.getDescription(); // First call sets examined to true
+        assertEquals("Sword", item.getDescription()); // Second call returns short description
     }
 
     @Test

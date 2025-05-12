@@ -43,6 +43,27 @@ public class CompanionManager {
     	return 1;
     }
 	
+    // Helper method to get the room_id from the database for the current room
+    private int getCurrentRoomDbId() {
+        Room currentRoom = engine.getRooms().get(engine.getCurrentRoomNum());
+        String roomName = currentRoom.getRoomName();
+        int roomId = -1;
+        
+        try (Connection conn = DerbyDatabase.getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                 "SELECT room_id FROM ROOM WHERE room_name = ?")) {
+            ps.setString(1, roomName);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                roomId = rs.getInt("room_id");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to get room ID: " + e.getMessage(), e);
+        }
+        
+        return roomId;
+    }
+    
 	public String chooseCompanion(int companionNum) {
 		if (companionNum < 0) {
             return "\n<b>choose what Companion?</b>";
@@ -86,12 +107,15 @@ public class CompanionManager {
             room.removeCompanion(companionNum);
             engine.getPlayer().setPlayerCompanion(companion);
 
+            // Get the actual room ID from the database
+            int roomId = getCurrentRoomDbId();
+            
             // DB update: remove from ROOM_INVENTORY, add to PLAYER_INVENTORY
             // 1) DELETE from ROOM_INVENTORY - check if it exists first
             boolean companionExistsInRoom = false;
             try (PreparedStatement checkRoom = conn.prepareStatement(
                      "SELECT 1 FROM COMPANION_ROOM WHERE room_id = ? AND companion_id = ?")) {
-                checkRoom.setInt(1, engine.getCurrentRoomNum() + 1);
+                checkRoom.setInt(1, roomId);
                 checkRoom.setInt(2, databaseCompanionId);
                 companionExistsInRoom = checkRoom.executeQuery().next();
             }
@@ -99,7 +123,7 @@ public class CompanionManager {
             if (companionExistsInRoom) {
                 try (PreparedStatement del = conn.prepareStatement(
                          "DELETE FROM COMPANION_ROOM WHERE room_id = ? AND companion_id = ?")) {
-                    del.setInt(1, engine.getCurrentRoomNum() + 1);
+                    del.setInt(1, roomId);
                     del.setInt(2, databaseCompanionId);
                     del.executeUpdate();
                 }
@@ -157,11 +181,14 @@ public class CompanionManager {
                 del.executeUpdate();
             }
             
+            // Get the actual room ID from the database
+            int roomId = getCurrentRoomDbId();
+            
             // 2) Check if the item already exists in the room's inventory
             boolean companionExistsInRoom = false;
             try (PreparedStatement checkRoom = conn.prepareStatement(
                      "SELECT 1 FROM COMPANION_ROOM WHERE room_id = ? AND companion_id = ?")) {
-                checkRoom.setInt(1, engine.getCurrentRoomNum() + 1);
+                checkRoom.setInt(1, roomId);
                 checkRoom.setInt(2, databaseCompanionId);
                 companionExistsInRoom = checkRoom.executeQuery().next();
             }
@@ -171,7 +198,7 @@ public class CompanionManager {
                 try (PreparedStatement ins = conn.prepareStatement(
                          "INSERT INTO COMPANION_ROOM(room_id, companion_id) VALUES(?, ?)"
                      )) {
-                    ins.setInt(1, engine.getCurrentRoomNum() + 1);
+                    ins.setInt(1, roomId);
                     ins.setInt(2, databaseCompanionId);
                     ins.executeUpdate();
                 }
