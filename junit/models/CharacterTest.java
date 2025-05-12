@@ -20,12 +20,16 @@ class CharacterTest {
     void testCharacterInitialization() {
         assertEquals("TestChar", character.getName());
         assertEquals(100, character.getHp());
+        assertEquals(100, character.getMaxHp());
     }
 
     @Test
     void testSetAndGetHp() {
         character.setHp(80);
         assertEquals(80, character.getHp());
+        
+        character.setMaxHp(120);
+        assertEquals(120, character.getMaxHp());
     }
 
     @Test
@@ -34,5 +38,10 @@ class CharacterTest {
         character.addItem(item);
         assertEquals("Sword", character.getItemName(0));
         assertEquals(1, character.getInventorySize());
+    }
+
+    @Test
+    void testDefaultAttackDamage() {
+        assertEquals(1, character.getAttackDmg(0));
     }
 }
