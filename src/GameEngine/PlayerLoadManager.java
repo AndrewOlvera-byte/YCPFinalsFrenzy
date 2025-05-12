@@ -15,6 +15,9 @@ import models.DerbyDatabase;
 import models.Inventory;
 import models.Item;
 import models.Player;
+import models.Quest;
+import models.QuestDefinition;
+import models.QuestManager;
 
 public class PlayerLoadManager {
     
@@ -87,86 +90,83 @@ public class PlayerLoadManager {
             int defenseBoost = 0;
             int currentRoom = 0;
             
-            try (PreparedStatement psGameState = conn.prepareStatement(gameStateSql)) {
-                psGameState.setInt(1, playerId);
-                try (ResultSet gameStateRs = psGameState.executeQuery()) {
-                    if (gameStateRs.next()) {
+            try (PreparedStatement stmt = conn.prepareStatement(gameStateSql)) {
+                stmt.setInt(1, playerId);
+                
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
                         hasGameState = true;
-                        playerHp = gameStateRs.getInt("player_hp");
-                        damageMulti = gameStateRs.getDouble("damage_multi");
-                        
-                        if (gameStateRs.getObject("attack_boost") != null) {
-                            attackBoost = gameStateRs.getInt("attack_boost");
-                        }
-                        if (gameStateRs.getObject("defense_boost") != null) {
-                            defenseBoost = gameStateRs.getInt("defense_boost");
-                        }
-                        
-                        currentRoom = gameStateRs.getInt("current_room");
-                        
-                        System.out.println("Found game state data - HP: " + playerHp + 
-                                         ", DMG Multi: " + damageMulti + 
-                                         ", Attack: " + attackBoost + 
-                                         ", Defense: " + defenseBoost);
+                        playerHp = rs.getInt("player_hp");
+                        damageMulti = rs.getDouble("damage_multi");
+                        attackBoost = rs.getInt("attack_boost");
+                        defenseBoost = rs.getInt("defense_boost");
+                        currentRoom = rs.getInt("current_room") - 1; // Convert from 1-indexed to 0-indexed
                     }
                 }
             }
             
-            // Load basic player info
-            String sql = "SELECT p.player_id, p.user_id, p.name, p.hp, p.skill_points, p.damage_multi, " +
-                         "p.long_description, p.short_description, p.player_type, " +
-                         "p.attack_boost, p.defense_boost " +
-                         "FROM PLAYER p WHERE p.player_id = ?";
+            // Query basic player info
+            String sql = "SELECT p.name, p.hp, p.skill_points, p.long_description, p.short_description, " +
+                        "p.player_type, p.user_id " +
+                        "FROM PLAYER p WHERE p.player_id = ?";
             
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, playerId);
                 
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
-                        // Create inventory for player
-                        Inventory inventory = new Inventory(new ArrayList<>(), 100); // Default max weight of 100
-                        loadPlayerInventory(conn, playerId, inventory);
+                        String name = rs.getString("name");
                         
-                        // If we have game state data, use it instead of the PLAYER table data
-                        // as it's more up-to-date
-                        int hp = hasGameState ? playerHp : rs.getInt("hp");
-                        double dmg = hasGameState ? damageMulti : rs.getDouble("damage_multi");
-                        int atk = hasGameState ? attackBoost : rs.getInt("attack_boost");
-                        int def = hasGameState ? defenseBoost : rs.getInt("defense_boost");
-                        
-                        // Create player with either game state or base values
-                        player = new Player(
-                            rs.getString("name"),
-                            hp,
-                            rs.getInt("skill_points"),
-                            inventory,
-                            rs.getString("long_description"),
-                            rs.getString("short_description"),
-                            dmg,
-                            atk,
-                            def
-                        );
-                        player.setId(playerId);
-                        player.setUserId(rs.getInt("user_id"));
-                        
-                        // Set player type from database
-                        player.setPlayerType(rs.getString("player_type"));
-                        
-                        // Load companion if exists
-                        Companion companion = loadPlayerCompanion(conn, playerId);
-                        player.setPlayerCompanion(companion);
-                        
-                        // If we have game state, set current room directly
-                        if (hasGameState) {
-                            player.setCurrentRoomNum(currentRoom - 1); // Adjust for 0-based indexing
-                        } else {
-                            // Otherwise load from game state, which loads other data too
-                            loadPlayerGameState(conn, player);
+                        // If we don't have game state, get HP from player table
+                        if (!hasGameState) {
+                            playerHp = rs.getInt("hp");
                         }
                         
-                        System.out.println("Player loaded with final HP: " + player.getHp() + 
-                                         ", Attack: " + player.getAttackBoost() + 
-                                         ", Defense: " + player.getdefenseBoost());
+                        int skillPoints = rs.getInt("skill_points");
+                        String description = rs.getString("long_description");
+                        String shortDesc = rs.getString("short_description");
+                        String playerClass = rs.getString("player_type");
+                        int userId = rs.getInt("user_id");
+                        
+                        // Create inventory
+                        Inventory inventory = new Inventory(new ArrayList<>(), 100);
+                        
+                        // Load inventory
+                        loadPlayerInventory(conn, playerId, inventory);
+                        
+                        // Create player with loaded stats
+                        player = new Player(
+                            name,
+                            playerHp,
+                            skillPoints,
+                            inventory,
+                            description,
+                            shortDesc,
+                            damageMulti,
+                            attackBoost,
+                            defenseBoost
+                        );
+                        
+                        player.setId(playerId);
+                        player.setUserId(userId);
+                        player.setPlayerType(playerClass.toUpperCase());
+                        
+                        // Set room number from game state if available
+                        if (hasGameState) {
+                            player.setCurrentRoomNum(currentRoom);
+                        }
+                        
+                        // Load equipped armor
+                        loadPlayerEquipment(conn, player);
+                        
+                        // Load companion
+                        Companion companion = loadPlayerCompanion(conn, playerId);
+                        if (companion != null) {
+                            player.setPlayerCompanion(companion);
+                        }
+                        
+                        // Load quests
+                        loadPlayerQuests(conn, player);
                     }
                 }
             }
@@ -279,6 +279,61 @@ public class PlayerLoadManager {
                     // Create item and add to companion's inventory
                     Item item = new Item(value, weight, name, new String[0], longDesc, shortDesc);
                     companion.getInventory().addItem(item);
+                }
+            }
+        }
+    }
+    
+    /**
+     * Load player equipment from database
+     * @param conn Database connection
+     * @param player Player to load equipment for
+     */
+    private void loadPlayerEquipment(Connection conn, Player player) throws SQLException {
+        String sql = "SELECT pe.slot, pe.armor_id, i.name, i.type, i.damage, i.defense, i.weight, i.description, i.short_description " +
+                    "FROM PLAYER_EQUIPMENT pe " + 
+                    "JOIN ITEM i ON pe.armor_id = i.item_id " +
+                    "WHERE pe.player_id = ?";
+        
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, player.getId());
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String slotName = rs.getString("slot");
+                    String itemName = rs.getString("name");
+                    int defense = rs.getInt("defense");
+                    int weight = rs.getInt("weight");
+                    String description = rs.getString("description");
+                    String shortDesc = rs.getString("short_description");
+                    
+                    // Create armor item (using existing constructor)
+                    // Note: Using 0 for value, empty array for components, 0 for healing, 0 for attackBoost
+                    Armor armor = new Armor(
+                        0, // value
+                        weight,
+                        itemName,
+                        new String[0], // components
+                        description,
+                        shortDesc,
+                        0, // healing
+                        0, // attackBoost
+                        defense, // defenseBoost
+                        ArmorSlot.valueOf(slotName) // slot
+                    );
+                    
+                    // Equip it in the proper slot
+                    try {
+                        ArmorSlot slot = ArmorSlot.valueOf(slotName);
+                        // Use the equip method instead of setEquippedArmor
+                        // Make sure slot is empty first
+                        if (player.getEquippedArmor(slot) != null) {
+                            player.unequip(slot);
+                        }
+                        player.equip(slot, armor);
+                    } catch (IllegalArgumentException e) {
+                        System.err.println("Invalid armor slot: " + slotName);
+                    }
                 }
             }
         }
@@ -866,6 +921,9 @@ public class PlayerLoadManager {
             // Save player's companion
             savePlayerCompanion(conn, player);
             
+            // Save player's quests
+            savePlayerQuests(conn, player);
+            
             conn.commit();
             return true;
         } catch (SQLException e) {
@@ -949,6 +1007,76 @@ public class PlayerLoadManager {
                     insert.setInt(2, itemId);
                     insert.setString(3, slot.name());
                     insert.executeUpdate();
+                }
+            }
+        }
+    }
+    
+    /**
+     * Save player quests to database
+     * @param conn Database connection
+     * @param player Player to save quests for
+     */
+    private void savePlayerQuests(Connection conn, Player player) throws SQLException {
+        // First delete existing quest records
+        try (PreparedStatement delete = conn.prepareStatement(
+                "DELETE FROM player_quests WHERE player_id = ?")) {
+            delete.setInt(1, player.getId());
+            delete.executeUpdate();
+        }
+        
+        // Insert active quests
+        String insertSql = "INSERT INTO player_quests (player_id, quest_id, status, progress) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement insert = conn.prepareStatement(insertSql)) {
+            // Save active quests
+            for (Quest quest : player.getActiveQuests()) {
+                insert.setInt(1, player.getId());
+                insert.setInt(2, quest.getDef().getId());
+                insert.setString(3, quest.getStatus().name());
+                insert.setInt(4, quest.getProgress());
+                insert.addBatch();
+            }
+            
+            // Save completed quests
+            for (Quest quest : player.getCompletedQuests()) {
+                insert.setInt(1, player.getId());
+                insert.setInt(2, quest.getDef().getId());
+                insert.setString(3, quest.getStatus().name());
+                insert.setInt(4, quest.getProgress());
+                insert.addBatch();
+            }
+            
+            insert.executeBatch();
+        }
+    }
+    
+    /**
+     * Load player quests from database
+     * @param conn Database connection
+     * @param player Player to load quests for
+     */
+    private void loadPlayerQuests(Connection conn, Player player) throws SQLException {
+        String sql = "SELECT quest_id, status, progress FROM player_quests WHERE player_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, player.getId());
+            try (ResultSet rs = ps.executeQuery()) {
+                QuestManager qm = new QuestManager();
+                qm.loadAll();
+                while (rs.next()) {
+                    int qid = rs.getInt("quest_id");
+                    String s = rs.getString("status");
+                    int prog = rs.getInt("progress");
+                    QuestDefinition def = qm.get(qid);
+                    if (def == null) {
+                        continue;
+                    }
+                    Quest.Status st = Quest.Status.valueOf(s);
+                    Quest q = new Quest(def, st, prog);
+                    if (st == Quest.Status.COMPLETE) {
+                        player.getCompletedQuests().add(q);
+                    } else {
+                        player.getActiveQuests().add(q);
+                    }
                 }
             }
         }

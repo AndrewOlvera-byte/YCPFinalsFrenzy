@@ -1210,34 +1210,88 @@ public class GameEngine {
     }
 
     // Quest commands
-    /** Accept a quest and return a message */
+    /**
+     * Accept a quest for the current player (if not already accepted or completed)
+     * @param questId the quest ID to accept
+     * @return a message describing the result
+     */
     public String acceptQuest(int questId) {
-        player.acceptQuest(questId, questManager);
-        if (!USE_FAKE_DB) {
-            try (Connection conn = DerbyDatabase.getConnection();
-                 PreparedStatement ps = conn.prepareStatement(
-                    "INSERT INTO player_quests (player_id, quest_id, status, progress) VALUES (1, ?, ?, ?)"
-                 )) {
-                ps.setInt(1, questId);
-                ps.setString(2, Quest.Status.IN_PROGRESS.name());
-                ps.setInt(3, 0);
-                ps.executeUpdate();
-            } catch (SQLException e) {
-                throw new RuntimeException("Failed to persist accepted quest", e);
+        QuestDefinition def = questManager.get(questId);
+        if (def == null) {
+            return "Invalid quest ID";
+        }
+        
+        // For backward compatibility, use the first player by default
+        if (players.isEmpty()) {
+            return "No player available";
+        }
+        
+        Player currentPlayer = players.get(0);
+        
+        // Check if player already has this quest active or completed
+        boolean alreadyHas = false;
+        
+        // Check active quests
+        for (Quest q : currentPlayer.getActiveQuests()) {
+            if (q.getDef().getId() == questId) {
+                alreadyHas = true;
+                break;
             }
         }
-        QuestDefinition def = questManager.get(questId);
-        return def != null
-            ? "\n<b>Quest accepted:</b> " + def.getName()
-            : "\n<b>No such quest:</b> " + questId;
+        
+        // Check completed quests if not found in active
+        if (!alreadyHas) {
+            for (Quest q : currentPlayer.getCompletedQuests()) {
+                if (q.getDef().getId() == questId) {
+                    alreadyHas = true;
+                    break;
+                }
+            }
+        }
+        
+        // If player doesn't have the quest yet, add it
+        if (!alreadyHas) {
+            currentPlayer.acceptQuest(questId, questManager);
+            
+            // Persist in database
+            try (Connection conn = DerbyDatabase.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(
+                      "INSERT INTO player_quests (player_id, quest_id, status, progress) VALUES (?, ?, ?, ?)")) {
+                ps.setInt(1, currentPlayer.getId());
+                ps.setInt(2, questId);
+                ps.setString(3, Quest.Status.IN_PROGRESS.name());
+                ps.setInt(4, 0);
+                ps.executeUpdate();
+            } catch (SQLException e) {
+                System.err.println("Failed to persist quest acceptance: " + e.getMessage());
+            }
+            
+            return "Quest accepted: " + def.getName();
+        } else {
+            return "You already have or completed this quest";
+        }
     }
-
-    /** Notify player of an event for quest progression */
+    
+    /**
+     * Fire an event to progress quests for all players
+     * @param type the event type (e.g., "KILL", "COLLECT")
+     * @param name the target name
+     * @param amount the amount to increment
+     */
     public void fireEvent(String type, String name, int amount) {
-        player.onEvent(type, name, amount);
+        // Notify all players about this event for quest progression
+        for (Player p : players) {
+            p.onEvent(type, name, amount);
+        }
     }
 
     public String increaseAttack() {
+        if (players.isEmpty()) {
+            return "No player available";
+        }
+        
+        Player player = players.get(0);
+        
         if (player.useSkillPoints(3)) {
             player.setAttackBoost(player.getAttackBoost() + 5);
             return "\n<b>Successfully increased attack by 5 points! New attack boost: " 
@@ -1249,6 +1303,12 @@ public class GameEngine {
     }
 
     public String increaseDefense() {
+        if (players.isEmpty()) {
+            return "No player available";
+        }
+        
+        Player player = players.get(0);
+        
         if (player.useSkillPoints(3)) {
             player.setdefenseBoost(player.getdefenseBoost() + 5);
             return "\n<b>Successfully increased defense by 5 points! New defense boost: " 

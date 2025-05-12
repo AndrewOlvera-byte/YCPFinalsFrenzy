@@ -207,6 +207,7 @@ public class Player extends Character {
     
     public void setRunningMessage(String runningMessage) {
         this.runningMessage = runningMessage;
+    }
     /** Accept a quest by ID, via the QuestManager */
     public void acceptQuest(int questId, QuestManager qm) {
         QuestDefinition def = qm.get(questId);

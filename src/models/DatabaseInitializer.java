@@ -36,6 +36,14 @@ public class DatabaseInitializer {
                 seedTable(conn, "items.csv",           "INSERT INTO ITEM VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 seedTable(conn, "item_components.csv", "INSERT INTO ITEM_COMPONENT VALUES (?, ?)");
                 
+                // Seed quest definitions if there's a quests.csv file
+                try {
+                    seedTable(conn, "quests.csv", "INSERT INTO quest_definition(quest_id, name, description, target_type, target_name, target_count, reward_skill_points, trigger_type, trigger_target) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    System.out.println("Quests data seeded from quests.csv");
+                } catch (Exception e) {
+                    System.out.println("Warning: Could not seed quests data: " + e.getMessage());
+                }
+                
                 // Then seed room-related tables
                 seedRoomsFromCSV(conn);
                 
@@ -49,12 +57,9 @@ public class DatabaseInitializer {
                 seedTable(conn, "companion_room.csv",  "INSERT INTO COMPANION_ROOM VALUES (?, ?)");
                 seedTable(conn, "companion_inventory.csv", "INSERT INTO COMPANION_INVENTORY VALUES (?, ?)");
                 
-                // Player, player_inventory, player_companion, and game_state tables are no longer seeded
+                // Player, player_inventory, player_companion, player_quests and game_state tables are no longer seeded
                 // They will be populated by user actions in the MMO game
                 System.out.println("Player tables will start empty for MMO functionality");
-                
-                // Seed quest definitions from CSV
-                seedQuestDefinitions(conn);
             }
         } catch (Exception e) {
             throw new RuntimeException("DB initialization failed", e);
