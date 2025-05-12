@@ -1,4 +1,4 @@
 quest_id,name,description,trigger,trigger_target,target_type,target_name,target_count,reward_skill_points
 1,Talk to Curly,"Speak with Curly in the town square.",ON_TALK,Curly,TALK,Curly,1,1
 2,Slay Moe,"Having examined the Sword, slay the fearsome Moe.",ON_EXAMINE,Sword,KILL,Moe,1,3
--3,Bring Sword to Road,"Bring the Sword to Manors Road.",ON_ENTER,Manors Road,COLLECT,Sword,1,1 
+3,Bring Sword to Road,"Bring the Sword to Manors Road.",ON_ENTER,Manors Road,COLLECT,Sword,1,1 
