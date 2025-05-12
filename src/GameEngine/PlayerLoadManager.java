@@ -18,6 +18,8 @@ import models.Player;
 import models.Quest;
 import models.QuestDefinition;
 import models.QuestManager;
+import models.Weapon;
+import models.Utility;
 
 public class PlayerLoadManager {
     
@@ -352,6 +354,8 @@ public class PlayerLoadManager {
         int playerId = -1;
         
         try (Connection conn = db.getConnection()) {
+            conn.setAutoCommit(false); // Start transaction
+            
             // First create the player record
             String sql = "INSERT INTO PLAYER (user_id, name, hp, skill_points, damage_multi, " +
                          "long_description, short_description, player_type, attack_boost, defense_boost) " +
@@ -400,6 +404,15 @@ public class PlayerLoadManager {
             }
             
             if (playerId > 0) {
+                // Clear any existing inventory for this player
+                try (PreparedStatement clearNew = conn.prepareStatement("DELETE FROM player_items WHERE player_id = ?");
+                     PreparedStatement clearOld = conn.prepareStatement("DELETE FROM PLAYER_INVENTORY WHERE player_id = ?")) {
+                    clearNew.setInt(1, playerId);
+                    clearOld.setInt(1, playerId);
+                    clearNew.executeUpdate();
+                    clearOld.executeUpdate();
+                }
+                
                 // Create inventory
                 Inventory inventory = new Inventory(new ArrayList<>(), 100); // Default max weight
                 
@@ -427,6 +440,8 @@ public class PlayerLoadManager {
                 // Set player type
                 player.setPlayerType(playerClass.toUpperCase());
             }
+            
+            conn.commit(); // Commit all changes
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -546,17 +561,36 @@ public class PlayerLoadManager {
             
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    // Create item with constructor arguments
+                    // Get all item details from result set
                     String name = rs.getString("name");
                     int value = rs.getInt("value");
                     int weight = rs.getInt("weight");
                     String longDesc = rs.getString("long_description");
                     String shortDesc = rs.getString("short_description");
+                    String type = rs.getString("type");
+                    int healing = rs.getInt("healing");
+                    double dmgMulti = rs.getDouble("damage_multi");
+                    int attackDmg = rs.getInt("attack_damage");
+                    int attackBoost = rs.getInt("attack_boost");
+                    int defenseBoost = rs.getInt("defense_boost");
+                    String slot = rs.getString("slot");
                     
                     // Using empty components array for now
                     String[] components = new String[0];
                     
-                    Item item = new Item(value, weight, name, components, longDesc, shortDesc);
+                    // Create the appropriate item type
+                    Item item;
+                    if ("WEAPON".equals(type)) {
+                        item = new Weapon(value, weight, name, components, attackDmg, longDesc, shortDesc);
+                    } else if ("ARMOR".equals(type)) {
+                        ArmorSlot armorSlot = (slot != null && !slot.isEmpty()) ? ArmorSlot.valueOf(slot) : ArmorSlot.ACCESSORY;
+                        item = new Armor(value, weight, name, components, longDesc, shortDesc, 
+                                healing, attackBoost, defenseBoost, armorSlot);
+                    } else if ("UTILITY".equals(type)) {
+                        item = new Utility(value, weight, name, components, longDesc, shortDesc, healing, dmgMulti);
+                    } else {
+                        item = new Item(value, weight, name, components, longDesc, shortDesc);
+                    }
                     
                     // Add item to inventory
                     inventory.addItem(item);

@@ -251,12 +251,11 @@ public class InventoryManager {
         // In-memory move
         Item item = player.getItem(itemNum);
         String itemName = item.getName();
-        player.removeItem(itemNum);
-        Room room = engine.getRooms().get(engine.getCurrentRoomNum());
-        room.addItem(item);
-
+        
         // DB update: remove from player_items & PLAYER_INVENTORY, add to ROOM_INVENTORY
         try (Connection conn = DerbyDatabase.getConnection()) {
+            conn.setAutoCommit(false); // Start transaction
+            
             // Get the actual item_id from the database
             int databaseItemId = -1;
             
@@ -269,9 +268,55 @@ public class InventoryManager {
                 }
             }
             
-            // If we couldn't find the item ID in the database, use the itemNum + 1 as fallback
+            // If we couldn't find the item ID in the database, we need to create it
             if (databaseItemId == -1) {
-                databaseItemId = itemNum + 1;
+                // Get the next available item_id
+                try (PreparedStatement psMaxId = conn.prepareStatement(
+                         "SELECT MAX(item_id) + 1 AS next_id FROM ITEM")) {
+                    ResultSet rsMaxId = psMaxId.executeQuery();
+                    if (rsMaxId.next()) {
+                        databaseItemId = rsMaxId.getInt("next_id");
+                        if (rsMaxId.wasNull()) {
+                            databaseItemId = 1;
+                        }
+                    }
+                }
+                
+                // Insert the new item into the ITEM table
+                try (PreparedStatement psInsertItem = conn.prepareStatement(
+                         "INSERT INTO ITEM (item_id, name, value, weight, long_description, short_description) " +
+                         "VALUES (?, ?, ?, ?, ?, ?)")) {
+                    psInsertItem.setInt(1, databaseItemId);
+                    psInsertItem.setString(2, item.getName());
+                    psInsertItem.setInt(3, item.getValue());
+                    psInsertItem.setInt(4, item.getWeight());
+                    psInsertItem.setString(5, item.getDescription());
+                    psInsertItem.setString(6, item.getShortDescription());
+                    psInsertItem.executeUpdate();
+                }
+            }
+            
+            // Verify the room exists in the database
+            int roomId = engine.getCurrentRoomNum() + 1;
+            boolean roomExists = false;
+            try (PreparedStatement psCheckRoom = conn.prepareStatement(
+                     "SELECT 1 FROM ROOM WHERE room_id = ?")) {
+                psCheckRoom.setInt(1, roomId);
+                ResultSet rsRoom = psCheckRoom.executeQuery();
+                roomExists = rsRoom.next();
+            }
+            
+            if (!roomExists) {
+                // Create the room if it doesn't exist
+                try (PreparedStatement psInsertRoom = conn.prepareStatement(
+                         "INSERT INTO ROOM (room_id, room_name, long_description, short_description) " +
+                         "VALUES (?, ?, ?, ?)")) {
+                    psInsertRoom.setInt(1, roomId);
+                    psInsertRoom.setString(2, "Room " + roomId);
+                    psInsertRoom.setString(3, "A room in the game");
+                    psInsertRoom.setString(4, "Room " + roomId);
+                    psInsertRoom.executeUpdate();
+                }
             }
             
             // 1) DELETE from player_items (new schema)
@@ -290,13 +335,32 @@ public class InventoryManager {
                 del.executeUpdate();
             }
             
-            // 3) INSERT into ROOM_INVENTORY
-            try (PreparedStatement ins = conn.prepareStatement(
-                     "INSERT INTO ROOM_INVENTORY(room_id, item_id) VALUES(?, ?)")) {
-                ins.setInt(1, engine.getCurrentRoomNum() + 1);
-                ins.setInt(2, databaseItemId);
-                ins.executeUpdate();
+            // 3) Check if item is already in room inventory
+            boolean itemInRoom = false;
+            try (PreparedStatement psCheckRoomInv = conn.prepareStatement(
+                     "SELECT 1 FROM ROOM_INVENTORY WHERE room_id = ? AND item_id = ?")) {
+                psCheckRoomInv.setInt(1, roomId);
+                psCheckRoomInv.setInt(2, databaseItemId);
+                ResultSet rsRoomInv = psCheckRoomInv.executeQuery();
+                itemInRoom = rsRoomInv.next();
             }
+            
+            // Only insert if not already in room
+            if (!itemInRoom) {
+                try (PreparedStatement ins = conn.prepareStatement(
+                         "INSERT INTO ROOM_INVENTORY(room_id, item_id) VALUES(?, ?)")) {
+                    ins.setInt(1, roomId);
+                    ins.setInt(2, databaseItemId);
+                    ins.executeUpdate();
+                }
+            }
+            
+            // Only remove from memory and add to room if all DB operations succeed
+            player.removeItem(itemNum);
+            Room room = engine.getRooms().get(engine.getCurrentRoomNum());
+            room.addItem(item);
+            
+            conn.commit(); // Commit all changes
             
         } catch (SQLException e) {
             throw new RuntimeException("Inventory DB update failed", e);
