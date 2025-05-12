@@ -65,11 +65,14 @@ public class RoomManager {
               "SELECT room_id, item_id FROM ROOM_INVENTORY");
             rs = ps.executeQuery();
             while (rs.next()) {
-                int roomIdx = rs.getInt("room_id") - 1;
+                int rawRoomId = rs.getInt("room_id");
+                Integer roomIdx = idToIndex.get(rawRoomId);
                 int itemId  = rs.getInt("item_id");
                 // fetch the ITEM row by itemId, build an Item object (similar to loadPlayer)
                 Item it = loadItemById(conn, itemId);
-                engine.getRooms().get(roomIdx).addItem(it);
+                if (roomIdx != null) {
+                    engine.getRooms().get(roomIdx).addItem(it);
+                }
             }
 
          // 4) Load NPCs into rooms
@@ -105,8 +108,12 @@ public class RoomManager {
                     rsNPC.getString("short_description")
                 );
 
-                int roomIdx = rsNPC.getInt("room_id") - 1;
-                engine.getRooms().get(roomIdx).getCharacterContainer().add(npc);
+                // Map real room_id to engine list index using idToIndex to handle gaps
+                int rawRoomId = rsNPC.getInt("room_id");
+                Integer roomIdx = idToIndex.get(rawRoomId);
+                if (roomIdx != null) {
+                    engine.getRooms().get(roomIdx).getCharacterContainer().add(npc);
+                }
             }
 
             // 5) Load Companions into Room
@@ -141,8 +148,12 @@ public class RoomManager {
             			companion
             			);
             	
-            	int roomIdx = rsCompanion.getInt("room_id") - 1;
-            	engine.getRooms().get(roomIdx).getCompanionContainer().add(newCompanion);
+                // Map real room_id to engine list index using idToIndex to handle gaps
+                int rawRoomId = rsCompanion.getInt("room_id");
+                Integer roomIdx = idToIndex.get(rawRoomId);
+                if (roomIdx != null) {
+                    engine.getRooms().get(roomIdx).getCompanionContainer().add(newCompanion);
+                }
             }
 
 
