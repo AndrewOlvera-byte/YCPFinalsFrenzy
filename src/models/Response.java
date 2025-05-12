@@ -26,6 +26,21 @@ public class Response {
     private boolean gameOver = false;
     private String  gameOverImage = "";
 
+    // New field for room name
+    private String roomName;
+
+    // New fields for enhanced UI layout
+    private String northRoom;
+    private String eastRoom;
+    private String southRoom;
+    private String westRoom;
+    private int playerCurrentHP;
+    private int playerMaxHP;
+    private int playerHealthPercent;
+    private int playerSkillPoints;
+    private int playerSkillPointsPercent;
+    private String sceneEntitiesData;
+
     // ─── Constructors ─────────────────────────────────────────────────────────
     /** No-arg constructor so you can do `new Response()` and then setters */
     public Response() { }
@@ -89,6 +104,21 @@ public class Response {
     public boolean isGameOver()               { return gameOver; }
     public String  getGameOverImage()         { return gameOverImage; }
 
+    // New getters for enhanced UI layout
+    public String getNorthRoom() { return northRoom; }
+    public String getEastRoom() { return eastRoom; }
+    public String getSouthRoom() { return southRoom; }
+    public String getWestRoom() { return westRoom; }
+    public int getPlayerCurrentHP() { return playerCurrentHP; }
+    public int getPlayerMaxHP() { return playerMaxHP; }
+    public int getPlayerHealthPercent() { return playerHealthPercent; }
+    public int getPlayerSkillPoints() { return playerSkillPoints; }
+    public int getPlayerSkillPointsPercent() { return playerSkillPointsPercent; }
+    public String getSceneEntitiesData() { return sceneEntitiesData; }
+
+    // New getter for room name
+    public String getRoomName() { return roomName; }
+
     // ─── Setters ──────────────────────────────────────────────────────────────
     public void setRoomInventory(String s)         { this.roomInventory = s; }
     public void setPlayerInventory(String s)       { this.playerInventory = s; }
@@ -108,6 +138,21 @@ public class Response {
     public void setQuestOverlay(String s)          { this.questOverlay = s; }
     public void setGameOver(boolean b)             { this.gameOver = b; }
     public void setGameOverImage(String s)         { this.gameOverImage = s; }
+
+    // New setters for enhanced UI layout
+    public void setNorthRoom(String s) { this.northRoom = s; }
+    public void setEastRoom(String s) { this.eastRoom = s; }
+    public void setSouthRoom(String s) { this.southRoom = s; }
+    public void setWestRoom(String s) { this.westRoom = s; }
+    public void setPlayerCurrentHP(int i) { this.playerCurrentHP = i; }
+    public void setPlayerMaxHP(int i) { this.playerMaxHP = i; }
+    public void setPlayerHealthPercent(int i) { this.playerHealthPercent = i; }
+    public void setPlayerSkillPoints(int i) { this.playerSkillPoints = i; }
+    public void setPlayerSkillPointsPercent(int i) { this.playerSkillPointsPercent = i; }
+    public void setSceneEntitiesData(String s) { this.sceneEntitiesData = s; }
+
+    // New setter for room name
+    public void setRoomName(String roomName) { this.roomName = roomName; }
 
     // ─── Convert to a JSON‐style string ───────────────────────────────────────
     public String toJson() {
