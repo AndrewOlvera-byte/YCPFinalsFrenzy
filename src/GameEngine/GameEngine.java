@@ -59,6 +59,11 @@ public class GameEngine {
             System.out.println("Seeding DB for the first time…");
         }
         loadData();
+        // Auto-trigger ON_ENTER quests upon spawning into the starting room
+        String qMsg = questManager.checkAndAccept(this, models.QuestDefinition.Trigger.ON_ENTER, getCurrentRoomName());
+        if (qMsg != null) {
+            appendMessage(qMsg);
+        }
         this.isRunning = true;
     }
 
