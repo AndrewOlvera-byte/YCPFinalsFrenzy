@@ -412,16 +412,16 @@ public class UIManager {
                 
                 // Calculate base position with some randomness within grid cell
                 // Spread horizontally between 25% and 75% to leave room for characters
-                leftPercent = 25 + (col * 10) + (rand.nextDouble() * 5);
+                leftPercent = 25 + (col * 10) ;
                 
                 // Position items vertically based on row
                 // First row (bottom/floor) around 80-82%
                 // Second row higher up, around 70-72%
                 // Subsequent rows continue upward
                 if (row == 0) {
-                    topPercent = 80 + (rand.nextDouble() * 2);
+                    topPercent = 80 ;
                 } else {
-                    topPercent = 70 - ((row - 1) * 7) + (rand.nextDouble() * 2);
+                    topPercent = 70 - ((row - 1) * 7) ;
                 }
                 
                 // Store the generated position for this item.
