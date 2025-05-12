@@ -549,7 +549,7 @@ public class UIManager {
             // Base player image
             sb.append("<div style='position: relative; display: inline-block;'>\n");
             sb.append("<img src='images/")
-              .append(playerName)
+              .append("Cooper")
               .append(".png' alt='")
               .append(playerName)
               .append("' style='width:2.5in; height:auto; background-color: transparent;'/>\n");
@@ -750,7 +750,7 @@ public class UIManager {
         // Player data
         sb.append("  player: {");
         if (player != null) {
-            sb.append("name: '" + player.getName() + "',");
+            sb.append("name: 'Cooper',");
             sb.append(" health: " + player.getHp() + ",");
             sb.append(" maxHealth: " + player.getMaxHp() + ",");
             sb.append(" skillPoints: " + player.getSkillPoints() + ",");
@@ -785,7 +785,7 @@ public class UIManager {
         sb.append("    const p = sceneData.player;\n");
         sb.append("    const pel = document.createElement('div'); pel.className = 'entity'; pel.style.left = p.position.left + '%'; pel.style.top = p.position.top + '%';\n");
         sb.append("    const phb = document.createElement('div'); phb.className = 'entity-health-bar'; const php = Math.floor((p.health / p.maxHealth) * 100); phb.innerHTML = `<div class='entity-health-fill' style='width:${php}%'>${p.health}</div>`; pel.appendChild(phb);\n");
-        sb.append("    const pimg = document.createElement('img'); pimg.src = 'images/' + p.name + '.png'; pimg.alt = p.name; pimg.style.width = '350px'; pel.appendChild(pimg);\n");
+        sb.append("    const pimg = document.createElement('img'); pimg.src = 'images/Cooper.png'; pimg.alt = p.name; pimg.style.width = '350px'; pel.appendChild(pimg);\n");
         sb.append("    playerContainer.appendChild(pel);\n");
         sb.append("  }\n");
         // Clear and render enemies
